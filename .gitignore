@@ -1,3 +1,4 @@
 .cache
+*.bash
+*.vim
 .viminfo
-.bash_history
