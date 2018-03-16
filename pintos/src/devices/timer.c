@@ -67,6 +67,9 @@ timer_calibrate (void)
 }
 
 /* Returns the number of timer ticks since the OS booted. */
+/* I can choose any thread in waiting list.*/
+
+
 int64_t
 timer_ticks (void) 
 {
