@@ -204,3 +204,28 @@ make grade>result
 ls
 result
 vi result
+ls
+cd pintos/src/threads/
+ls
+make
+../utils/pintos run alarm-multiple
+ls
+cd ../utils/
+ls
+echo 'export PATH=$PATH:~/pintos/src/utils/' >> ~/.bashrc
+source ~/.baschrc
+source ~/.bashrc
+ls
+pintos -v -- -q run alarm-multiple
+ls
+%PATH
+ls
+echo 'export PATH=$PATH:~/pintos/src/utils/' >> ~/.bashrc
+source ~/.bashrc
+pintos –v -- -q run alarm-multiple
+PATH
+ls
+ls -al
+vi backtrace 
+ls
+pintos
