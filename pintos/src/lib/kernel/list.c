@@ -1,5 +1,6 @@
 #include "list.h"
 #include "../debug.h"
+#include <stdio.h>
 
 /* Our doubly linked lists have two header elements: the "head"
    just before the first element and the "tail" just after the
@@ -81,6 +82,8 @@ list_begin (struct list *list)
 struct list_elem *
 list_next (struct list_elem *elem)
 {
+  printf("ii : %d\n"is_head (elem));
+  printf("ii : %d\n"is_interior(elem));
   ASSERT (is_head (elem) || is_interior (elem));
   return elem->next;
 }
