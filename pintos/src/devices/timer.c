@@ -89,19 +89,8 @@ timer_elapsed (int64_t then)
 void
 timer_sleep (int64_t ticks) 
 {
-  printf("timer sleep start");
   int64_t start = timer_ticks ();
-
-  static struct thread *cur;
-  cur = thread_current();
-  cur->tick_time = start + ticks;
-  thread_block();
-
-  list_push_back (&wait_list, &cur->elem);
-  /*
-  while (timer_elapsed (start) < ticks) 
-    thread_yield ();*/
-  printf("timer sleep end");
+  timer_set(start+ticks);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -178,25 +167,15 @@ timer_print_stats (void)
 static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
-  printf("timer_interrupt start\n");
+  enum intr_level old_level;
+  old_level = intr_disable();
+
   ticks++;
   int64_t cur_tick = timer_ticks();
-  
-  struct list_elem *pointer;
-  struct thread *t;
+  timer_release(cur_tick);
 
-  for (pointer = list_begin(&wait_list); pointer != list_end (&wait_list); pointer = list_next(pointer)){
-	  t = list_entry (pointer, struct thread, elem);
-	  printf("list next : %d\n", list_next(list_head(&wait_list))==NULL);
-	  printf("thread : %d\nwait_list size : %d\n",t,list_size(&wait_list));
-	  printf("tick time? : %d\n",t->tick_time);
-	  if (t->tick_time && t->tick_time > cur_tick) {
-		  list_remove(&t->elem);
-		  thread_unblock(t);
-		  break;
-	  }
-  }
-  printf("timer_interrupt end\n");
+  intr_set_level(old_level);
+
   thread_tick ();
 }
 

@@ -109,8 +109,6 @@ struct thread
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
 
-static struct list wait_list;
-
 void thread_init (void);
 void thread_start (void);
 
@@ -142,4 +140,6 @@ void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
+void timer_release(int64_t tick);
+void timer_set(int64_t tick);
 #endif /* threads/thread.h */

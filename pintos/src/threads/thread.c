@@ -28,7 +28,7 @@ static struct list ready_list;
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
 
-//static struct list wait_list;
+static struct list wait_list;
 
 /* Idle thread. */
 static struct thread *idle_thread;
@@ -67,7 +67,7 @@ static void idle (void *aux UNUSED);
 static struct thread *running_thread (void);
 static struct thread *next_thread_to_run (void);
 static void init_thread (struct thread *, const char *name, int priority);
-static bool is_thread (struct thread *) UNUSED;
+static bool is_thread (struct thread *);
 static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
@@ -90,7 +90,6 @@ void
 thread_init (void) 
 {
   ASSERT (intr_get_level () == INTR_OFF);
-  printf("thread_init!!\n");
 
   lock_init (&tid_lock);
   list_init (&ready_list);
@@ -229,6 +228,7 @@ thread_block (void)
   ASSERT (intr_get_level () == INTR_OFF);
 
   thread_current ()->status = THREAD_BLOCKED;
+
   schedule ();
 }
 
@@ -254,6 +254,48 @@ thread_unblock (struct thread *t)
   intr_set_level (old_level);
 }
 
+void
+timer_release (int64_t tick){
+//tick is current tick
+  struct list_elem *e;
+  struct thread *t;
+  bool check = false;
+
+  for (e = list_begin(&wait_list); e != list_end(&wait_list); e = list_next(e)){
+	  t= list_entry(e, struct thread, elem);
+    if (check){
+      struct thread *tmp = list_entry(list_prev(e),struct thread, elem);
+      list_remove(list_prev(e));
+      thread_unblock(tmp);
+    }
+    if (t->tick_time && t->tick_time <= tick){
+      check = true;
+    }else{
+      check = false;
+    }
+  }
+  if (check){
+    list_remove(list_prev(e));
+    thread_unblock(t);
+  }
+}
+
+void
+timer_set (int64_t tick){
+  enum intr_level old_level;
+  old_level = intr_disable();
+ 
+  static struct thread *cur;
+  cur = thread_current();
+  cur->tick_time = tick;
+  cur->status = THREAD_BLOCKED;
+  
+  list_push_back(&wait_list, &cur->elem);
+  
+  schedule();
+  
+  intr_set_level(old_level);
+}
 /* Returns the name of the running thread. */
 const char *
 thread_name (void) 
