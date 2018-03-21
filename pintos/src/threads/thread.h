@@ -101,7 +101,7 @@ struct thread
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
 
-    int tick_time;			/* Detects when to stop the timer_sleep() */
+    int tick_time;			/* Saved tick : used in timer.c */
   };
 
 /* If false (default), use round-robin scheduler.
@@ -140,6 +140,7 @@ void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
+/* Performs timer operation by given integer tick */
 void timer_release(int64_t tick);
 void timer_set(int64_t tick);
 #endif /* threads/thread.h */

@@ -254,32 +254,39 @@ thread_unblock (struct thread *t)
   intr_set_level (old_level);
 }
 
+/* When thread successfully holds block for given tick time, 
+   this function releases its block state.
+   Transitions a blocked thread T to the ready-to-run state.*/
 void
-timer_release (int64_t tick){
-//tick is current tick
+timer_release (int64_t tick){//parameter tick is current tick
   struct list_elem *e;
   struct thread *t;
   bool check = false;
 
   for (e = list_begin(&wait_list); e != list_end(&wait_list); e = list_next(e)){
-	  t= list_entry(e, struct thread, elem);
+    t= list_entry(e, struct thread, elem);
+    
     if (check){
       struct thread *tmp = list_entry(list_prev(e),struct thread, elem);
       list_remove(list_prev(e));
       thread_unblock(tmp);
     }
+
     if (t->tick_time && t->tick_time <= tick){
       check = true;
     }else{
       check = false;
     }
   }
+
   if (check){
     list_remove(list_prev(e));
     thread_unblock(t);
   }
 }
 
+/* Called in devices/timer.c. 
+   Transitions a running thread to the blocked state.*/
 void
 timer_set (int64_t tick){
   enum intr_level old_level;
