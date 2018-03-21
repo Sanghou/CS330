@@ -72,6 +72,7 @@ static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
+bool priority_compare(struct list_elem *a, struct list_elem *b, void *aux);
 
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
@@ -249,6 +250,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
+  //list_insert_ordered(&ready_list, &t->elem, &priority_compare, a);
   list_push_back (&ready_list, &t->elem);
   t->status = THREAD_READY;
   intr_set_level (old_level);
@@ -295,11 +297,9 @@ timer_set (int64_t tick){
   static struct thread *cur;
   cur = thread_current();
   cur->tick_time = tick;
-  cur->status = THREAD_BLOCKED;
-  
   list_push_back(&wait_list, &cur->elem);
   
-  schedule();
+  thread_block();
   
   intr_set_level(old_level);
 }
@@ -370,6 +370,7 @@ thread_yield (void)
   old_level = intr_disable ();
   if (cur != idle_thread) 
     list_push_back (&ready_list, &cur->elem);
+    // list_insert_ordered(&ready_list, &cur->elem, &priority_compare, a);
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -436,7 +437,17 @@ thread_get_recent_cpu (void)
   /* Not yet implemented. */
   return 0;
 }
-
+
+bool
+priority_compare(struct list_elem *a, struct list_elem *b, void *aux){
+  struct thread *ta = list_entry(a, struct thread, elem);
+  struct thread *tb = list_entry(b, struct thread, elem);
+
+  if (ta->priority < tb->priority){//if a's priority is higher than b, then return true
+    return true;
+  }return false;
+}
+
 /* Idle thread.  Executes when no other thread is ready to run.
 
    The idle thread is initially put on the ready list by
@@ -546,9 +557,11 @@ alloc_frame (struct thread *t, size_t size)
 static struct thread *
 next_thread_to_run (void) 
 {
+  // int *a = 0;
   if (list_empty (&ready_list))
     return idle_thread;
   else
+    //list_sort(&ready_list,&priority_compare,a);
     return list_entry (list_pop_front (&ready_list), struct thread, elem);
 }
 
@@ -634,7 +647,7 @@ allocate_tid (void)
 
   return tid;
 }
-
+
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
