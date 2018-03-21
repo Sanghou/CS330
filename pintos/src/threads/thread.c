@@ -557,12 +557,19 @@ alloc_frame (struct thread *t, size_t size)
 static struct thread *
 next_thread_to_run (void) 
 {
-  // int *a = 0;
+  int *a = 0;
   if (list_empty (&ready_list))
     return idle_thread;
   else
-    //list_sort(&ready_list,&priority_compare,a);
-    return list_entry (list_pop_front (&ready_list), struct thread, elem);
+    list_sort(&ready_list, &priority_compare, a);
+
+    struct list_elem *e;
+    struct thread *t;
+    for (e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)){
+      t= list_entry(e, struct thread, elem);
+      printf("priority : %d\n",t->priority);
+    }
+    return list_entry (list_pop_front(&ready_list), struct thread, elem);
 }
 
 /* Completes a thread switch by activating the new thread's page
@@ -629,13 +636,15 @@ schedule (void)
   ASSERT (cur->status != THREAD_RUNNING);
   ASSERT (is_thread (next));
 
+
+
   if (cur != next)
     prev = switch_threads (cur, next);
   thread_schedule_tail (prev);
 }
 
 /* Returns a tid to use for a new thread. */
-static tid_t
+static tid_t  
 allocate_tid (void) 
 {
   static tid_t next_tid = 1;
