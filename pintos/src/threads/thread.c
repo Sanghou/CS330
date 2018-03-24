@@ -213,6 +213,10 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
 
+  if (thread_current()->priority < t->priority){
+    thread_yield();
+  }
+
   return tid;
 }
 
@@ -244,16 +248,17 @@ thread_block (void)
 void
 thread_unblock (struct thread *t) 
 {
-  enum intr_level old_level;
+  // enum intr_level old_level;
 
   ASSERT (is_thread (t));
 
-  old_level = intr_disable ();
+  // old_level = intr_disable();
   ASSERT (t->status == THREAD_BLOCKED);
-  //list_insert_ordered(&ready_list, &t->elem, &priority_compare, a);
-  list_push_back (&ready_list, &t->elem);
+  list_insert_ordered(&ready_list, &t->elem, &priority_compare, NULL);
+  
+  // list_push_back (&ready_list, &t->elem);
   t->status = THREAD_READY;
-  intr_set_level (old_level);
+  // intr_set_level (old_level);
 }
 
 /* When thread successfully holds block for given tick time, 
@@ -292,17 +297,19 @@ timer_release (int64_t tick){//parameter tick is current tick
 void
 timer_set (int64_t tick){
   enum intr_level old_level;
-  old_level = intr_disable();
  
   static struct thread *cur;
   cur = thread_current();
   cur->tick_time = tick;
   list_push_back(&wait_list, &cur->elem);
-  
+
+  old_level = intr_disable();
+
   thread_block();
   
   intr_set_level(old_level);
 }
+
 /* Returns the name of the running thread. */
 const char *
 thread_name (void) 
@@ -364,13 +371,13 @@ thread_yield (void)
 {
   struct thread *cur = thread_current ();
   enum intr_level old_level;
-  
+
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
-    list_push_back (&ready_list, &cur->elem);
-    // list_insert_ordered(&ready_list, &cur->elem, &priority_compare, a);
+    // list_push_back (&ready_list, &cur->elem);
+    list_insert_ordered(&ready_list, &cur->elem, &priority_compare, NULL);
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -398,6 +405,9 @@ void
 thread_set_priority (int new_priority) 
 {
   thread_current ()->priority = new_priority;
+  struct thread *t = list_entry(list_begin(&ready_list), struct thread, elem);
+  if (new_priority < t->priority)
+    thread_yield();
 }
 
 /* Returns the current thread's priority. */
@@ -443,7 +453,7 @@ priority_compare(struct list_elem *a, struct list_elem *b, void *aux){
   struct thread *ta = list_entry(a, struct thread, elem);
   struct thread *tb = list_entry(b, struct thread, elem);
 
-  if (ta->priority < tb->priority){//if a's priority is higher than b, then return true
+  if (ta->priority > tb->priority){//if a's priority is higher than b, then return true
     return true;
   }return false;
 }
@@ -557,18 +567,10 @@ alloc_frame (struct thread *t, size_t size)
 static struct thread *
 next_thread_to_run (void) 
 {
-  int *a = 0;
   if (list_empty (&ready_list))
     return idle_thread;
   else
-    list_sort(&ready_list, &priority_compare, a);
-
-    struct list_elem *e;
-    struct thread *t;
-    for (e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)){
-      t= list_entry(e, struct thread, elem);
-      printf("priority : %d\n",t->priority);
-    }
+    list_sort(&ready_list, &priority_compare, NULL);
     return list_entry (list_pop_front(&ready_list), struct thread, elem);
 }
 
@@ -635,8 +637,6 @@ schedule (void)
   ASSERT (intr_get_level () == INTR_OFF);
   ASSERT (cur->status != THREAD_RUNNING);
   ASSERT (is_thread (next));
-
-
 
   if (cur != next)
     prev = switch_threads (cur, next);

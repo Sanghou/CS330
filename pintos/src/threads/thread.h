@@ -101,7 +101,7 @@ struct thread
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
 
-    int tick_time;			/* Saved tick : used in timer.c */
+    int tick_time;	                 		/* Saved tick : used in timer.c */
   };
 
 /* If false (default), use round-robin scheduler.

@@ -168,14 +168,16 @@ timer_print_stats (void)
 static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
-  enum intr_level old_level;
-  old_level = intr_disable();
+  // enum intr_level old_level;
+  // old_level = intr_disable();
 
   ticks++;
   int64_t cur_tick = timer_ticks();
   timer_release(cur_tick);
 
-  intr_set_level(old_level);
+  // priority_scheck();
+
+  // intr_set_level(old_level);
 
   thread_tick ();
 }
