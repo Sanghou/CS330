@@ -313,6 +313,12 @@ timer_set (int64_t tick){
   intr_set_level(old_level);
 }
 
+struct lock_elem{
+  struct list_elem elem;
+  struct lock *lock;
+  struct thread *t;
+};
+
 /* Returns the name of the running thread. */
 const char *
 thread_name (void) 

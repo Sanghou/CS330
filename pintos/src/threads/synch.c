@@ -213,7 +213,6 @@ lock_acquire (struct lock *lock)
       lock->holder->donated = thread_current();
     }
   }
-
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
 }
@@ -249,17 +248,13 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
-
-  if (get_priority(lock->holder) != -1){
-    int priority = -1;
+  if (lock->holder->donated!= NULL){
     
     if (!list_empty (&lock->semaphore.waiters)){
       struct thread *t = list_entry (list_begin(&lock->semaphore.waiters), struct thread, elem);
       
-      priority = get_priority(t);
-      
-      if (priority == get_priority(lock->holder))
-        lock->holder->donated = NULL;
+      if (t->priority == get_priority(lock->holder))
+        lock->holder->donated = lock->holder->donated->donated;
     }
   }
 
