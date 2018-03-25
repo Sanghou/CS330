@@ -92,7 +92,7 @@ struct thread
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
-
+    
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -102,7 +102,7 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
 
     int tick_time;	                 		/* Saved tick : used in timer.c */
-    int donated_priority;               /* Donated priority. */
+    struct thread *donated;               /* Donated priority. */
   };
 
 /* If false (default), use round-robin scheduler.
@@ -135,6 +135,7 @@ void thread_foreach (thread_action_func *, void *);
 
 int thread_get_priority (void);
 void thread_set_priority (int);
+int get_priority (struct thread *t);
 
 int thread_get_nice (void);
 void thread_set_nice (int);

@@ -28,8 +28,11 @@ static struct list ready_list;
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
 
+/* List of timer blocked processes. Used in proj 1, timer. */
 static struct list wait_list;
 
+static struct list lock_list;
+ 
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -95,6 +98,7 @@ thread_init (void)
   list_init (&ready_list);
   list_init (&all_list);
   list_init (&wait_list);
+  list_init (&lock_list);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -212,7 +216,7 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
 
-  if (thread_current()->priority < t->priority){
+  if (thread_get_priority() < get_priority(t)){
     thread_yield();
   }
 
@@ -405,7 +409,7 @@ thread_set_priority (int new_priority)
 {
   thread_current ()->priority = new_priority;
   struct thread *t = list_entry(list_begin(&ready_list), struct thread, elem);
-  if (new_priority < t->priority)
+  if (new_priority < get_priority(t))
     thread_yield();
 }
 
@@ -413,9 +417,16 @@ thread_set_priority (int new_priority)
 int
 thread_get_priority (void) 
 {
-  if (thread_current ()-> donated_priority > 0)
-    return thread_current ()->donated_priority;
+  if (thread_current ()-> donated != NULL)
+    return get_priority (thread_current ()-> donated);
   return thread_current ()->priority;
+}
+
+int 
+get_priority (struct thread *t){
+  if (t-> donated != NULL)
+    return get_priority(t->donated);
+  return t->priority;
 }
 
 /* Sets the current thread's nice value to NICE. */
@@ -454,7 +465,10 @@ priority_compare(struct list_elem *a, struct list_elem *b, void *aux){
   struct thread *ta = list_entry(a, struct thread, elem);
   struct thread *tb = list_entry(b, struct thread, elem);
 
-  if (ta->priority > tb->priority){//if a's priority is higher than b, then return true
+  int na = get_priority(ta);
+  int nb = get_priority(tb);
+
+  if (na > nb){//if a's priority is higher than b, then return true
     return true;
   }return false;
 }
@@ -544,7 +558,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
-  t->donated_priority = -1;
+  t->donated = NULL;
   list_push_back (&all_list, &t->allelem);
 }
 

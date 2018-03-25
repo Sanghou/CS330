@@ -71,8 +71,9 @@ sema_down (struct semaphore *sema)
   while (sema->value == 0) 
     {
       list_insert_ordered(&sema->waiters, &thread_current ()->elem, &priority_compare, NULL);
-      // list_push_back (&sema->waiters, &thread_current ()->elem);
       thread_block ();
+
+
     }
   sema->value--;
   intr_set_level (old_level);
@@ -118,7 +119,7 @@ sema_up (struct semaphore *sema)
 
   old_level = intr_disable ();
   if (!list_empty (&sema->waiters)) {
-    priority = list_entry (list_begin (&sema->waiters), struct thread, elem)->priority;
+    priority = get_priority(list_entry (list_begin (&sema->waiters), struct thread, elem));
     thread_unblock (list_entry (list_pop_front (&sema->waiters),
                                 struct thread, elem));
   }
@@ -165,6 +166,7 @@ sema_test_helper (void *sema_)
       sema_up (&sema[1]);
     }
 }
+
 
 /* Initializes LOCK.  A lock can be held by at most a single
    thread at any given time.  Our locks are not "recursive", that
@@ -205,6 +207,13 @@ lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
+  if (lock->holder != NULL){
+    //donates priority
+    if (thread_get_priority() > get_priority(lock->holder)){
+      lock->holder->donated = thread_current();
+    }
+  }
+
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
 }
@@ -239,6 +248,20 @@ lock_release (struct lock *lock)
 {
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
+
+
+  if (get_priority(lock->holder) != -1){
+    int priority = -1;
+    
+    if (!list_empty (&lock->semaphore.waiters)){
+      struct thread *t = list_entry (list_begin(&lock->semaphore.waiters), struct thread, elem);
+      
+      priority = get_priority(t);
+      
+      if (priority == get_priority(lock->holder))
+        lock->holder->donated = NULL;
+    }
+  }
 
   lock->holder = NULL;
   sema_up (&lock->semaphore);
@@ -356,7 +379,10 @@ waiter_compare(struct list_elem *a, struct list_elem *b, void *aux){
   struct thread *ta = list_entry(list_begin(&sa->semaphore.waiters), struct thread, elem);
   struct thread *tb = list_entry(list_begin(&sb->semaphore.waiters), struct thread, elem);
 
-  if (ta->priority > tb->priority){//if a's priority is higher than b, then return true
+  int n1 = get_priority(ta);
+  int n2 = get_priority(tb);
+
+  if (n1 > n2){//if a's priority is higher than b, then return true
     return true;
   }return false;
 }
