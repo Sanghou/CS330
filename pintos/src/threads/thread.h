@@ -143,4 +143,6 @@ int thread_get_load_avg (void);
 /* Performs timer operation by given integer tick */
 void timer_release(int64_t tick);
 void timer_set(int64_t tick);
+
+bool priority_compare(struct list_elem *a, struct list_elem *b, void *aux);
 #endif /* threads/thread.h */
