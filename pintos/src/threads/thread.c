@@ -413,6 +413,8 @@ thread_set_priority (int new_priority)
 int
 thread_get_priority (void) 
 {
+  if (thread_current ()-> donated_priority > 0)
+    return thread_current ()->donated_priority;
   return thread_current ()->priority;
 }
 
@@ -542,6 +544,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+  t->donated_priority = -1;
   list_push_back (&all_list, &t->allelem);
 }
 

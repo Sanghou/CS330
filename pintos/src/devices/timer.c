@@ -174,9 +174,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
   ticks++;
   int64_t cur_tick = timer_ticks();
   timer_release(cur_tick);
-
-  // priority_scheck();
-
+  
   // intr_set_level(old_level);
 
   thread_tick ();

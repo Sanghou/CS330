@@ -102,6 +102,7 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
 
     int tick_time;	                 		/* Saved tick : used in timer.c */
+    int donated_priority;               /* Donated priority. */
   };
 
 /* If false (default), use round-robin scheduler.
