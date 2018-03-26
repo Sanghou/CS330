@@ -313,22 +313,6 @@ timer_set (int64_t tick){
   intr_set_level(old_level);
 }
 
-struct thread *
-thread_find_for_unblock (struct thread *tmp){
-  struct list_elem *e;
-  int prior = -1;
-  struct thread *result = NULL;
-
-  for (e = list_begin(&all_list); e != list_end(&all_list); e=list_next(e)){
-    struct thread *t = list_entry(e, struct thread, allelem);
-    if (t->status == THREAD_BLOCKED && t!= tmp && get_priority(t) > prior){
-      result = t;
-      prior = get_priority(t);
-    }
-  }
-  return result;
-}
-
 /* Returns the name of the running thread. */
 const char *
 thread_name (void) 
