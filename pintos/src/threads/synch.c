@@ -275,6 +275,14 @@ lock_release (struct lock *lock)
   lock->holder = NULL;
   sema_up (&lock->semaphore);
   
+  struct list_elem *e;
+  for (e = list_begin(&lock->semaphore.waiters); e != list_end(&lock->semaphore.waiters); e = list_next(e)){
+    
+    struct thread *t = list_entry(e, struct thread, elem);
+    list_remove(&t->lockelem);
+    list_insert_ordered(&t->donated_list, &t->lockelem ,&priority_compare, NULL);  
+  }
+
   intr_set_level(old_level);
 }
 
