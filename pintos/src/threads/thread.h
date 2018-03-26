@@ -103,6 +103,8 @@ struct thread
 
     int tick_time;	                 		/* Saved tick : used in timer.c */
     struct thread *donated;               /* Donated priority. */
+    struct list donated_list;
+    struct list_elem lockelem;
   };
 
 /* If false (default), use round-robin scheduler.
@@ -147,4 +149,5 @@ void timer_release(int64_t tick);
 void timer_set(int64_t tick);
 
 bool priority_compare(struct list_elem *a, struct list_elem *b, void *aux);
+struct thread * thread_find_for_unblock (struct thread *t);
 #endif /* threads/thread.h */

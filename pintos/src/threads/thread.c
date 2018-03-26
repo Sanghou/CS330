@@ -32,7 +32,7 @@ static struct list all_list;
 static struct list wait_list;
 
 static struct list lock_list;
- 
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -313,11 +313,21 @@ timer_set (int64_t tick){
   intr_set_level(old_level);
 }
 
-struct lock_elem{
-  struct list_elem elem;
-  struct lock *lock;
-  struct thread *t;
-};
+struct thread *
+thread_find_for_unblock (struct thread *tmp){
+  struct list_elem *e;
+  int prior = -1;
+  struct thread *result = NULL;
+
+  for (e = list_begin(&all_list); e != list_end(&all_list); e=list_next(e)){
+    struct thread *t = list_entry(e, struct thread, allelem);
+    if (t->status == THREAD_BLOCKED && t!= tmp && get_priority(t) > prior){
+      result = t;
+      prior = get_priority(t);
+    }
+  }
+  return result;
+}
 
 /* Returns the name of the running thread. */
 const char *
@@ -565,6 +575,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->magic = THREAD_MAGIC;
   t->donated = NULL;
+  list_init(&t->donated_list);
   list_push_back (&all_list, &t->allelem);
 }
 
