@@ -103,8 +103,8 @@ struct thread
 
     int tick_time;	                 		/* Saved tick : used in timer.c */
     struct thread *donated;             /* Donated priority. */
-    struct list donated_list;
-    struct list_elem lockelem;
+    struct list donated_list;           /* List of blocked threads. Blocked because current thread acquired lock. */
+    struct list_elem lockelem;          /* List element for donated_list. */
   };
 
 /* If false (default), use round-robin scheduler.

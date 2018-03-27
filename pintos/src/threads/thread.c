@@ -31,8 +31,6 @@ static struct list all_list;
 /* List of timer blocked processes. Used in proj 1, timer. */
 static struct list wait_list;
 
-static struct list lock_list;
-
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -98,7 +96,6 @@ thread_init (void)
   list_init (&ready_list);
   list_init (&all_list);
   list_init (&wait_list);
-  list_init (&lock_list);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -251,24 +248,22 @@ thread_block (void)
 void
 thread_unblock (struct thread *t) 
 {
-  // enum intr_level old_level;
 
   ASSERT (is_thread (t));
 
-  // old_level = intr_disable();
   ASSERT (t->status == THREAD_BLOCKED);
   list_insert_ordered(&ready_list, &t->elem, &priority_compare, NULL);
   
   // list_push_back (&ready_list, &t->elem);
   t->status = THREAD_READY;
-  // intr_set_level (old_level);
 }
 
 /* When thread successfully holds block for given tick time, 
    this function releases its block state.
    Transitions a blocked thread T to the ready-to-run state.*/
 void
-timer_release (int64_t tick){//parameter tick is current tick
+timer_release (int64_t tick){
+  //parameter tick is current tick
   struct list_elem *e;
   struct thread *t;
   bool check = false;
