@@ -257,6 +257,7 @@ lock_release (struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
   enum intr_level old_level;
   struct thread *t;
+  struct list_elem *e;
   old_level = intr_disable();
 
   if (lock->holder->donated!= NULL){
@@ -265,7 +266,10 @@ lock_release (struct lock *lock)
       t = list_entry (list_begin(&lock->semaphore.waiters), struct thread, elem);
       int priority = get_priority(t);
 
-      list_remove(&t->lockelem);
+      for (e = list_begin(&lock->semaphore.waiters); e != list_end(&lock->semaphore.waiters); e = list_next(e)){
+          struct thread *tmp = list_entry(e, struct thread, elem);
+          list_remove(&tmp->lockelem); 
+      }
 
       if (priority == get_priority(lock->holder)){
         lock->holder->donated = find_priority(lock->holder);
@@ -273,26 +277,24 @@ lock_release (struct lock *lock)
     }
   }
 
+  intr_set_level(old_level);
+
   lock->holder = NULL;
   sema_up (&lock->semaphore);
-  
-  struct list_elem *e;
-  for (e = list_begin(&lock->semaphore.waiters); e != list_end(&lock->semaphore.waiters); e = list_next(e)){
-    
-    struct thread *tmp = list_entry(e, struct thread, elem);
-    list_remove(&tmp->lockelem);
-    list_insert_ordered(&t->donated_list, &tmp->lockelem ,&priority_compare, NULL);  
-  }
-
-  intr_set_level(old_level);
 }
 
+/* 
+  Find a high priority thread blocked by lock_acquire()
+
+  returns a struct thread pointer.
+*/
 struct thread *
 find_priority (struct thread *t){
   struct thread *result = NULL;
-  if (list_empty(&t->donated_list))
+  if (list_empty(&t->donated_list)){
     return NULL;
-
+  }
+  
   struct list_elem *e = list_pop_front(&t->donated_list);
   result = list_entry(e, struct thread, lockelem);
   return result;
