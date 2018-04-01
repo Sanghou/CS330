@@ -1,0 +1,10 @@
+.bash_history
+.bash_logout
+.bashrc
+.cache/
+.gitconfig
+.profile
+.ssh/
+.vim/
+.viminfo
+.sgrep.c.swp
