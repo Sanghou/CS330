@@ -11,10 +11,10 @@
 # hlsearch on (H) or off (h):
 ~h
 # Command Line History (newest to oldest):
-:q
-|2,0,1520940811,,"q"
 :wq
-|2,0,1520939188,,"wq"
+|2,0,1523209512,,"wq"
+:q
+|2,0,1523209386,,"q"
 :W
 |2,0,1520938532,,"W"
 
@@ -29,230 +29,244 @@
 # Registers:
 
 # File marks:
-'0  1  0  ~/]
-|4,48,1,0,1520940811,"~/]"
-'1  897  37  ~/pintos/src/threads/result
-|4,49,897,37,1520939550,"~/pintos/src/threads/result"
-'2  40  0  ~/pintos/src/tests/threads/Make.tests
-|4,50,40,0,1520939188,"~/pintos/src/tests/threads/Make.tests"
-'3  5  34  ~/pintos/src/tests/threads/Grading
-|4,51,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
-'4  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,52,10,1,1520939117,"~/pintos/src/tests/threads/Make.tests"
-'5  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,53,10,1,1520939117,"~/pintos/src/tests/threads/Make.tests"
-'6  5  34  ~/pintos/src/tests/threads/Grading
-|4,54,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
-'7  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,55,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
-'8  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,56,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
-'9  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,57,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
+'0  6  0  ~/.gitignore
+|4,48,6,0,1523209512,"~/.gitignore"
+'1  5  0  ~/.gitignore
+|4,49,5,0,1523209463,"~/.gitignore"
+'2  5  0  ~/.gitignore
+|4,50,5,0,1523209463,"~/.gitignore"
+'3  126  0  ~/pintos/src/userprog/process.c
+|4,51,126,0,1523209386,"~/pintos/src/userprog/process.c"
+'4  96  0  ~/pintos/src/userprog/process.c
+|4,52,96,0,1523209354,"~/pintos/src/userprog/process.c"
+'5  96  0  ~/pintos/src/userprog/process.c
+|4,53,96,0,1523209354,"~/pintos/src/userprog/process.c"
+'6  1  0  ~/]
+|4,54,1,0,1520940811,"~/]"
+'7  897  37  ~/pintos/src/threads/result
+|4,55,897,37,1520939550,"~/pintos/src/threads/result"
+'8  40  0  ~/pintos/src/tests/threads/Make.tests
+|4,56,40,0,1520939188,"~/pintos/src/tests/threads/Make.tests"
+'9  5  34  ~/pintos/src/tests/threads/Grading
+|4,57,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
 
 # Jumplist (newest first):
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  5  0  ~/.gitignore
+|4,39,5,0,1523209477,"~/.gitignore"
+-'  5  0  ~/.gitignore
+|4,39,5,0,1523209463,"~/.gitignore"
+-'  1  0  ~/.gitignore
+|4,39,1,0,1523209436,"~/.gitignore"
+-'  1  0  ~/.gitignore
+|4,39,1,0,1523209436,"~/.gitignore"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523209386,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523209386,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523209386,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523209386,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209354,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209354,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209354,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209354,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
 -'  1  0  ~/]
 |4,39,1,0,1520940811,"~/]"
 -'  897  37  ~/pintos/src/threads/result
 |4,39,897,37,1520939550,"~/pintos/src/threads/result"
 -'  897  37  ~/pintos/src/threads/result
 |4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
+-'  897  37  ~/pintos/src/threads/result
+|4,39,897,37,1520939550,"~/pintos/src/threads/result"
 -'  1  0  ~/pintos/src/threads/result
 |4,39,1,0,1520939243,"~/pintos/src/threads/result"
 -'  1  0  ~/pintos/src/threads/result
 |4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  40  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,40,0,1520939188,"~/pintos/src/tests/threads/Make.tests"
--'  40  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,40,0,1520939188,"~/pintos/src/tests/threads/Make.tests"
--'  40  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,40,0,1520939188,"~/pintos/src/tests/threads/Make.tests"
--'  40  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,40,0,1520939188,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939159,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939159,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939159,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939159,"~/pintos/src/tests/threads/Make.tests"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939117,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939117,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939117,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939117,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939117,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939117,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939117,"~/pintos/src/tests/threads/Make.tests"
--'  10  1  ~/pintos/src/tests/threads/Make.tests
-|4,39,10,1,1520939117,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520939104,"~/pintos/src/tests/threads/Make.tests"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  5  34  ~/pintos/src/tests/threads/Grading
-|4,39,5,34,1520938970,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  1  0  ~/pintos/src/tests/threads/Grading
-|4,39,1,0,1520938963,"~/pintos/src/tests/threads/Grading"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  53  0  ~/pintos/src/tests/threads/Make.tests
-|4,39,53,0,1520938960,"~/pintos/src/tests/threads/Make.tests"
--'  4  23  ~/pintos/src/tests/threads/Make.tests
-|4,39,4,23,1520938948,"~/pintos/src/tests/threads/Make.tests"
--'  4  23  ~/pintos/src/tests/threads/Make.tests
-|4,39,4,23,1520938948,"~/pintos/src/tests/threads/Make.tests"
--'  4  23  ~/pintos/src/tests/threads/Make.tests
-|4,39,4,23,1520938948,"~/pintos/src/tests/threads/Make.tests"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/pintos/src/threads/result
+|4,39,1,0,1520939243,"~/pintos/src/threads/result"
 
 # History of marks within files (newest to oldest):
+
+> ~/.gitignore
+	*	1523209511	0
+	"	6	0
+	^	6	0
+	.	6	0
+	+	1	21
+	+	2	21
+	+	4	4
+	+	6	0
+
+> ~/pintos/src/userprog/process.c
+	*	1523209385	0
+	"	126	0
 
 > ~/]
 	*	1520940810	0

@@ -88,6 +88,9 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
+  while(true){
+
+  }
   return -1;
 }
 
@@ -213,13 +216,19 @@ load (const char *file_name, void (**eip) (void), void **esp)
   struct file *file = NULL;
   off_t file_ofs;
   bool success = false;
-  int i;
+  int i, count, tmp, bytes_count;
+  char *token, *saved_ptr;
+  char* argv[32];
 
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();
   if (t->pagedir == NULL) 
     goto done;
   process_activate ();
+
+  count = 1;
+  token = strtok_r (file_name, " ", &saved_ptr);
+  file_name = token;
 
   /* Open executable file. */
   file = filesys_open (file_name);
@@ -229,10 +238,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
       goto done; 
     }
 
-  /* Read and verify executable header. */
+   // Read and verify executable header. 
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
       || memcmp (ehdr.e_ident, "\177ELF\1\1\1", 7)
-      || ehdr.e_type != 2
+       || ehdr.e_type != 2
       || ehdr.e_machine != 3
       || ehdr.e_version != 1
       || ehdr.e_phentsize != sizeof (struct Elf32_Phdr)
@@ -305,8 +314,53 @@ load (const char *file_name, void (**eip) (void), void **esp)
   if (!setup_stack (esp))
     goto done;
 
-  /* Start address. */
+  /* Start address. */  
   *eip = (void (*) (void)) ehdr.e_entry;
+
+  token = file_name;
+  file_name = saved_ptr;
+  *esp -= strlen(token)+1;
+  memcpy(*esp, token, strlen(token));
+  argv[0] = *esp;
+
+  for (token = strtok_r (file_name, " ", &saved_ptr); token != NULL;
+        token = strtok_r (NULL, " ", &saved_ptr)){
+    *esp -= strlen(token)+1;
+    memcpy(*esp, token, strlen(token));
+    argv[count] = *esp;
+    count++;
+
+  }
+
+  tmp = ((int) *esp)&0x000000ff;
+  bytes_count = tmp%4;
+  tmp = 0;
+  
+  //writes word-align into stack
+  *esp -= sizeof(uint8_t)*bytes_count;
+  memcpy(*esp, &tmp, sizeof(uint8_t)*bytes_count);
+
+  //writes the last argv[i] which contains NULL element into the stack
+  *esp -= sizeof(char *);
+  memcpy(*esp, &tmp, sizeof(char *));
+
+  //writes each argv[i] location into the stack
+  for (i = count -1; i>=0; i--){
+    *esp -= sizeof(char *);
+    memcpy(*esp, &argv[i], sizeof(char *));
+  }
+  
+  saved_ptr = *esp; 
+  // writes argv pointer into the stack
+  *esp -= sizeof(char **);
+  memcpy(*esp, &saved_ptr, sizeof(char **));
+
+  //writes argc into stack
+  *esp -= sizeof(int);
+  memcpy(*esp, &count, sizeof(int));
+
+  *esp -= sizeof(void *);
+  memcpy(*esp, &tmp, sizeof(void *));
 
   success = true;
 
@@ -423,7 +477,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
     }
   return true;
 }
-
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
@@ -436,8 +489,9 @@ setup_stack (void **esp)
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
-      if (success)
+      if (success){
         *esp = PHYS_BASE;
+      }
       else
         palloc_free_page (kpage);
     }
