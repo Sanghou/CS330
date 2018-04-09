@@ -17,6 +17,8 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "userprog/syscall.h"
+#include "threads/synch.h"
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
@@ -31,6 +33,9 @@ process_execute (const char *file_name)
   char *fn_copy;
   tid_t tid;
 
+  struct lock *sys_lock = get_sys_lock();
+  lock_acquire(sys_lock);
+
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -42,6 +47,7 @@ process_execute (const char *file_name)
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
+  lock_release(sys_lock);
   return tid;
 }
 
@@ -88,10 +94,18 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
-  while(true){
+  struct thread *t = get_thread_from_tid(child_tid);
 
+  if (t == NULL){
+    return -1;
   }
-  return -1;
+
+  while(t->status != THREAD_DYING){
+    t = get_thread_from_tid(child_tid);
+    if (t == NULL) break;
+  }
+  return 0;
+  
 }
 
 /* Free the current process's resources. */
@@ -355,7 +369,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   *esp -= sizeof(char **);
   memcpy(*esp, &saved_ptr, sizeof(char **));
 
-  //writes argc into stack
+  //writes argc into Stack
   *esp -= sizeof(int);
   memcpy(*esp, &count, sizeof(int));
 
