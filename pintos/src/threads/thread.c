@@ -477,9 +477,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
 
-  list_init(&t->fd_list);
-
   #ifdef USERPROG
+    list_init(&t->fd_list);
     sema_init(&t->start,0);
     t->exit_status = 0;
   #endif
@@ -663,7 +662,9 @@ append_file (struct list_elem *elem){
 //remove file to file_descript.
 void
 remove_file (struct list_elem *elem){
+  struct file_descript *file_descript = list_entry(elem, struct file_descript, fd_elem);
   list_remove(elem);
+  free(file_descript);
 }
 
 
@@ -672,18 +673,28 @@ remove_file (struct list_elem *elem){
 int
 set_file_descript(struct file *file){
   struct thread *t = thread_current();
-  struct file_descript *file_descript;
-  int fd;
+  struct file_descript *file_descript = malloc(sizeof(struct file_descript));
+  int fd = 2;
   memset (file_descript, 0, sizeof *file_descript);
   // file_descript->t = t;
 
   file_descript->file = file;
 
   struct list_elem *e;
+
+  if (list_empty(&t->fd_list))
+  {
+    file_descript->fd = fd;
+
+  }
+  else
+  {
   e = list_back(&t->fd_list);
+
   struct file_descript *exist_fd= list_entry(e, struct file_descript, fd_elem);
   file_descript->fd = exist_fd->fd + 1;
-  
+  }
+
   append_file(&file_descript->fd_elem);
 
   return fd;

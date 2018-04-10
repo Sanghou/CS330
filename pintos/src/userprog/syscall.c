@@ -178,7 +178,13 @@ syscall_handler (struct intr_frame *f)
       const char *file = (const char *) read(f,1);
       unsigned size = (unsigned) read(f,0);
 
-  		// f->eax = filesys_create(file, initial_size);
+      if (!is_valid_addr(file)) 
+      {
+        terminate_error();
+        break;
+      }
+
+  		f->eax = filesys_create(file, size);
   		break;
   	}
   	case SYS_REMOVE:
@@ -186,18 +192,30 @@ syscall_handler (struct intr_frame *f)
   		//read arguments
       const char *file = (const char *) read(f,1);
 
-  		// f->eax = filesys_remove(file);
+      if (!is_valid_addr(file)) 
+      {
+        terminate_error();
+        break;
+      }
+
+  		f->eax = filesys_remove(file);
   		break;
   	}
   	case SYS_OPEN:
     {
   		//read arguments
-      const char *file = (const char *) read(f,1);
+      const char *file_name = (const char *) read(f,1);
 
-  		// struct file *file = filesys_open(file_name);
-  		// struct file_descript *file_ds = 
+      if (!is_valid_addr(file_name)) 
+      {
+        f->eax = -1;
+        terminate_error();
+        break;
+      }
+      struct file *file = filesys_open(file_name);
+      int fd =  set_file_descript(file);
 
-  		// set_file_descript( ,file);
+      f->eax = fd;
   		break;
   	}
   	case SYS_FILESIZE:
@@ -248,7 +266,15 @@ syscall_handler (struct intr_frame *f)
   	case SYS_CLOSE:
     {
       int fd = read(f, 0);
-  		
+
+      if (fd == 1 || fd == 0) {
+        terminate_error();
+        break;
+      }
+
+      struct file_descript *descript = find_file_descript(fd);
+      remove_file(&descript->fd_elem);
+
   		break;
   	}
   	default:
