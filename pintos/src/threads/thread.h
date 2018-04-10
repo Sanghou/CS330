@@ -101,6 +101,7 @@ struct thread
     struct semaphore start;
     struct thread* parent;
     
+    struct list fd_list;
 #endif
 
     /* Owned by thread.c. */
@@ -115,6 +116,13 @@ struct thread
     struct list_elem elem;
     bool is_waiting;                    /* Default value of is_waiting is false */
   };
+
+struct file_descript{
+    int fd;
+    struct file *file;
+    struct list_elem fd_elem;
+};  
+
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -156,5 +164,10 @@ struct thread *get_thread_from_tid(tid_t t_value);
 struct child_info *find_info(tid_t child_pid);
 void remove_child(struct list_elem *elem);
 void insert_child(struct list_elem *elem);
+
+void append_file(struct list_elem *elem);
+void remove_file(struct list_elem *elem);
+int set_file_descript(struct file_descript *file_descript, struct file *file);
+struct file_descript * find_file_descript(int fd);
 
 #endif /* threads/thread.h */

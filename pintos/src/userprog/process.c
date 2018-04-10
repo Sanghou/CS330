@@ -247,6 +247,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
   /* Open executable file. */
   file = filesys_open (file_name);
+
   if (file == NULL) 
     {
       printf ("load: %s: open failed\n", file_name);
@@ -256,7 +257,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
    // Read and verify executable header. 
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
       || memcmp (ehdr.e_ident, "\177ELF\1\1\1", 7)
-       || ehdr.e_type != 2
+      || ehdr.e_type != 2
       || ehdr.e_machine != 3
       || ehdr.e_version != 1
       || ehdr.e_phentsize != sizeof (struct Elf32_Phdr)
@@ -328,7 +329,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
   /* Set up stack. */
   if (!setup_stack (esp))
     goto done;
-
   /* Start address. */  
   *eip = (void (*) (void)) ehdr.e_entry;
 
@@ -346,7 +346,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
     count++;
 
   }
-
+  
   tmp = ((int) *esp)&0x000000ff;
   bytes_count = tmp%4;
   tmp = 0;
@@ -382,6 +382,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
  done:
   /* We arrive here whether the load is successful or not. */
   file_close (file);
+
   return success;
 }
 

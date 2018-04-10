@@ -1,6 +1,7 @@
 #include "userprog/syscall.h"
 #include <stdio.h>
 #include <syscall-nr.h>
+#include <list.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/synch.h"
@@ -12,6 +13,10 @@ static void syscall_handler (struct intr_frame *);
 static int get_user (const uint8_t *uaddr);
 static bool put_user (uint8_t *udst, uint8_t byte);
 
+
+
+
+
 void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid);
 int read(struct intr_frame *f);
 // void write();
@@ -22,9 +27,53 @@ static struct lock sys_lock;
 void
 syscall_init (void) 
 {
-  lock_init(&sys_lock);
-  intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
+	//list_init(&fd_list);
+  	lock_init(&sys_lock);
+  	intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
 }
+
+// void
+// append_file (struct list_elem *elem){
+// 	list_push_back(&fd_list);
+// }
+
+// void
+// remove_file (struct list_elem *elem){
+// 	list_remove(elem);
+// }
+
+// struct file_descript * 
+// set_file_descript(struct file_descript *file_descript, struct file *file){
+
+// 	struct thread *t = thread_current();
+
+// 	int fd;
+
+// 	memset (info, 0, sizeof *file_descript);
+
+// 	file_descript->t = t;
+//   	file_descript->file = file;
+
+//   	file_descript->fd = 
+
+//   	insert_child(&info->elem);
+// }
+
+// struct file_descript *
+// find_file_descript(int fd, struct thead *t){
+// 	struct list_elem *e;
+
+// 	for(e=list_begin(&fd_list); e != list_end(&fd_list);e=list_next(e)){
+// 		struct file_descript *file_descript = list_entry(e, struct file_descript, elem){
+// 			if(file_descript->fd == fd && file_descript->t == t){
+// 				return file_descript;
+// 			}
+// 		}
+// 	}
+
+// 	return NULL;
+// }
+
 
 static void
 syscall_handler (struct intr_frame *f) 
@@ -75,7 +124,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXEC:{
   		enum intr_level old_level;
-  		old_level = intr_disable();
+  		//old_level = intr_disable();
 
   		if (read(f) == -1) terminate();
   		const char * cmd_line= (const char *)*((const void **) f->esp);
@@ -93,7 +142,7 @@ syscall_handler (struct intr_frame *f)
   		struct child_info *info = malloc(sizeof(struct child_info));
   		set_child_info(info, child_pid, thread_current()->tid);
 
-  		intr_set_level(old_level);
+  		//intr_set_level(old_level);
 
   		break;
   	}
@@ -107,17 +156,17 @@ syscall_handler (struct intr_frame *f)
 
   		struct child_info *info = find_info(child_pid);
 
-  		if (info == NULL || info->parent_pid != parent_pid || info->is_waiting ){
+  		if (info == NULL || info->parent_pid != parent_pid || info->is_waiting )
+  		{
   			//when given argument pid_t is not a child of current thread.
   			f->eax = -1;
   			break;
   		}
-  		info->is_waiting = true;
 
+  		info->is_waiting = true;
   		sema_down(info->sema);
 
   		f->eax = info->exit_status;
-
   		remove_child(&info->elem);
   		free(info);
 
@@ -125,13 +174,15 @@ syscall_handler (struct intr_frame *f)
   	}
 
 
-  	case SYS_CREATE:{
+  	case SYS_CREATE:
+  	{
   		//read arguments
 
   		// f->eax = filesys_create(file, initial_size);
   		break;
   	}
-  	case SYS_REMOVE:{
+  	case SYS_REMOVE:
+  	{
   		//read arguments
 
   		// f->eax = filesys_remove(file);
@@ -176,8 +227,6 @@ syscall_handler (struct intr_frame *f)
   	}
   	case SYS_CLOSE:{
   		
-
-
   		break;
   	}
   	default:

@@ -477,6 +477,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
 
+  list_init(&t->fd_list);
+
   #ifdef USERPROG
     sema_init(&t->start,0);
   #endif
@@ -645,3 +647,54 @@ insert_child(struct list_elem *elem){
 
   lock_release(&child_list_manage_lock);
 }
+
+
+
+
+void
+append_file (struct list_elem *elem){
+  list_push_back(&thread_current()->fd_list,elem);
+}
+
+void
+remove_file (struct list_elem *elem){
+  list_remove(elem);
+}
+
+int
+set_file_descript(struct file_descript *file_descript, struct file *file){
+  struct thread *t = thread_current();
+  int fd;
+  memset (file_descript, 0, sizeof *file_descript);
+  // file_descript->t = t;
+  file_descript->file = file;
+
+  struct list_elem *e;
+  e = list_back(&t->fd_list);
+  struct file_descript *exist_fd= list_entry(e, struct file_descript, fd_elem);
+  file_descript->fd = exist_fd->fd + 1;
+
+  append_file(&file_descript->fd_elem);
+
+  return fd;
+  
+}
+
+struct file_descript *
+find_file_descript(int fd){
+  
+  struct list_elem *e;
+  struct thread *t = thread_current();
+
+  for(e=list_begin(&t->fd_list); e != list_end(&t->fd_list);e=list_next(e)){
+    
+    struct file_descript *file_descript = list_entry(e, struct file_descript, fd_elem);
+
+      if(file_descript->fd == fd){
+        return file_descript;
+      }
+
+    }
+  return NULL;
+}
+
