@@ -127,6 +127,8 @@ syscall_handler (struct intr_frame *f)
   	case SYS_CREATE:
     {
   		//read arguments
+      const char *file = (const char *) read(f,1);
+      unsigned size = (unsigned) read(f,0);
 
   		// f->eax = filesys_create(file, initial_size);
   		break;
@@ -134,6 +136,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_REMOVE:
     {
   		//read arguments
+      const char *file = (const char *) read(f,1);
 
   		// f->eax = filesys_remove(file);
   		break;
@@ -141,18 +144,22 @@ syscall_handler (struct intr_frame *f)
   	case SYS_OPEN:
     {
   		//read arguments
+      const char *file = (const char *) read(f,1);
 
   		// struct file *file = filesys_open(file_name);
   		break;
   	}
   	case SYS_FILESIZE:
     {
-
+      int fd = read(f, 0);
 
   		break;
   	}
   	case SYS_READ:
     {
+      int fd = read(f,0);
+      const char *buffer = (const char *) read(f,1);
+      unsigned size = (unsigned) read(f, 0);
 
   		break;
   	}
@@ -177,14 +184,19 @@ syscall_handler (struct intr_frame *f)
   	}
   	case SYS_SEEK:
     {
+      int fd = read(f, 0);
+      unsigned position = (unsigned) read(f, 0);
+
   		break;
   	}
   	case SYS_TELL:
     {
+      int fd = read(f, 0);
   		break;
   	}
   	case SYS_CLOSE:
     {
+      int fd = read(f, 0);
   		
 
 
