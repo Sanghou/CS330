@@ -1,6 +1,6 @@
 pintos/src/examples/*
 pintos/src/examples/*
-.vim*
+.vim
 .ssh
 .viminfo
 pintos/filesys.disk

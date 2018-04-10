@@ -33,48 +33,6 @@ syscall_init (void)
   	intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
 }
 
-// void
-// append_file (struct list_elem *elem){
-// 	list_push_back(&fd_list);
-// }
-
-// void
-// remove_file (struct list_elem *elem){
-// 	list_remove(elem);
-// }
-
-// struct file_descript * 
-// set_file_descript(struct file_descript *file_descript, struct file *file){
-
-// 	struct thread *t = thread_current();
-
-// 	int fd;
-
-// 	memset (info, 0, sizeof *file_descript);
-
-// 	file_descript->t = t;
-//   	file_descript->file = file;
-
-//   	file_descript->fd = 
-
-//   	insert_child(&info->elem);
-// }
-
-// struct file_descript *
-// find_file_descript(int fd, struct thead *t){
-// 	struct list_elem *e;
-
-// 	for(e=list_begin(&fd_list); e != list_end(&fd_list);e=list_next(e)){
-// 		struct file_descript *file_descript = list_entry(e, struct file_descript, elem){
-// 			if(file_descript->fd == fd && file_descript->t == t){
-// 				return file_descript;
-// 			}
-// 		}
-// 	}
-
-// 	return NULL;
-// }
-
 
 static void
 syscall_handler (struct intr_frame *f) 
@@ -82,7 +40,7 @@ syscall_handler (struct intr_frame *f)
   // printf ("system call!\n");
 
   //to provide an  exclude operation for one user program.
-  lock_acquire(&sys_lock);
+  //lock_acquire(&sys_lock);
 
   //read system call number 
   int sys_num = read(f, 0);
@@ -104,10 +62,12 @@ syscall_handler (struct intr_frame *f)
 
   		struct child_info *info = find_info(child_pid);
 
+  		thread_current()->exit_status = status;
+
   		if (info == NULL)
       {
   			sema_up(&thread_current()->start);
-  			printf("%s: exit(%d)\n", thread_current()->name,status);
+  			// printf("%s: exit(%d)\n", thread_current()->name,status);
   			terminate();
    			break;
   		}
@@ -134,13 +94,12 @@ syscall_handler (struct intr_frame *f)
   			terminate_error();
   			break;
   		}
+
   		tid_t child_pid = process_execute (cmd_line);
 
   		f->eax = child_pid;
-
   		struct child_info *info = malloc(sizeof(struct child_info));
   		set_child_info(info, child_pid, thread_current()->tid);
-
   		//intr_set_level(old_level);
 
   		break;
@@ -203,6 +162,7 @@ syscall_handler (struct intr_frame *f)
   	}
   	case SYS_OPEN:
     {
+    	//lock_acquire(&sys_lock);
   		//read arguments
       const char *file_name = (const char *) read(f,1);
 
@@ -212,18 +172,30 @@ syscall_handler (struct intr_frame *f)
         terminate_error();
         break;
       }
+
+      if (!strcmp(file_name,"")){
+      	f->eax =  -1;
+      	terminate();
+      	break;
+      }
+
       struct file *file = filesys_open(file_name);
       int fd =  set_file_descript(file);
 
       f->eax = fd;
   		break;
   	}
+
+
   	case SYS_FILESIZE:
     {
       int fd = read(f, 0);
 
   		break;
   	}
+  	
+
+
   	case SYS_READ:
     {
       int fd = read(f,0);
@@ -232,6 +204,8 @@ syscall_handler (struct intr_frame *f)
 
   		break;
   	}
+  	
+
   	case SYS_WRITE:
     { 
   		int fd = read(f,0);
@@ -282,7 +256,7 @@ syscall_handler (struct intr_frame *f)
   		break;
   }
 
-  lock_release(&sys_lock);
+  //lock_release(&sys_lock);
 }
 
 void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid)
@@ -348,16 +322,19 @@ is_valid_addr(void *addr)
 
   return true;
 }
+
 void terminate()
 {
-  lock_release(&sys_lock);
+  //lock_release(&sys_lock);
+  
   sema_up(&thread_current()->start);
+  printf("%s: exit(%d)\n", thread_current()->name, thread_current()->exit_status);
   thread_exit();
 }
 
 void terminate_error()
 {
-	lock_release(&sys_lock);
+//	lock_release(&sys_lock);
   thread_current()->exit_status = -1;
   printf("%s: exit(%d)\n", thread_current()->name, -1);
   sema_up(&thread_current()->start);
