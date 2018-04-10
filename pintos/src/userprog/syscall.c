@@ -12,6 +12,7 @@ static void syscall_handler (struct intr_frame *);
 static int get_user (const uint8_t *uaddr);
 static bool put_user (uint8_t *udst, uint8_t byte);
 
+void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid);
 int read(struct intr_frame *f);
 // void write();
 void terminate();
@@ -34,8 +35,10 @@ syscall_handler (struct intr_frame *f)
   lock_acquire(&sys_lock);
 
   //read system call number 
-  int sys_num = read(f);
-  if (sys_num == -1) terminate();
+  if (read(f) == -1) terminate();
+  int sys_num = *(char *)f->esp;
+  f->esp += 4; 
+
 
   switch(sys_num){
   	/* System call for pintos proj2 */
@@ -44,30 +47,80 @@ syscall_handler (struct intr_frame *f)
   		break;
   	}
 
-
   	case SYS_EXIT:{
-  		int status = read(f);
-  		if (status == -1) terminate();
+  		if (read(f) == -1) terminate();
+  		int status = *(char *)f->esp;
+  		f->esp += 4; 
 
-  		//some code to transfer child end.
+  		tid_t child_pid = thread_current()->tid;
 
-  		sema_up(&start);
-  		// f->eax = status;
+  		struct child_info *info = find_info(child_pid);
+
+  		if (info == NULL){
+  			sema_up(&thread_current()->start);
+  			printf("%s: exit(%d)\n", thread_current()->name,status);
+  			terminate();
+   			break;
+  		}
+
+  		info->exit_status = status;
+
+  		sema_up(&thread_current()->start);
+
+  		info->is_waiting = false;
+
   		terminate();
   		break;
   	}
 
   	case SYS_EXEC:{
+  		enum intr_level old_level;
+  		old_level = intr_disable();
+
+  		if (read(f) == -1) terminate();
+  		const char * cmd_line= (const char *)*((const void **) f->esp);
+  		// printf("cmd_line : %s, is same : %d\n",cmd_line, cmd_line=="child-simple");
+  		f->esp += 4;
+
+  		if (!is_user_vaddr(cmd_line)) {
+  			terminate();
+  			break;
+  		}
+  		tid_t child_pid = process_execute (cmd_line);
+
+  		f->eax = child_pid;
+
+  		struct child_info *info = malloc(sizeof(struct child_info));
+  		set_child_info(info, child_pid, thread_current()->tid);
+
+  		intr_set_level(old_level);
 
   		break;
   	}
 
   	case SYS_WAIT:{
-  		sema_down(&start);
+  		if (read(f) == -1) terminate();
+  		tid_t child_pid =  *(char*)f->esp;
+  		f->esp += 4; 
 
+  		tid_t parent_pid = thread_current()->tid;
 
+  		struct child_info *info = find_info(child_pid);
 
-  		sema_up(&end);
+  		if (info == NULL || info->parent_pid != parent_pid || info->is_waiting ){
+  			//when given argument pid_t is not a child of current thread.
+  			f->eax = -1;
+  			break;
+  		}
+  		info->is_waiting = true;
+
+  		sema_down(info->sema);
+
+  		f->eax = info->exit_status;
+
+  		remove_child(&info->elem);
+  		free(info);
+
   		break;
   	}
 
@@ -99,13 +152,15 @@ syscall_handler (struct intr_frame *f)
 
   		break;
   	}
-  	case SYS_WRITE:{
+  	case SYS_WRITE:{ 
   		int fd = read(f);
   		if (fd == -1) terminate();
+  		f->esp += 4; 
   		const void * buffer= *((const void **) f->esp); 
   		f->esp += 4;
   		unsigned size = (unsigned) read(f);
   		if (size == (unsigned) -1) terminate();
+  		f->esp += 4; 
 
   		if (fd == 1){
   			putbuf(buffer, size);
@@ -133,6 +188,20 @@ syscall_handler (struct intr_frame *f)
   lock_release(&sys_lock);
 }
 
+void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid){
+
+	struct thread *child = get_thread_from_tid(child_pid);
+
+	memset (info, 0, sizeof *info);
+	info->child_pid = child_pid;
+  	info->parent_pid = parent_pid;
+  	info->sema = &child->start;
+  	info->exit_status = -1;
+  	info->is_waiting = false;
+
+  	insert_child(&info->elem);
+}
+
 int read(struct intr_frame *f){
 
 	void *addr = (void *)f->esp;
@@ -145,8 +214,6 @@ int read(struct intr_frame *f){
 	if (result == -1){
 			return -1;
 	}
-	f->esp += 4; 
-
 	return result;
 }
 

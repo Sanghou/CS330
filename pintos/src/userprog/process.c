@@ -30,11 +30,11 @@ static bool load (const char *cmdline, void (**eip) (void), void **esp);
 tid_t
 process_execute (const char *file_name) 
 {
-  char *fn_copy;
+  char *fn_copy, *saved_ptr;
   tid_t tid;
 
-  struct lock *sys_lock = get_sys_lock();
-  lock_acquire(sys_lock);
+  // struct lock *sys_lock = get_sys_lock();
+  // lock_acquire(sys_lock);
 
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
@@ -43,11 +43,13 @@ process_execute (const char *file_name)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
 
+  file_name = strtok_r (file_name, " ", &saved_ptr);
+
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
-  lock_release(sys_lock);
+  // lock_release(sys_lock);
   return tid;
 }
 
@@ -92,7 +94,7 @@ start_process (void *file_name_)
    This function will be implemented in problem 2-2.  For now, it
    does nothing. */
 int
-process_wait (tid_t child_tid UNUSED) 
+process_wait (tid_t child_tid) 
 {
   struct thread *t = get_thread_from_tid(child_tid);
 
@@ -100,12 +102,11 @@ process_wait (tid_t child_tid UNUSED)
     return -1;
   }
 
-  while(t->status != THREAD_DYING){
-    t = get_thread_from_tid(child_tid);
-    if (t == NULL) break;
-  }
+  sema_down(&t->start);
+
   return 0;
-  
+
+
 }
 
 /* Free the current process's resources. */

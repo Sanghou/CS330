@@ -28,6 +28,8 @@ static struct list ready_list;
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
 
+static struct list child_list;
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -36,6 +38,8 @@ static struct thread *initial_thread;
 
 /* Lock used by allocate_tid(). */
 static struct lock tid_lock;
+
+static struct lock child_list_manage_lock;
 
 /* Stack frame for kernel_thread(). */
 struct kernel_thread_frame 
@@ -90,8 +94,10 @@ thread_init (void)
   ASSERT (intr_get_level () == INTR_OFF);
 
   lock_init (&tid_lock);
+  lock_init (&child_list_manage_lock);
   list_init (&ready_list);
   list_init (&all_list);
+  list_init (&child_list);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -472,9 +478,7 @@ init_thread (struct thread *t, const char *name, int priority)
   list_push_back (&all_list, &t->allelem);
 
   #ifdef USERPROG
-    sema_init(&start,0);
-    list_init(&child_list);
-    lock_init(&list_lock);
+    sema_init(&t->start,0);
   #endif
 
 }
@@ -604,4 +608,40 @@ get_thread_from_tid(tid_t t_value){
     }
   }
   return NULL;
+}
+
+struct child_info *
+find_info(tid_t child_pid){
+  struct list_elem *e;
+
+  lock_acquire(&child_list_manage_lock);
+
+  for(e= list_begin(&child_list); e!=list_end(&child_list); e = list_next(e)){
+    struct child_info *info = list_entry(e, struct child_info, elem);
+    if(info->child_pid == child_pid){
+      lock_release(&child_list_manage_lock);
+      return info;
+    }
+  }
+
+  lock_release(&child_list_manage_lock);
+  return NULL;
+}
+
+void 
+remove_child(struct list_elem *elem){
+  lock_acquire(&child_list_manage_lock);
+
+  list_remove(elem);
+
+  lock_release(&child_list_manage_lock);
+}
+
+void 
+insert_child(struct list_elem *elem){
+  lock_acquire(&child_list_manage_lock);
+
+  list_push_back(&child_list, elem);
+
+  lock_release(&child_list_manage_lock);
 }

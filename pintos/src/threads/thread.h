@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "threads/synch.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -97,10 +98,8 @@ struct thread
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
 
-        struct semaphore start;
+    struct semaphore start;
     struct thread* parent;
-    struct list child_list;
-    struct lock list_lock;
     
 #endif
 
@@ -109,11 +108,13 @@ struct thread
   };
 
   struct child_info{
-    tid_t pid;
+    tid_t parent_pid;
+    tid_t child_pid;
     struct semaphore* sema;
     int exit_status;
     struct list_elem elem;
-  }
+    bool is_waiting;                    /* Default value of is_waiting is false */
+  };
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -152,5 +153,8 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
 struct thread *get_thread_from_tid(tid_t t_value);
+struct child_info *find_info(tid_t child_pid);
+void remove_child(struct list_elem *elem);
+void insert_child(struct list_elem *elem);
 
 #endif /* threads/thread.h */
