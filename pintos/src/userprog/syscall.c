@@ -88,6 +88,7 @@ syscall_handler (struct intr_frame *f)
 
   		if (!is_valid_addr(cmd_line)) 
       {
+        f->eax = -1;
   			terminate_error();
   			break;
   		}
@@ -146,6 +147,7 @@ syscall_handler (struct intr_frame *f)
       lock_release(&sys_lock);
   		break;
   	}
+    
   	case SYS_REMOVE:
   	{
   		//read arguments
@@ -162,6 +164,7 @@ syscall_handler (struct intr_frame *f)
       lock_release(&sys_lock);
   		break;
   	}
+
   	case SYS_OPEN:
     {
   		//read arguments
@@ -196,8 +199,17 @@ syscall_handler (struct intr_frame *f)
   	case SYS_FILESIZE:
     {
       int fd = read(f, 0);
+      
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (descript == NULL){
+        terminate_error();
+        break;
+      }
 
       lock_acquire(&sys_lock);
+
+      f->eax = (int) file_length(descript->file);
 
       lock_release(&sys_lock);
   		break;
@@ -259,7 +271,16 @@ syscall_handler (struct intr_frame *f)
       int fd = read(f, 0);
       unsigned position = (unsigned) read(f, 0);
 
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (descript == NULL){
+        terminate_error();
+        break;
+      }
+
       lock_acquire(&sys_lock);
+
+      file_seek(descript->file, position);
 
       lock_release(&sys_lock);
 
@@ -269,7 +290,16 @@ syscall_handler (struct intr_frame *f)
     {
       int fd = read(f, 0);
 
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (descript == NULL){
+        terminate_error();
+        break;
+      }
+
       lock_acquire(&sys_lock);
+
+      f->eax = (unsigned) file_tell(descript->file);
 
       lock_release(&sys_lock);
   		break;
@@ -278,13 +308,15 @@ syscall_handler (struct intr_frame *f)
     {
       int fd = read(f, 0);
 
-      if (fd == 1 || fd == 0) {
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (descript == NULL){
         terminate_error();
         break;
       }
+      
       lock_acquire(&sys_lock);
 
-      struct file_descript *descript = find_file_descript(fd);
       remove_file(&descript->fd_elem);
 
       lock_release(&sys_lock);
