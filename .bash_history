@@ -697,3 +697,336 @@ make
 pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-none -a args-none -- -q  -f run args-none
 make
 pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-none -a args-none -- -q  -f run args-none
+cd pintos/src/userprog
+make
+cd pintos/src/userprog
+make
+cd pintos/src/userprog
+make grade
+cd
+git 
+git status
+git checkout .bash_history
+git status
+git checkout 
+git checkout .viminfo
+git status
+git add --all
+git status
+git commit -m "remove unusable functions"
+git push 
+cd pintos/src/userprog
+cd build
+cd
+git pull
+git status
+cd pintos/src/userprog/build
+make
+make grade
+backtrace kernel.o 0xc00285d0 0xc002b77c 0xc002b834 0xc0021b2d 0xc0021c5f 0xccccccac 0xc002a536 0xc0020285 0xc0020930
+make
+backtrace kernel.o 0xc00285d0 0xc002b77c 0xc002b834 0xc0021b2d 0xc0021c5f 0xccccccac 0xc002a536 0xc0020285 0xc0020930
+make grade
+make
+make grade
+make
+make grade
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-none -a args-none -- -q  -f run args-none
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-none -a args-none -- -q  -f run args-none
+make
+make grade
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-none -a args-none -- -q  -f run args-none
+backtrace kernel.o 0xc00285d0 0xc002b76c 0xc002b824 0xc0021b2d 0xc0021c5f 0 0xc0021b2d 0xc0021c5f 0x804a267 0x8048746
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-multiple -a args-multiple -- -q  -f run 'args-multiple some arguments for you!'
+backtrace kernel.o 0xc00285d0 0xc002b76c 0xc002b824 0xc0021b2d 0xc0021c5f 0 0xc0021b2d 0xc0021c5f 0x804a267 0x8048746.
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-multiple -a args-multiple -- -q  -f run 'args-multiple some arguments for you!'
+backtrace kernel.o 0xc00285d0 0xc002b76c 0xc002b814 0xc0021b2d 0xc0021c5f 0xc002b97f 0xc0021b2d 0xc0021c5f 0x804a267 0x8048746
+make;
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-multiple -a args-multiple -- -q  -f run 'args-multiple some arguments for you!'
+backtrace kernel.o 0x804a0dd 0x804a28e 0x8048746
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-multiple -a args-multiple -- -q  -f run 'args-multiple some arguments for you!'
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-multiple -a args-multiple -- -q  -f run 'args-multiple some arguments for you!'
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-multiple -a args-multiple -- -q  -f run 'args-multiple some arguments for you!'
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-multiple -a args-multiple -- -q  -f run 'args-multiple some arguments for you!'
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-multiple -a args-multiple -- -q  -f run 'args-multiple some arguments for you!'
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-multiple -a args-multiple -- -q  -f run 'args-multiple some arguments for you!'
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/args-multiple -a args-multiple -- -q  -f run 'args-multiple some arguments for you!'
+make grade
+make
+make grade
+make
+make grade
+make
+make grade
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-arg -a exec-arg -- -q  -f run exec-arg
+backtrace kernel.o  0xc00285d0 0xc0022e20 0xc002a55d 0xc002ba2c 0xc0021b2d 0xc0021c5f 0x804a0c4 0x80480b2 0x80480f4 0x804870e
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-arg -a exec-arg -- -q  -f run 'child-args childarg'
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-arg -a exec-arg -- -q  -f run 'child-args childarg'
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-arg -a exec-arg -- -q  -f run 'childarg child-args'
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-arg -a exec-arg -- -q  -f run exec-arg
+backtrace kernel.o
+backtrace kernel.o 0xc00285d0 0xc0022e20 0xc002a55d 0xc002ba39 0xc0021b2d 0xc0021c5f 0x804a0c4 0x80480b2 0x80480f4 0x804870e
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-arg -a exec-arg -- -q  -f run exec-arg
+backtrace kernel.o 0xc00285d0 0xc002b76c 0xc002b824 0xc0021b2d 0xc0021c5f 0xc0030451 0xc002a593 0xc002ba29 0xc0021b2d 0xc0021c5f 0x804a0c4 0x80480b2 0x80480f4 0x804870e
+make
+backtrace kernel.o 0xc00285d0 0xc002b76c 0xc002b824 0xc0021b2d 0xc0021c5f 0xc0030451 0xc002a593 0xc002ba29 0xc0021b2d 0xc0021c5f 0x804a0c4 0x80480b2 0x80480f4 0x804870e
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-arg -a exec-arg -- -q  -f run exec-arg
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-arg -a exec-arg -- -q  -f run exec-arg
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-once -a exec-once -- -q  -f run exec-once
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-once -a exec-once -- -q  -f run exec-once
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exec-once -a exec-once -- -q  -f run exec-once
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/exit -a exit -- -q  -f run exit
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/halt -a halt -- -q  -f run halt
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/wait-simple -a wait-simple -- -q  -f run wait-simple
+cd ../../
+
+build
+make
+cd ../userprog/biuld
+cd ../userprog/build
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/wait-simple -a wait-simple -- -q  -f run wait-smake
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/wait-simple -a wait-simple -- -q  -f run wait-smake
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/wait-simple -a wait-simple -- -q  -f run wait-simple
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/wait-simple -a wait-simple -- -q  -f run wait-simple
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/wait-simple -a wait-simple -- -q  -f run wait-simple
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/wait-simple -a wait-simple -- -q  -f run wait-simple
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/wait-simple -a wait-simple -- -q  -f run wait-simple
+backtrace kernel.o 0xc00285d0 0xc002b76c 0xc002b824 0xc0021b2d 0xc0021c5f 0xffffffff 0xc0026c00 0xc002a469 0xc0026da3 0xc002ba2f 0xc0021b2d 0xc0021c5f 0x804a0d4 0x80480b2 0x8048104 0x804871e
+backtrace kernel.bin 0xc00285d0 0xc002b76c 0xc002b824 0xc0021b2d 0xc0021c5f 0xffffffff 0xc0026c00 0xc002a469 0xc0026da3 0xc002ba2f 0xc0021b2d 0xc0021c5f 0x804a0d4 0x80480b2 0x8048104 0x804871e
+backtrace kernel.o 0xc00285d0 0xc002b76c 0xc002b824 0xc0021b2d 0xc0021c5f 0xffffffff 0xc0026c00 0xc002a469 0xc0026da3 0xc002ba2f 0xc0021b2d 0xc0021c5f 0x804a0d4 0x80480b2 0x8048104 0x804871e
+mae
+make
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/wait-simple -a wait-simple -- -q  -f run wait-simple
+cd ../../exampels
+cd ../../examples
+make
+make clean
+make
+cd ../
+ls
+cd tests
+make
+cd ../userprog/build
+make
+cd ../..
+cd lib
+make
+cd ../utils
+make
+cd ../userprog/build
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/userprog/wait-simple -a wait-simple -- -q  -f run wait-simple
+make
+cdd
+cd
+git status
+git add --all
+git commit -m "good luck"
+git push
+cd pintos/src/userprog/build
+make 
+make tests/userprog/wait-bad-pid.result VERBOSE=1
+make
+make tests/userprog/wait-bad-pid.result VERBOSE=1
+backtrace kernel.o 0xc00285d0 0xc0022ba9 0xc002bb2c 0xc0021b2d 0xc0021c5f 0x804a237
+make grade
+maek
+make
+make grade
+backtrace kernel.o 0xc00285d0 0xc0022ba9 0xc002bb38 0xc0021b2d 0xc0021c5f 0x804a267
+make
+backtrace kernel.o 0xc00285d0 0xc0022ba9 0xc002bb38 0xc0021b2d 0xc0021c5f 0x804a267'
+make grade
+cd
+git stash .
+cd pintos/src/userprog/build
+make
+make clean
+make
+make grade
+cd
+git stash .
+git stash pop .
+git stash pop 
+git checkout .
+cd pintos/src/userprog/build
+make
+make grade
+cd
+git chekcout -b proj2
+git checkout -b proj2
+cd pintos/src/userprog/build
+make
+make grade
+make tests/userprog/args-none.result VERBOSE = 1
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make grade
+make
+make grade
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+ake
+make
+ake
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+ake
+make
+ake
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make
+make tests/userprog/args-none.result VERBOSE=1
+make grade
+make
+make grade
+make
+make grade
+make
+make grade
+make
+make grade
+make
+make grade
+make
+make grade
+make
+make grade
+make
+make grade
+cd
+git status
+git add --all
+git commit -m "check whether the pointer is valid or not"
+git push 
+git remote
+git push  --set-upstream origin proj2
+git push
+cd pintos/src/userprog/build
+make
+make grade
+make tests/userprog/exec-once.result VERBOSE=1
+make
+cd
+git status
+git add --all
+git commit -m "argument" 
+git push
+cd pintos/src/thread/make
+cd pintos/src/userprog/build
+make
+make grade
+cd
+git pull origin file_descipt
+cd pintos/src/userprog
+cd build
+make
+make grade
+make
+make grade
+make
+make grade
+make
+make grade
+cd
+git status
+git add --all
+git commit -m 'close and open, create partially done'
+git push 
+cd pintos/src/userprog/build
+make tests/userprog/exec-once.result VERBOSE=1
+makmake
+make
+make tests/userprog/exec-once.result VERBOSE=1
+make
+make tests/userprog/exec-once.result VERBOSE=1
+make
+make tests/userprog/exec-once.result VERBOSE=1
+make
+make tests/userprog/exec-once.result VERBOSE=1
+cd
+git pull
+git pull origin file_descipt
+git checkout .
+git pull origin file_descipt

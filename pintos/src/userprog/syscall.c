@@ -14,14 +14,11 @@
 static void syscall_handler (struct intr_frame *);
 
 
-
-
-
-void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid);
-bool is_valid_addr(void *addr);
+void set_child_info (struct child_info *info, tid_t child_pid, tid_t parent_pid);
+bool is_valid_addr (void *addr);
 int read (struct intr_frame *f, int pointer);
-void terminate_error();
-void terminate();
+void terminate_error (void);
+void terminate (void);
 
 static struct lock sys_lock;
 
@@ -66,7 +63,7 @@ syscall_handler (struct intr_frame *f)
 
   		if (info == NULL)
       {
-  			sema_up(&thread_current()->start);
+  			// sema_up(&thread_current()->start);
   			// printf("%s: exit(%d)\n", thread_current()->name,status);
   			terminate();
    			break;
@@ -74,7 +71,7 @@ syscall_handler (struct intr_frame *f)
 
   		info->exit_status = status;
 
-  		sema_up(&thread_current()->start);
+  		// sema_up(&thread_current()->start);
 
   		info->is_waiting = false;
 
@@ -142,8 +139,11 @@ syscall_handler (struct intr_frame *f)
         terminate_error();
         break;
       }
+      lock_acquire(&sys_lock);
 
   		f->eax = filesys_create(file, size);
+
+      lock_release(&sys_lock);
   		break;
   	}
   	case SYS_REMOVE:
@@ -156,15 +156,17 @@ syscall_handler (struct intr_frame *f)
         terminate_error();
         break;
       }
+      lock_acquire(&sys_lock);
 
   		f->eax = filesys_remove(file);
+      lock_release(&sys_lock);
   		break;
   	}
   	case SYS_OPEN:
     {
-    	//lock_acquire(&sys_lock);
   		//read arguments
       const char *file_name = (const char *) read(f,1);
+      char *tmp = "";
 
       if (!is_valid_addr(file_name)) 
       {
@@ -173,16 +175,20 @@ syscall_handler (struct intr_frame *f)
         break;
       }
 
-      if (!strcmp(file_name,"")){
+      if (!strcmp(file_name,tmp)){
       	f->eax =  -1;
       	terminate();
       	break;
       }
+      lock_acquire(&sys_lock);
+
 
       struct file *file = filesys_open(file_name);
       int fd =  set_file_descript(file);
 
       f->eax = fd;
+
+      lock_release(&sys_lock);
   		break;
   	}
 
@@ -191,6 +197,9 @@ syscall_handler (struct intr_frame *f)
     {
       int fd = read(f, 0);
 
+      lock_acquire(&sys_lock);
+
+      lock_release(&sys_lock);
   		break;
   	}
   	
@@ -202,13 +211,25 @@ syscall_handler (struct intr_frame *f)
       const char *buffer = (const char *) read(f,1);
       unsigned size = (unsigned) read(f, 0);
 
+      if (!is_valid_addr(buffer)) 
+      {
+        terminate_error();
+        break;
+      }
+      lock_acquire(&sys_lock);
+
+      if (fd == 0)
+      {
+        //keyboard input
+      }
+      lock_release(&sys_lock);
   		break;
   	}
   	
 
   	case SYS_WRITE:
     { 
-  		int fd = read(f,0);
+      int fd = read(f,0);
       const char *buffer = (const char *) read(f,1);
   		unsigned size = (unsigned) read(f, 0);
 
@@ -218,11 +239,19 @@ syscall_handler (struct intr_frame *f)
         break;
       }
 
+      lock_acquire(&sys_lock);
+
   		if (fd == 1)
       {
   			putbuf(buffer, size);
   			f->eax = size;
   		}
+      else
+      {
+
+      }
+
+      lock_release(&sys_lock);
   		break;
   	}
   	case SYS_SEEK:
@@ -230,11 +259,19 @@ syscall_handler (struct intr_frame *f)
       int fd = read(f, 0);
       unsigned position = (unsigned) read(f, 0);
 
+      lock_acquire(&sys_lock);
+
+      lock_release(&sys_lock);
+
   		break;
   	}
   	case SYS_TELL:
     {
       int fd = read(f, 0);
+
+      lock_acquire(&sys_lock);
+
+      lock_release(&sys_lock);
   		break;
   	}
   	case SYS_CLOSE:
@@ -245,9 +282,12 @@ syscall_handler (struct intr_frame *f)
         terminate_error();
         break;
       }
+      lock_acquire(&sys_lock);
 
       struct file_descript *descript = find_file_descript(fd);
       remove_file(&descript->fd_elem);
+
+      lock_release(&sys_lock);
 
   		break;
   	}
@@ -256,7 +296,6 @@ syscall_handler (struct intr_frame *f)
   		break;
   }
 
-  //lock_release(&sys_lock);
 }
 
 void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid)
@@ -324,9 +363,7 @@ is_valid_addr(void *addr)
 }
 
 void terminate()
-{
-  //lock_release(&sys_lock);
-  
+{ 
   sema_up(&thread_current()->start);
   printf("%s: exit(%d)\n", thread_current()->name, thread_current()->exit_status);
   thread_exit();
@@ -334,7 +371,6 @@ void terminate()
 
 void terminate_error()
 {
-//	lock_release(&sys_lock);
   thread_current()->exit_status = -1;
   printf("%s: exit(%d)\n", thread_current()->name, -1);
   sema_up(&thread_current()->start);

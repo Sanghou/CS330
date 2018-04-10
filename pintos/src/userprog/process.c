@@ -30,26 +30,27 @@ static bool load (const char *cmdline, void (**eip) (void), void **esp);
 tid_t
 process_execute (const char *file_name) 
 {
-  char *fn_copy, *saved_ptr;
+  char *fn_copy, *saved_ptr, *tmp;
   tid_t tid;
-
-  // struct lock *sys_lock = get_sys_lock();
-  // lock_acquire(sys_lock);
 
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
+  tmp = palloc_get_page (1);
   if (fn_copy == NULL)
     return TID_ERROR;
+  if (tmp == NULL)
+    return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
+  strlcpy (tmp, file_name, PGSIZE);
 
-  file_name = strtok_r (file_name, " ", &saved_ptr);
+  file_name = strtok_r (tmp, " ", &saved_ptr);
 
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
-  // lock_release(sys_lock);
+  palloc_free_page (tmp);
   return tid;
 }
 
@@ -235,6 +236,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
   char *token, *saved_ptr;
   char* argv[32];
 
+  // struct lock *sys_lock = get_sys_lock();
+
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();
   if (t->pagedir == NULL) 
@@ -245,6 +248,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   token = strtok_r (file_name, " ", &saved_ptr);
   file_name = token;
 
+  // lock_acquire(&sys_lock);
   /* Open executable file. */
   file = filesys_open (file_name);
 
@@ -382,6 +386,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
  done:
   /* We arrive here whether the load is successful or not. */
   file_close (file);
+  // lock_release(&sys_lock);
 
   return success;
 }
