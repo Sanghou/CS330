@@ -12,7 +12,7 @@ static void syscall_handler (struct intr_frame *);
 static int get_user (const uint8_t *uaddr);
 static bool put_user (uint8_t *udst, uint8_t byte);
 
-int read(void *addr);
+int read(struct intr_frame *f);
 // void write();
 void terminate();
 
@@ -34,8 +34,8 @@ syscall_handler (struct intr_frame *f)
   lock_acquire(&sys_lock);
 
   //read system call number 
-  int sys_num = read((void *)f->esp);
-  pop(f, sys_num);
+  int sys_num = read(f);
+  if (sys_num == -1) terminate();
 
   switch(sys_num){
   	/* System call for pintos proj2 */
@@ -44,8 +44,8 @@ syscall_handler (struct intr_frame *f)
   		break;
   	}
   	case SYS_EXIT:{
-  		int status = read((void *)f->esp);
-  		pop(f, status);
+  		int status = read(f);
+  		if (status == -1) terminate();
   		// f->eax = status;
   		terminate();
   		break;
@@ -86,12 +86,12 @@ syscall_handler (struct intr_frame *f)
   		break;
   	}
   	case SYS_WRITE:{
-  		int fd = read((void *)f->esp);
-  		pop(f, fd);
+  		int fd = read(f);
+  		if (fd == -1) terminate();
   		const void * buffer= *((const void **) f->esp); 
   		f->esp += 4;
-  		unsigned size = (unsigned) read((void *)f->esp);
-  		pop(f, (int) size);
+  		unsigned size = (unsigned) read(f);
+  		if (size == (unsigned) -1) terminate();
 
   		if (fd == 1){
   			putbuf(buffer, size);
@@ -118,14 +118,10 @@ syscall_handler (struct intr_frame *f)
 
   lock_release(&sys_lock);
 }
-void pop(struct intr_frame *f, int value){
-	if (value == -1)
-		terminate();
-	else 
-		f->esp += 4;
-}
 
-int read(void *addr){
+int read(struct intr_frame *f){
+
+	void *addr = (void *)f->esp;
 	
 	if (!is_user_vaddr(addr)){
 		return -1;
@@ -135,6 +131,7 @@ int read(void *addr){
 	if (result == -1){
 			return -1;
 	}
+	f->esp += 4; 
 
 	return result;
 }

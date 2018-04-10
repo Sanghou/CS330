@@ -4,3 +4,4 @@ pintos/src/examples/*
 .ssh
 .viminfo
 pintos/filesys.disk
+.bash_history
