@@ -8,18 +8,19 @@
 #include "devices/shutdown.h"
 #include "filesys/filesys.h"
 #include "threads/vaddr.h"
+#include "threads/pte.h"
+#include "userprog/pagedir.h"
 
 static void syscall_handler (struct intr_frame *);
-static int get_user (const uint8_t *uaddr);
-static bool put_user (uint8_t *udst, uint8_t byte);
 
 
 
 
 
 void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid);
-int read(struct intr_frame *f);
-// void write();
+bool is_valid_addr(void *addr);
+int read (struct intr_frame *f, int pointer);
+void terminate_error();
 void terminate();
 
 static struct lock sys_lock;
@@ -84,28 +85,27 @@ syscall_handler (struct intr_frame *f)
   lock_acquire(&sys_lock);
 
   //read system call number 
-  if (read(f) == -1) terminate();
-  int sys_num = *(char *)f->esp;
-  f->esp += 4; 
+  int sys_num = read(f, 0);
 
-
-  switch(sys_num){
+  switch(sys_num)
+  {
   	/* System call for pintos proj2 */
-  	case SYS_HALT:{
+  	case SYS_HALT:
+    {
   		shutdown_power_off();
   		break;
   	}
 
-  	case SYS_EXIT:{
-  		if (read(f) == -1) terminate();
-  		int status = *(char *)f->esp;
-  		f->esp += 4; 
+  	case SYS_EXIT:
+    {
+  		int status = read(f, 0);
 
   		tid_t child_pid = thread_current()->tid;
 
   		struct child_info *info = find_info(child_pid);
 
-  		if (info == NULL){
+  		if (info == NULL)
+      {
   			sema_up(&thread_current()->start);
   			printf("%s: exit(%d)\n", thread_current()->name,status);
   			terminate();
@@ -122,17 +122,16 @@ syscall_handler (struct intr_frame *f)
   		break;
   	}
 
-  	case SYS_EXEC:{
+  	case SYS_EXEC:
+    {
   		enum intr_level old_level;
   		//old_level = intr_disable();
 
-  		if (read(f) == -1) terminate();
-  		const char * cmd_line= (const char *)*((const void **) f->esp);
-  		// printf("cmd_line : %s, is same : %d\n",cmd_line, cmd_line=="child-simple");
-  		f->esp += 4;
+  		const char * cmd_line= (const char *) read(f, 1);
 
-  		if (!is_user_vaddr(cmd_line)) {
-  			terminate();
+  		if (!is_valid_addr(cmd_line)) 
+      {
+  			terminate_error();
   			break;
   		}
   		tid_t child_pid = process_execute (cmd_line);
@@ -147,17 +146,16 @@ syscall_handler (struct intr_frame *f)
   		break;
   	}
 
-  	case SYS_WAIT:{
-  		if (read(f) == -1) terminate();
-  		tid_t child_pid =  *(char*)f->esp;
-  		f->esp += 4; 
+  	case SYS_WAIT:
+    {
+      tid_t child_pid = (tid_t) read(f, 0);
 
   		tid_t parent_pid = thread_current()->tid;
 
   		struct child_info *info = find_info(child_pid);
 
   		if (info == NULL || info->parent_pid != parent_pid || info->is_waiting )
-  		{
+      {
   			//when given argument pid_t is not a child of current thread.
   			f->eax = -1;
   			break;
@@ -188,7 +186,8 @@ syscall_handler (struct intr_frame *f)
   		// f->eax = filesys_remove(file);
   		break;
   	}
-  	case SYS_OPEN:{
+  	case SYS_OPEN:
+    {
   		//read arguments
 
   		// struct file *file = filesys_open(file_name);
@@ -197,38 +196,46 @@ syscall_handler (struct intr_frame *f)
   		// set_file_descript( ,file);
   		break;
   	}
-  	case SYS_FILESIZE:{
+  	case SYS_FILESIZE:
+    {
 
 
   		break;
   	}
-  	case SYS_READ:{
+  	case SYS_READ:
+    {
 
   		break;
   	}
-  	case SYS_WRITE:{ 
-  		int fd = read(f);
-  		if (fd == -1) terminate();
-  		f->esp += 4; 
-  		const void * buffer= *((const void **) f->esp); 
-  		f->esp += 4;
-  		unsigned size = (unsigned) read(f);
-  		if (size == (unsigned) -1) terminate();
-  		f->esp += 4; 
+  	case SYS_WRITE:
+    { 
+  		int fd = read(f,0);
+      const char *buffer = (const char *) read(f,1);
+  		unsigned size = (unsigned) read(f, 0);
 
-  		if (fd == 1){
+      if (!is_valid_addr(buffer)) 
+      {
+        terminate_error();
+        break;
+      }
+
+  		if (fd == 1)
+      {
   			putbuf(buffer, size);
   			f->eax = size;
   		}
   		break;
   	}
-  	case SYS_SEEK:{
+  	case SYS_SEEK:
+    {
   		break;
   	}
-  	case SYS_TELL:{
+  	case SYS_TELL:
+    {
   		break;
   	}
-  	case SYS_CLOSE:{
+  	case SYS_CLOSE:
+    {
   		
   		break;
   	}
@@ -240,8 +247,8 @@ syscall_handler (struct intr_frame *f)
   lock_release(&sys_lock);
 }
 
-void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid){
-
+void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid)
+{
 	struct thread *child = get_thread_from_tid(child_pid);
 
 	memset (info, 0, sizeof *info);
@@ -254,54 +261,73 @@ void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid){
   	insert_child(&info->elem);
 }
 
-int read(struct intr_frame *f){
-
-	void *addr = (void *)f->esp;
-	
-	if (!is_user_vaddr(addr)){
-		return -1;
-	}
-
-	int result = get_user((const uint8_t *)addr);
-	if (result == -1){
-			return -1;
-	}
-	return result;
-}
-
-
-void terminate(){
-	lock_release(&sys_lock);
-	thread_exit();
-}
-
-//code in the pintos document
-/* Reads a byte at user virtual address UADDR.
-   UADDR must be below PHYS_BASE.
-   Returns the byte value if successful, -1 if a segfault
-   occurred. */
-static int
-get_user (const uint8_t *uaddr)
+int 
+read (struct intr_frame *f, int pointer)
 {
+  if (!is_valid_addr(f->esp)) {
+    terminate_error();
+    return -1;
+  }
   int result;
-  asm ("movl $1f, %0; movzbl %1, %0; 1:"
-       : "=&a" (result) : "m" (*uaddr));
+
+  if (pointer)
+  {
+    result = *(char **)f->esp;
+  }else
+  {
+    result = *(char *)f->esp;
+  }
+  
+  f->esp += 4;
   return result;
 }
 
-/* Writes BYTE to user address UDST.
-   UDST must be below PHYS_BASE.
-   Returns true if successful, false if a segfault occurred. */
-static bool
-put_user (uint8_t *udst, uint8_t byte)
+bool 
+is_valid_addr(void *addr)
 {
-  int error_code;
-  asm ("movl $1f, %0; movb %b2, %1; 1:"
-       : "=&a" (error_code), "=m" (*udst) : "q" (byte));
-  return error_code != -1;
+  if (!is_user_vaddr(addr) || addr == NULL) return false;
+
+  uint32_t *pd, *pde, *pt, *pte;
+  uintptr_t tmp;
+  asm volatile ("movl %%cr3, %0" : "=r" (tmp));
+  pd = ptov (tmp);
+
+  if (pd == NULL) return false;
+
+  pde = pd + pd_no(addr);
+
+  if (*pde == 0) return false;
+
+  pt = pde_get_pt(*pde);
+
+  if (pt == NULL) return false;
+
+  pte = &pt[pt_no(addr)];
+
+  if (pte == NULL) return false; //page table doesn't exist
+
+  if (!(*pte&PTE_P)) return false; //page table entry not present
+
+  return true;
+}
+void terminate()
+{
+  lock_release(&sys_lock);
+  sema_up(&thread_current()->start);
+  thread_exit();
+}
+
+void terminate_error()
+{
+	lock_release(&sys_lock);
+  thread_current()->exit_status = -1;
+  printf("%s: exit(%d)\n", thread_current()->name, -1);
+  sema_up(&thread_current()->start);
+	thread_exit();
 }
 
 struct lock *
-get_sys_lock(void){
+get_sys_lock(void)
+{
 	return &sys_lock;
 }

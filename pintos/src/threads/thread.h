@@ -100,6 +100,8 @@ struct thread
 
     struct semaphore start;
     struct thread* parent;
+
+    int exit_status;                    /* exit status of the current thread */
     
     struct list fd_list;
 #endif
