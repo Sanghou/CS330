@@ -43,21 +43,35 @@ syscall_handler (struct intr_frame *f)
   		shutdown_power_off();
   		break;
   	}
+
+
   	case SYS_EXIT:{
   		int status = read(f);
   		if (status == -1) terminate();
+
+  		//some code to transfer child end.
+
+  		sema_up(&start);
   		// f->eax = status;
   		terminate();
   		break;
   	}
+
   	case SYS_EXEC:{
 
   		break;
   	}
-  	case SYS_WAIT:{
 
+  	case SYS_WAIT:{
+  		sema_down(&start);
+
+
+
+  		sema_up(&end);
   		break;
   	}
+
+
   	case SYS_CREATE:{
   		//read arguments
 

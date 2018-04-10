@@ -11,10 +11,10 @@
 # hlsearch on (H) or off (h):
 ~h
 # Command Line History (newest to oldest):
+:q
+|2,0,1523363852,,"q"
 :wq
 |2,0,1523209512,,"wq"
-:q
-|2,0,1523209386,,"q"
 :W
 |2,0,1520938532,,"W"
 
@@ -29,38 +29,88 @@
 # Registers:
 
 # File marks:
-'0  6  0  ~/.gitignore
-|4,48,6,0,1523209512,"~/.gitignore"
-'1  5  0  ~/.gitignore
-|4,49,5,0,1523209463,"~/.gitignore"
-'2  5  0  ~/.gitignore
-|4,50,5,0,1523209463,"~/.gitignore"
-'3  126  0  ~/pintos/src/userprog/process.c
-|4,51,126,0,1523209386,"~/pintos/src/userprog/process.c"
-'4  96  0  ~/pintos/src/userprog/process.c
-|4,52,96,0,1523209354,"~/pintos/src/userprog/process.c"
-'5  96  0  ~/pintos/src/userprog/process.c
-|4,53,96,0,1523209354,"~/pintos/src/userprog/process.c"
-'6  1  0  ~/]
-|4,54,1,0,1520940811,"~/]"
-'7  897  37  ~/pintos/src/threads/result
-|4,55,897,37,1520939550,"~/pintos/src/threads/result"
-'8  40  0  ~/pintos/src/tests/threads/Make.tests
-|4,56,40,0,1520939188,"~/pintos/src/tests/threads/Make.tests"
-'9  5  34  ~/pintos/src/tests/threads/Grading
-|4,57,5,34,1520939148,"~/pintos/src/tests/threads/Grading"
+'0  115  3  ~/pintos/src/userprog/syscall.c
+|4,48,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
+'1  59  3  ~/pintos/src/userprog/process.c
+|4,49,59,3,1523361458,"~/pintos/src/userprog/process.c"
+'2  6  0  ~/.gitignore
+|4,50,6,0,1523209512,"~/.gitignore"
+'3  5  0  ~/.gitignore
+|4,51,5,0,1523209463,"~/.gitignore"
+'4  5  0  ~/.gitignore
+|4,52,5,0,1523209463,"~/.gitignore"
+'5  126  0  ~/pintos/src/userprog/process.c
+|4,53,126,0,1523209386,"~/pintos/src/userprog/process.c"
+'6  126  0  ~/pintos/src/userprog/process.c
+|4,54,126,0,1523209386,"~/pintos/src/userprog/process.c"
+'7  96  0  ~/pintos/src/userprog/process.c
+|4,55,96,0,1523209354,"~/pintos/src/userprog/process.c"
+'8  96  0  ~/pintos/src/userprog/process.c
+|4,56,96,0,1523209354,"~/pintos/src/userprog/process.c"
+'9  96  0  ~/pintos/src/userprog/process.c
+|4,57,96,0,1523209354,"~/pintos/src/userprog/process.c"
 
 # Jumplist (newest first):
+-'  115  3  ~/pintos/src/userprog/syscall.c
+|4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
+-'  1  0  ~/pintos/src/userprog/syscall.c
+|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
+-'  59  3  ~/pintos/src/userprog/process.c
+|4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  59  3  ~/pintos/src/userprog/process.c
+|4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
 -'  6  0  ~/.gitignore
 |4,39,6,0,1523209512,"~/.gitignore"
 -'  5  0  ~/.gitignore
 |4,39,5,0,1523209477,"~/.gitignore"
+-'  5  0  ~/.gitignore
+|4,39,5,0,1523209477,"~/.gitignore"
+-'  5  0  ~/.gitignore
+|4,39,5,0,1523209477,"~/.gitignore"
+-'  5  0  ~/.gitignore
+|4,39,5,0,1523209477,"~/.gitignore"
+-'  5  0  ~/.gitignore
+|4,39,5,0,1523209463,"~/.gitignore"
+-'  5  0  ~/.gitignore
+|4,39,5,0,1523209463,"~/.gitignore"
+-'  5  0  ~/.gitignore
+|4,39,5,0,1523209463,"~/.gitignore"
 -'  5  0  ~/.gitignore
 |4,39,5,0,1523209463,"~/.gitignore"
 -'  1  0  ~/.gitignore
 |4,39,1,0,1523209436,"~/.gitignore"
 -'  1  0  ~/.gitignore
 |4,39,1,0,1523209436,"~/.gitignore"
+-'  1  0  ~/.gitignore
+|4,39,1,0,1523209436,"~/.gitignore"
+-'  1  0  ~/.gitignore
+|4,39,1,0,1523209436,"~/.gitignore"
+-'  1  0  ~/.gitignore
+|4,39,1,0,1523209436,"~/.gitignore"
+-'  1  0  ~/.gitignore
+|4,39,1,0,1523209436,"~/.gitignore"
+-'  1  0  ~/.gitignore
+|4,39,1,0,1523209436,"~/.gitignore"
+-'  1  0  ~/.gitignore
+|4,39,1,0,1523209436,"~/.gitignore"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523209386,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523209386,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523209386,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523209386,"~/pintos/src/userprog/process.c"
 -'  126  0  ~/pintos/src/userprog/process.c
 |4,39,126,0,1523209386,"~/pintos/src/userprog/process.c"
 -'  126  0  ~/pintos/src/userprog/process.c
@@ -77,6 +127,26 @@
 |4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
 -'  96  0  ~/pintos/src/userprog/process.c
 |4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209379,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209354,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209354,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209354,"~/pintos/src/userprog/process.c"
+-'  96  0  ~/pintos/src/userprog/process.c
+|4,39,96,0,1523209354,"~/pintos/src/userprog/process.c"
 -'  96  0  ~/pintos/src/userprog/process.c
 |4,39,96,0,1523209354,"~/pintos/src/userprog/process.c"
 -'  96  0  ~/pintos/src/userprog/process.c
@@ -101,6 +171,26 @@
 |4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
 -'  1  0  ~/pintos/src/userprog/process.c
 |4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
+-'  1  0  ~/pintos/src/userprog/process.c
+|4,39,1,0,1523209344,"~/pintos/src/userprog/process.c"
 -'  1  0  ~/]
 |4,39,1,0,1520940811,"~/]"
 -'  1  0  ~/]
@@ -133,126 +223,44 @@
 |4,39,1,0,1520940811,"~/]"
 -'  1  0  ~/]
 |4,39,1,0,1520940811,"~/]"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  897  37  ~/pintos/src/threads/result
-|4,39,897,37,1520939550,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
--'  1  0  ~/pintos/src/threads/result
-|4,39,1,0,1520939243,"~/pintos/src/threads/result"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
+-'  1  0  ~/]
+|4,39,1,0,1520940811,"~/]"
 
 # History of marks within files (newest to oldest):
+
+> ~/pintos/src/userprog/syscall.c
+	*	1523361477	0
+	"	115	3
+
+> ~/pintos/src/userprog/process.c
+	*	1523361457	0
+	"	59	3
 
 > ~/.gitignore
 	*	1523209511	0
@@ -263,10 +271,6 @@
 	+	2	21
 	+	4	4
 	+	6	0
-
-> ~/pintos/src/userprog/process.c
-	*	1523209385	0
-	"	126	0
 
 > ~/]
 	*	1520940810	0
