@@ -104,7 +104,7 @@ process_wait (tid_t child_tid)
 
   sema_down(&t->start);
 
-  return 0;
+  return t->exit_status;
 
 
 }
