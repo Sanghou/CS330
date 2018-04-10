@@ -651,29 +651,38 @@ insert_child(struct list_elem *elem){
 
 
 
+
+//append file to file_descript.
+
 void
 append_file (struct list_elem *elem){
   list_push_back(&thread_current()->fd_list,elem);
 }
 
+//remove file to file_descript.
 void
 remove_file (struct list_elem *elem){
   list_remove(elem);
 }
 
+
+//Append struct file_descript to fd_list of thread.
+
 int
-set_file_descript(struct file_descript *file_descript, struct file *file){
+set_file_descript(struct file *file){
   struct thread *t = thread_current();
+  struct file_descript *file_descript;
   int fd;
   memset (file_descript, 0, sizeof *file_descript);
   // file_descript->t = t;
+
   file_descript->file = file;
 
   struct list_elem *e;
   e = list_back(&t->fd_list);
   struct file_descript *exist_fd= list_entry(e, struct file_descript, fd_elem);
   file_descript->fd = exist_fd->fd + 1;
-
+  
   append_file(&file_descript->fd_elem);
 
   return fd;

@@ -165,9 +165,9 @@ struct child_info *find_info(tid_t child_pid);
 void remove_child(struct list_elem *elem);
 void insert_child(struct list_elem *elem);
 
-void append_file(struct list_elem *elem);
+//void append_file(struct list_elem *elem);
 void remove_file(struct list_elem *elem);
-int set_file_descript(struct file_descript *file_descript, struct file *file);
+int set_file_descript(struct file *file);
 struct file_descript * find_file_descript(int fd);
 
 #endif /* threads/thread.h */

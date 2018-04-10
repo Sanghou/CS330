@@ -192,6 +192,9 @@ syscall_handler (struct intr_frame *f)
   		//read arguments
 
   		// struct file *file = filesys_open(file_name);
+  		// struct file_descript *file_ds = 
+
+  		// set_file_descript( ,file);
   		break;
   	}
   	case SYS_FILESIZE:{
