@@ -11,12 +11,12 @@
 # hlsearch on (H) or off (h):
 ~h
 # Command Line History (newest to oldest):
+:q
+|2,0,1523383551,,"q"
 :wq
 |2,0,1523383476,,"wq"
 :q!
 |2,0,1523383439,,"q!"
-:q
-|2,0,1523363852,,"q"
 :W
 |2,0,1520938532,,"W"
 
@@ -58,38 +58,54 @@
 |3,0,9,1,1,0,1523383447,">>>>>>> bb517b0db335efebdf2ad655d5c823df2c6e7484"
 
 # File marks:
-'0  286  2  ~/pintos/src/userprog/syscall.c
-|4,48,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
-'1  171  4  ~/pintos/src/userprog/syscall.c
-|4,49,171,4,1523383439,"~/pintos/src/userprog/syscall.c"
-'2  175  4  ~/pintos/src/userprog/syscall.c
-|4,50,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
-'3  115  3  ~/pintos/src/userprog/syscall.c
-|4,51,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
+'0  7  0  ~/.git/MERGE_MSG
+|4,48,7,0,1523383551,"~/.git/MERGE_MSG"
+'1  286  2  ~/pintos/src/userprog/syscall.c
+|4,49,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
+'2  171  4  ~/pintos/src/userprog/syscall.c
+|4,50,171,4,1523383439,"~/pintos/src/userprog/syscall.c"
+'3  175  4  ~/pintos/src/userprog/syscall.c
+|4,51,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
 '4  115  3  ~/pintos/src/userprog/syscall.c
 |4,52,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
 '5  115  3  ~/pintos/src/userprog/syscall.c
 |4,53,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
 '6  115  3  ~/pintos/src/userprog/syscall.c
 |4,54,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
-'7  59  3  ~/pintos/src/userprog/process.c
-|4,55,59,3,1523361458,"~/pintos/src/userprog/process.c"
-'8  6  0  ~/.gitignore
-|4,56,6,0,1523209512,"~/.gitignore"
-'9  5  0  ~/.gitignore
-|4,57,5,0,1523209463,"~/.gitignore"
+'7  115  3  ~/pintos/src/userprog/syscall.c
+|4,55,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
+'8  59  3  ~/pintos/src/userprog/process.c
+|4,56,59,3,1523361458,"~/pintos/src/userprog/process.c"
+'9  6  0  ~/.gitignore
+|4,57,6,0,1523209512,"~/.gitignore"
 
 # Jumplist (newest first):
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  1  0  ~/.git/MERGE_MSG
+|4,39,1,0,1523383542,"~/.git/MERGE_MSG"
+-'  286  2  ~/pintos/src/userprog/syscall.c
+|4,39,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
 -'  286  2  ~/pintos/src/userprog/syscall.c
 |4,39,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
 -'  171  4  ~/pintos/src/userprog/syscall.c
 |4,39,171,4,1523383440,"~/pintos/src/userprog/syscall.c"
+-'  171  4  ~/pintos/src/userprog/syscall.c
+|4,39,171,4,1523383440,"~/pintos/src/userprog/syscall.c"
+-'  175  4  ~/pintos/src/userprog/syscall.c
+|4,39,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
 -'  175  4  ~/pintos/src/userprog/syscall.c
 |4,39,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
 -'  115  3  ~/pintos/src/userprog/syscall.c
 |4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
 -'  115  3  ~/pintos/src/userprog/syscall.c
 |4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
+-'  115  3  ~/pintos/src/userprog/syscall.c
+|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
+-'  115  3  ~/pintos/src/userprog/syscall.c
+|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
+-'  115  3  ~/pintos/src/userprog/syscall.c
+|4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
 -'  115  3  ~/pintos/src/userprog/syscall.c
 |4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
 -'  1  0  ~/pintos/src/userprog/syscall.c
@@ -98,6 +114,12 @@
 |4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
 -'  1  0  ~/pintos/src/userprog/syscall.c
 |4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
+-'  1  0  ~/pintos/src/userprog/syscall.c
+|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
+-'  1  0  ~/pintos/src/userprog/syscall.c
+|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
+-'  1  0  ~/pintos/src/userprog/syscall.c
+|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
 -'  59  3  ~/pintos/src/userprog/process.c
 |4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
 -'  59  3  ~/pintos/src/userprog/process.c
@@ -114,6 +136,38 @@
 |4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
 -'  59  3  ~/pintos/src/userprog/process.c
 |4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  59  3  ~/pintos/src/userprog/process.c
+|4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  59  3  ~/pintos/src/userprog/process.c
+|4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  59  3  ~/pintos/src/userprog/process.c
+|4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  59  3  ~/pintos/src/userprog/process.c
+|4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  59  3  ~/pintos/src/userprog/process.c
+|4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  59  3  ~/pintos/src/userprog/process.c
+|4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  59  3  ~/pintos/src/userprog/process.c
+|4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  59  3  ~/pintos/src/userprog/process.c
+|4,39,59,3,1523361458,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
+-'  126  0  ~/pintos/src/userprog/process.c
+|4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
 -'  126  0  ~/pintos/src/userprog/process.c
 |4,39,126,0,1523361450,"~/pintos/src/userprog/process.c"
 -'  126  0  ~/pintos/src/userprog/process.c
@@ -162,6 +216,38 @@
 |4,39,6,0,1523209512,"~/.gitignore"
 -'  6  0  ~/.gitignore
 |4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
+-'  6  0  ~/.gitignore
+|4,39,6,0,1523209512,"~/.gitignore"
 -'  5  0  ~/.gitignore
 |4,39,5,0,1523209477,"~/.gitignore"
 -'  5  0  ~/.gitignore
@@ -194,94 +280,12 @@
 |4,39,5,0,1523209477,"~/.gitignore"
 -'  5  0  ~/.gitignore
 |4,39,5,0,1523209477,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  5  0  ~/.gitignore
-|4,39,5,0,1523209463,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
--'  1  0  ~/.gitignore
-|4,39,1,0,1523209436,"~/.gitignore"
 
 # History of marks within files (newest to oldest):
+
+> ~/.git/MERGE_MSG
+	*	1523383549	0
+	"	7	0
 
 > ~/pintos/src/userprog/syscall.c
 	*	1523383474	0
