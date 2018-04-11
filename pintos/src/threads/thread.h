@@ -110,7 +110,8 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
   };
 
-  struct child_info{
+  struct child_info
+  {
     tid_t parent_pid;
     tid_t child_pid;
     struct semaphore* sema;
@@ -119,11 +120,12 @@ struct thread
     bool is_waiting;                    /* Default value of is_waiting is false */
   };
 
-struct file_descript{
+struct file_descript
+  {
     int fd;
     struct file *file;
     struct list_elem fd_elem;
-};  
+  };  
 
 
 /* If false (default), use round-robin scheduler.

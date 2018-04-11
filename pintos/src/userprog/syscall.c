@@ -147,7 +147,7 @@ syscall_handler (struct intr_frame *f)
       lock_release(&sys_lock);
   		break;
   	}
-    
+
   	case SYS_REMOVE:
   	{
   		//read arguments
@@ -222,18 +222,30 @@ syscall_handler (struct intr_frame *f)
       int fd = read(f,0);
       const char *buffer = (const char *) read(f,1);
       unsigned size = (unsigned) read(f, 0);
+      int read_size = 0; 
 
       if (!is_valid_addr(buffer)) 
       {
         terminate_error();
         break;
       }
+
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (fd != 0 && descript == NULL){
+        terminate_error();
+        break;
+      }
+
       lock_acquire(&sys_lock);
 
       if (fd == 0)
       {
         //keyboard input
+      } else {
+        read_size = (int) file_read(descript->file, buffer, size);
       }
+      f->eax = read_size;
       lock_release(&sys_lock);
   		break;
   	}
@@ -244,9 +256,17 @@ syscall_handler (struct intr_frame *f)
       int fd = read(f,0);
       const char *buffer = (const char *) read(f,1);
   		unsigned size = (unsigned) read(f, 0);
+      int write_size = 0;
 
       if (!is_valid_addr(buffer)) 
       {
+        terminate_error();
+        break;
+      }
+
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (fd != 1 && descript == NULL){
         terminate_error();
         break;
       }
@@ -260,7 +280,7 @@ syscall_handler (struct intr_frame *f)
   		}
       else
       {
-
+        write_size = (int) file_write(descript->file, buffer, size);
       }
 
       lock_release(&sys_lock);
@@ -318,6 +338,7 @@ syscall_handler (struct intr_frame *f)
       lock_acquire(&sys_lock);
 
       remove_file(&descript->fd_elem);
+      file_close(descript->file);
 
       lock_release(&sys_lock);
 
@@ -330,7 +351,8 @@ syscall_handler (struct intr_frame *f)
 
 }
 
-void set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid)
+void 
+set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid)
 {
 	struct thread *child = get_thread_from_tid(child_pid);
 
