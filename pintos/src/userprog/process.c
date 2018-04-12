@@ -32,6 +32,7 @@ process_execute (const char *file_name)
 {
   char *fn_copy, *saved_ptr, *tmp;
   tid_t tid;
+  struct thread *t;
 
   acquire_sys_lock();
   /* Make a copy of FILE_NAME.
@@ -49,10 +50,15 @@ process_execute (const char *file_name)
 
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+
+  exec_sema_down();
+  t = get_thread_from_tid(tid);
+
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
   palloc_free_page (tmp);
 
+  if (t == NULL) tid = TID_ERROR;
   release_sys_lock();
   return tid;
 }
@@ -72,8 +78,6 @@ start_process (void *file_name_)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
   success = load (file_name, &if_.eip, &if_.esp);
-
-  // set_exec_success(success);
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
@@ -391,6 +395,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
  done:
   /* We arrive here whether the load is successful or not. */
   file_close (file);
+  exec_sema_up();
 
   return success;
 }

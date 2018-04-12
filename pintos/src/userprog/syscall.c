@@ -21,14 +21,13 @@ void terminate_error (void);
 void terminate (void);
 
 struct lock sys_lock;
-// struct semaphore exec_sema;
-bool exec_success = true;
+struct semaphore exec_sema;
 
 void
 syscall_init (void) 
 {
   	lock_init(&sys_lock);
-    // sema_init(&exec_sema, 0);
+    sema_init(&exec_sema, 0);
   	intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
 }
 
@@ -96,10 +95,8 @@ syscall_handler (struct intr_frame *f)
 
       if (child_pid == TID_ERROR){
         f->eax = -1;
-        terminate_error();
         break;
       }
-      // sema_down(&exec_sema);
 
   		f->eax = child_pid;
   		struct child_info *info = malloc(sizeof(struct child_info));
@@ -453,8 +450,13 @@ acquire_sys_lock (void)
   lock_acquire(&sys_lock);
 }
 
-// void 
-// set_exec_success (bool success)
-// {
-//   exec_success = success;
-// }
+void
+exec_sema_up (void)
+{
+  sema_up(&exec_sema);
+}
+void
+exec_sema_down (void)
+{
+  sema_down(&exec_sema);
+}
