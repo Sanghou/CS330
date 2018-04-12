@@ -676,24 +676,22 @@ set_file_descript(struct file *file){
   struct file_descript *file_descript = malloc(sizeof(struct file_descript));
   int fd = 2;
   memset (file_descript, 0, sizeof *file_descript);
-  // file_descript->t = t;
 
   file_descript->file = file;
 
   struct list_elem *e;
 
   if (list_empty(&t->fd_list))
-  {
-    file_descript->fd = fd;
-
-  }
+    {
+      file_descript->fd = fd;
+    }
   else
-  {
-  e = list_back(&t->fd_list);
+    {
+      e = list_back(&t->fd_list);
 
-  struct file_descript *exist_fd= list_entry(e, struct file_descript, fd_elem);
-  file_descript->fd = exist_fd->fd + 1;
-  }
+      struct file_descript *exist_fd= list_entry(e, struct file_descript, fd_elem);
+      file_descript->fd = exist_fd->fd + 1;
+    }
 
   append_file(&file_descript->fd_elem);
 
@@ -702,20 +700,23 @@ set_file_descript(struct file *file){
 }
 
 struct file_descript *
-find_file_descript(int fd){
+find_file_descript(int fd)
+{
   
   struct list_elem *e;
   struct thread *t = thread_current();
 
-  for(e=list_begin(&t->fd_list); e != list_end(&t->fd_list);e=list_next(e)){
+  for(e=list_begin(&t->fd_list); e != list_end(&t->fd_list);e=list_next(e))
+  {
     
     struct file_descript *file_descript = list_entry(e, struct file_descript, fd_elem);
 
-      if(file_descript->fd == fd){
+    if(file_descript->fd == fd)
+      {
         return file_descript;
       }
 
-    }
+  }
   return NULL;
 }
 

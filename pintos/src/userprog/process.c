@@ -386,7 +386,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
  done:
   /* We arrive here whether the load is successful or not. */
   file_close (file);
-  // lock_release(&sys_lock);
 
   return success;
 }

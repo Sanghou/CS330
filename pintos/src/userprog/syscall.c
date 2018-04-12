@@ -36,9 +36,6 @@ syscall_handler (struct intr_frame *f)
 {
   // printf ("system call!\n");
 
-  //to provide an  exclude operation for one user program.
-  //lock_acquire(&sys_lock);
-
   //read system call number 
   int sys_num = read(f, 0);
 
@@ -82,7 +79,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_EXEC:
     {
   		enum intr_level old_level;
-  		//old_level = intr_disable();
+  		old_level = intr_disable();
 
   		const char * cmd_line= (const char *) read(f, 1);
 
@@ -95,10 +92,16 @@ syscall_handler (struct intr_frame *f)
 
   		tid_t child_pid = process_execute (cmd_line);
 
+      if (child_pid == TID_ERROR){
+        f->eax = -1;
+        terminate_error();
+        break;
+      }
+
   		f->eax = child_pid;
   		struct child_info *info = malloc(sizeof(struct child_info));
   		set_child_info(info, child_pid, thread_current()->tid);
-  		//intr_set_level(old_level);
+  		intr_set_level(old_level);
 
   		break;
   	}
@@ -180,7 +183,6 @@ syscall_handler (struct intr_frame *f)
 
       if (!strcmp(file_name,tmp)){
       	f->eax =  -1;
-      	terminate();
       	break;
       }
       lock_acquire(&sys_lock);
@@ -222,7 +224,7 @@ syscall_handler (struct intr_frame *f)
       int fd = read(f,0);
       const char *buffer = (const char *) read(f,1);
       unsigned size = (unsigned) read(f, 0);
-      int read_size = 0; 
+      int read_size = 0;
 
       if (!is_valid_addr(buffer)) 
       {
@@ -243,7 +245,7 @@ syscall_handler (struct intr_frame *f)
       {
         //keyboard input
       } else {
-        read_size = (int) file_read(descript->file, buffer, size);
+        read_size = file_read(descript->file, buffer, (off_t) size);
       }
       f->eax = read_size;
       lock_release(&sys_lock);
