@@ -187,8 +187,13 @@ syscall_handler (struct intr_frame *f)
       }
       lock_acquire(&sys_lock);
 
-
       struct file *file = filesys_open(file_name);
+
+      if (file == NULL){
+        f->eax = -1;
+        lock_release(&sys_lock);
+        break;
+      }
       int fd =  set_file_descript(file);
 
       f->eax = fd;
