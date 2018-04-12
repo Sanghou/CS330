@@ -33,6 +33,7 @@ process_execute (const char *file_name)
   char *fn_copy, *saved_ptr, *tmp;
   tid_t tid;
 
+  acquire_sys_lock();
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -51,6 +52,8 @@ process_execute (const char *file_name)
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
   palloc_free_page (tmp);
+
+  release_sys_lock();
   return tid;
 }
 
@@ -69,6 +72,8 @@ start_process (void *file_name_)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
   success = load (file_name, &if_.eip, &if_.esp);
+
+  // set_exec_success(success);
 
   /* If load failed, quit. */
   palloc_free_page (file_name);

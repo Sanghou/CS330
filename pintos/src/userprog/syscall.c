@@ -20,13 +20,15 @@ int read (struct intr_frame *f, int pointer);
 void terminate_error (void);
 void terminate (void);
 
-static struct lock sys_lock;
+struct lock sys_lock;
+// struct semaphore exec_sema;
+bool exec_success = true;
 
 void
 syscall_init (void) 
 {
-	//list_init(&fd_list);
   	lock_init(&sys_lock);
+    // sema_init(&exec_sema, 0);
   	intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
 }
 
@@ -97,6 +99,7 @@ syscall_handler (struct intr_frame *f)
         terminate_error();
         break;
       }
+      // sema_down(&exec_sema);
 
   		f->eax = child_pid;
   		struct child_info *info = malloc(sizeof(struct child_info));
@@ -438,8 +441,20 @@ void terminate_error()
 	thread_exit();
 }
 
-struct lock *
-get_sys_lock(void)
+void
+release_sys_lock(void)
 {
-	return &sys_lock;
+	lock_release(&sys_lock);
 }
+
+void 
+acquire_sys_lock (void)
+{
+  lock_acquire(&sys_lock);
+}
+
+// void 
+// set_exec_success (bool success)
+// {
+//   exec_success = success;
+// }
