@@ -136,16 +136,17 @@ syscall_handler (struct intr_frame *f)
   	{
   		//read arguments
       const char *file = (const char *) read(f,1);
-      unsigned size = (unsigned) read(f,0);
+      int size = read(f,1);
 
       if (!is_valid_addr(file)) 
       {
+        f->eax = 0;
         terminate_error();
         break;
       }
       lock_acquire(&sys_lock);
 
-  		f->eax = filesys_create(file, size);
+  		f->eax = filesys_create(file, (size_t)size);
 
       lock_release(&sys_lock);
   		break;
@@ -158,6 +159,7 @@ syscall_handler (struct intr_frame *f)
 
       if (!is_valid_addr(file)) 
       {
+        f->eax = 0;
         terminate_error();
         break;
       }
@@ -210,7 +212,7 @@ syscall_handler (struct intr_frame *f)
       struct file_descript *descript = find_file_descript(fd);
 
       if (descript == NULL){
-        terminate_error();
+        f->eax = -1;
         break;
       }
 
@@ -228,8 +230,10 @@ syscall_handler (struct intr_frame *f)
     {
       int fd = read(f,0);
       const char *buffer = (const char *) read(f,1);
-      unsigned size = (unsigned) read(f, 0);
+      int size = read(f, 1);
+
       int read_size = 0;
+      uint8_t tmp = 1;
 
       if (!is_valid_addr(buffer)) 
       {
@@ -248,7 +252,10 @@ syscall_handler (struct intr_frame *f)
 
       if (fd == 0)
       {
-        //keyboard input
+        while (tmp != '\0'){
+          tmp = input_getc();
+          read_size++;
+        }
       } else {
         read_size = file_read(descript->file, buffer, (off_t) size);
       }
@@ -262,7 +269,8 @@ syscall_handler (struct intr_frame *f)
     { 
       int fd = read(f,0);
       const char *buffer = (const char *) read(f,1);
-  		unsigned size = (unsigned) read(f, 0);
+  		int size = read(f, 1);
+
       int write_size = 0;
 
       if (!is_valid_addr(buffer)) 
@@ -288,6 +296,7 @@ syscall_handler (struct intr_frame *f)
       else
       {
         write_size = (int) file_write(descript->file, buffer, size);
+        f->eax = write_size;
       }
 
       lock_release(&sys_lock);
@@ -296,12 +305,12 @@ syscall_handler (struct intr_frame *f)
   	case SYS_SEEK:
     {
       int fd = read(f, 0);
-      unsigned position = (unsigned) read(f, 0);
+      int position = read(f, 1);
 
       struct file_descript *descript = find_file_descript(fd);
 
       if (descript == NULL){
-        terminate_error();
+        f->eax = -1;
         break;
       }
 
@@ -320,7 +329,7 @@ syscall_handler (struct intr_frame *f)
       struct file_descript *descript = find_file_descript(fd);
 
       if (descript == NULL){
-        terminate_error();
+        f->eax = -1;
         break;
       }
 
@@ -338,7 +347,7 @@ syscall_handler (struct intr_frame *f)
       struct file_descript *descript = find_file_descript(fd);
 
       if (descript == NULL){
-        terminate_error();
+        f->eax = -1;
         break;
       }
       

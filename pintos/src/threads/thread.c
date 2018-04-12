@@ -481,6 +481,7 @@ init_thread (struct thread *t, const char *name, int priority)
     list_init(&t->fd_list);
     sema_init(&t->start,0);
     t->exit_status = 0;
+    t->file = NULL;
   #endif
 
 }
@@ -695,7 +696,7 @@ set_file_descript(struct file *file){
 
   append_file(&file_descript->fd_elem);
 
-  return fd;
+  return file_descript->fd;
   
 }
 

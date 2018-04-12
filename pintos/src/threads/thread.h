@@ -104,6 +104,8 @@ struct thread
     int exit_status;                    /* exit status of the current thread */
     
     struct list fd_list;
+
+    struct file *file;
 #endif
 
     /* Owned by thread.c. */
