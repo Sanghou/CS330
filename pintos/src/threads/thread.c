@@ -666,6 +666,7 @@ remove_file (struct list_elem *elem){
   struct file_descript *file_descript = list_entry(elem, struct file_descript, fd_elem);
   list_remove(elem);
   free(file_descript);
+  // palloc_free_page(file_descript);
 }
 
 
@@ -675,6 +676,7 @@ int
 set_file_descript(struct file *file){
   struct thread *t = thread_current();
   struct file_descript *file_descript = malloc(sizeof(struct file_descript));
+  // struct file_descript *file_descript = palloc_get_page (PAL_ZERO);
   int fd = 2;
   memset (file_descript, 0, sizeof *file_descript);
 
