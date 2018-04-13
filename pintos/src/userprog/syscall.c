@@ -17,8 +17,9 @@ static void syscall_handler (struct intr_frame *);
 void set_child_info (struct child_info *info, tid_t child_pid, tid_t parent_pid);
 bool is_valid_addr (void *addr);
 
-void* read (void **esp);
+//void* read (void **esp);
 
+int read (struct intr_frame *f);
 void terminate_error (void);
 void terminate (void);
 
@@ -40,7 +41,7 @@ syscall_handler (struct intr_frame *f)
 
    //printf ("system call!\n");
   //read system call number 
-
+/*
   if(!is_valid_addr(f->esp) || !is_valid_addr(*f->eip)){
     terminate_error();
   }
@@ -50,7 +51,9 @@ syscall_handler (struct intr_frame *f)
 
   int sys_num = read(esp);
   
-
+*/
+  //read system call number 
+  int sys_num = read(f);
 
   switch(sys_num)
   {
@@ -72,7 +75,8 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXIT:
     {
-  		int status = read(esp+1);
+  		//int status = read(esp+1);
+  		int status = read(f);
 
   		tid_t child_pid = thread_current()->tid;
 
@@ -83,7 +87,6 @@ syscall_handler (struct intr_frame *f)
   		if (info == NULL)
       {
   			// sema_up(&thread_current()->start);
-  			// printf("%s: exit(%d)\n", thread_current()->name,status);
   			terminate();
    			break;
   		}
@@ -106,7 +109,8 @@ syscall_handler (struct intr_frame *f)
   		enum intr_level old_level;
   		old_level = intr_disable();
 
-  		const char * cmd_line= (const char *) read(esp+1);
+//  		const char * cmd_line= (const char *) read(esp+1);
+  		const char * cmd_line= (const char *) read(f);
 
   		if (!is_valid_addr(cmd_line)) 
       {
@@ -135,7 +139,8 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_WAIT:
     {
-      tid_t child_pid = (tid_t) read(esp+1);
+     // tid_t child_pid = (tid_t) read(esp+1);
+      tid_t child_pid = (tid_t) read(f);
 
   		tid_t parent_pid = thread_current()->tid;
 
@@ -164,9 +169,11 @@ syscall_handler (struct intr_frame *f)
   	case SYS_CREATE:
   	{
   		//read arguments
-      const char *file = (const char *) read(esp+1);
+     // const char *file = (const char *) read(esp+1);
       
-      int size = read(esp+2);
+      //int size = read(esp+2);
+      const char *file = (const char *) read(f);
+      int size = read(f);
 
       if (!is_valid_addr(file)) 
       {
@@ -188,7 +195,8 @@ syscall_handler (struct intr_frame *f)
   	case SYS_REMOVE:
   	{
   		//read arguments
-      const char *file = (const char *) read(esp+1);
+//      const char *file = (const char *) read(esp+1);
+      const char *file = (const char *) read(f);
 
       if (!is_valid_addr(file)) 
       {
@@ -211,7 +219,8 @@ syscall_handler (struct intr_frame *f)
   	case SYS_OPEN:
     {
   		//read arguments
-      const char *file_name = (const char *) read(esp+1);
+      //const char *file_name = (const char *) read(esp+1);
+      const char *file_name = (const char *) read(f);
       char *tmp = "";
 
       if (!is_valid_addr(file_name)) 
@@ -234,6 +243,7 @@ syscall_handler (struct intr_frame *f)
         lock_release(&sys_lock);
         break;
       }
+
       int fd =  set_file_descript(file);
 
       f->eax = fd;
@@ -249,18 +259,19 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_FILESIZE:
     {
-      int fd = read(esp+1);
+      //int fd = read(esp+1);
+      int fd = read(f);
       
       struct file_descript *descript = find_file_descript(fd);
 
       if (descript == NULL){
-        f->eax = -1;
+        f->eax = 0;
         break;
       }
 
       lock_acquire(&sys_lock);
 
-      f->eax = (int) file_length(descript->file);
+      f->eax = file_length(descript->file);
 
       lock_release(&sys_lock);
   		break;
@@ -273,44 +284,54 @@ syscall_handler (struct intr_frame *f)
   	case SYS_READ:
     {
 
-      int fd = read(esp+1);
+//      int fd = read(esp+1);
       
-      const char *buffer = (const char *) read(esp+2);
+  //    const char *buffer = (const char *) read(esp+2);
 
-      int size = read(esp+3);
+    //  int size = read(esp+3);
 
+      int fd = read(f);
+      const char *buffer = (const char *) read(f);
+      int size = read(f);
 
       int read_size = 0;
-      uint8_t tmp = 1;
+      int8_t tmp = 1;
 
       if (!is_valid_addr(buffer)) 
       {
-        terminate_error();
-        break;
-      }
-
-      struct file_descript *descript = find_file_descript(fd);
-
-      if (fd != 0 && descript == NULL){
+        f->eax = -1;
         terminate_error();
         break;
       }
 
       lock_acquire(&sys_lock);
 
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (fd != 0 && descript == NULL){
+        f->eax = -1;
+        lock_release(&sys_lock);
+        terminate_error();
+        break;
+      }
+
       if (fd == 0)
       {
         while (tmp != '\0'){
           tmp = input_getc();
+          memcpy(buffer, tmp, 1);
+          buffer++;
           read_size++;
           //putbuf();
         }
 
       } else {
+
         read_size = file_read(descript->file, buffer, (off_t) size);
       }
       f->eax = read_size;
       lock_release(&sys_lock);
+      
   		break;
   	}
   	
@@ -321,26 +342,32 @@ syscall_handler (struct intr_frame *f)
   	case SYS_WRITE:
     { 
 
-      int fd = read(esp+1);
-      const char *buffer = (const char *) read(esp+2);
-  		int size = read(esp+3);
+//      int fd = read(esp+1);
+  //    const char *buffer = (const char *) read(esp+2);
+  //		int size = read(esp+3);
+      int fd = read(f);
+      const char *buffer = (const char *) read(f);
+  		int size = read(f);
 
       int write_size = 0;
 
       if (!is_valid_addr(buffer)) 
       {
-        terminate_error();
-        break;
-      }
-
-      struct file_descript *descript = find_file_descript(fd);
-
-      if (fd != 1 && descript == NULL){
+        f->eax = 0;
         terminate_error();
         break;
       }
 
       lock_acquire(&sys_lock);
+
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (fd != 1 && descript == NULL){
+        f->eax = 0;
+        lock_release(&sys_lock);
+        terminate_error();
+        break;
+      }
 
   		if (fd == 1)
       {
@@ -349,11 +376,12 @@ syscall_handler (struct intr_frame *f)
   		}
       else
       {
-        write_size = (int) file_write(descript->file, buffer, size);
+        write_size = file_write(descript->file, buffer, size);
         f->eax = write_size;
       }
 
       lock_release(&sys_lock);
+
   		break;
   	}
 
@@ -363,13 +391,14 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_SEEK:
     {
-      int fd = read(esp+1);
-      int position = read(esp+2);
+      //int fd = read(esp+1);
+      //int position = read(esp+2);
+      int fd = read(f);
+      int position = read(f);
 
       struct file_descript *descript = find_file_descript(fd);
 
       if (descript == NULL){
-        f->eax = -1;
         break;
       }
 
@@ -383,7 +412,8 @@ syscall_handler (struct intr_frame *f)
   	}
   	case SYS_TELL:
     {
-      int fd = read(esp+1);
+      //int fd = read(esp+1);
+      int fd = read(f);
 
       struct file_descript *descript = find_file_descript(fd);
 
@@ -394,7 +424,7 @@ syscall_handler (struct intr_frame *f)
 
       lock_acquire(&sys_lock);
 
-      f->eax = (unsigned) file_tell(descript->file);
+      f->eax = file_tell(descript->file);
 
       lock_release(&sys_lock);
   		break;
@@ -406,20 +436,22 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_CLOSE:
     {
-      int fd = read(esp+1);
+      //int fd = read(esp+1);
+      int fd = read(f);
 
       struct file_descript *descript = find_file_descript(fd);
 
       if (descript == NULL){
-        f->eax = -1;
         break;
       }
       
       lock_acquire(&sys_lock);
 
       
+//      file_close(descript->file);
+//        remove_file(&descript->fd_elem);
       file_close(descript->file);
-        remove_file(&descript->fd_elem);
+      remove_file(&descript->fd_elem); 
 
       lock_release(&sys_lock);
 
@@ -430,6 +462,10 @@ syscall_handler (struct intr_frame *f)
   		break;
   }
 
+  // printf("%p\n", f->eip);
+  // if (is_user_vaddr((char *)f->eip)){
+  //   terminate_error();
+  // }
 }
 
 void 
@@ -447,9 +483,8 @@ set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid)
   	insert_child(&info->elem);
 }
 
-/*
 int 
-read (struct intr_frame *f, int pointer)
+read (struct intr_frame *f)
 {
   if (!is_valid_addr(f->esp)) {
     terminate_error();
@@ -457,7 +492,8 @@ read (struct intr_frame *f, int pointer)
   }
 
   int result;
-
+/*
+<<<<<<< HEAD
   if (pointer)
   {
     result = *(char **)f->esp;
@@ -473,11 +509,13 @@ read (struct intr_frame *f, int pointer)
   //printf("f->esp : %X \n", (unsigned)f->epi);
   //printf("f->eip : %p \n", f->eip);
 
+=======*/
+  result = *(char **)f->esp;
+  
   f->esp += 4;
   return result;
 }
-*/
-
+/*
 void*
 read (void **esp){
   if(!is_valid_addr(esp)){
@@ -486,6 +524,7 @@ read (void **esp){
   }
   return *esp;
 }
+*/
 
 /*
 bool 
@@ -534,7 +573,7 @@ void terminate()
   thread_exit();
 }
 
-void terminate_error()
+void terminate_error(void)
 {
   thread_current()->exit_status = -1;
   printf("%s: exit(%d)\n", thread_current()->name, -1);
