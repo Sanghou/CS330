@@ -60,7 +60,6 @@ syscall_handler (struct intr_frame *f)
   		if (info == NULL)
       {
   			// sema_up(&thread_current()->start);
-  			// printf("%s: exit(%d)\n", thread_current()->name,status);
   			terminate();
    			break;
   		}
@@ -256,7 +255,7 @@ syscall_handler (struct intr_frame *f)
       {
         while (tmp != '\0'){
           tmp = input_getc();
-          memcpy(buffer, (char *)tmp, 1);
+          memcpy(buffer, tmp, 1);
           buffer++;
           read_size++;
         }
@@ -445,7 +444,7 @@ void terminate()
   thread_exit();
 }
 
-void terminate_error()
+void terminate_error(void)
 {
   thread_current()->exit_status = -1;
   printf("%s: exit(%d)\n", thread_current()->name, -1);

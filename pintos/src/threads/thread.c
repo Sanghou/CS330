@@ -296,9 +296,31 @@ thread_exit (void)
 {
   ASSERT (!intr_context ());
 
+  struct thread *cur = thread_current();
+
 #ifdef USERPROG
   process_exit ();
+
+  struct list_elem *e;
+  bool empty = list_empty(&cur->fd_list);
+  for (e= list_begin(&cur->fd_list); e != list_end(&cur->fd_list);
+       e= list_next(e))
+  {
+    if (e != list_begin(&cur->fd_list)){
+      struct file_descript *file = list_entry (list_prev(e), struct file_descript, fd_elem);
+      file_close(file->file);
+      free(file);
+    }
+  }
+  // if (empty){
+  //   struct file_descript *file = list_entry (list_prev(e), struct file_descript, fd_elem);
+  //   file_close(file->file);
+  //   free(file);
+  // }
+
 #endif
+
+  // printf("processocess_exit : %d\n",list_size(&thread_current()->fd_list));
 
   /* Remove thread from all threads list, set our status to dying,
      and schedule another process.  That process will destroy us
