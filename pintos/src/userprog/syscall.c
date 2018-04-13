@@ -16,7 +16,9 @@ static void syscall_handler (struct intr_frame *);
 
 void set_child_info (struct child_info *info, tid_t child_pid, tid_t parent_pid);
 bool is_valid_addr (void *addr);
-int read (struct intr_frame *f, int pointer);
+
+void* read (void **esp);
+
 void terminate_error (void);
 void terminate (void);
 
@@ -35,23 +37,42 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f) 
 {
-  // printf ("system call!\n");
 
+   //printf ("system call!\n");
   //read system call number 
-  int sys_num = read(f, 0);
+
+  if(!is_valid_addr(f->esp) || !is_valid_addr(*f->eip)){
+    terminate_error();
+  }
+
+
+  void **esp = f->esp;
+
+  int sys_num = read(esp);
+  
+
 
   switch(sys_num)
   {
   	/* System call for pintos proj2 */
+
+    if(!is_valid_addr(f->esp)){
+      terminate_error();
+    }
+
+
+
   	case SYS_HALT:
     {
   		shutdown_power_off();
   		break;
   	}
 
+
+
   	case SYS_EXIT:
     {
-  		int status = read(f, 0);
+  		int status = read(esp+1);
 
   		tid_t child_pid = thread_current()->tid;
 
@@ -77,12 +98,15 @@ syscall_handler (struct intr_frame *f)
   		break;
   	}
 
+
+
+
   	case SYS_EXEC:
     {
   		enum intr_level old_level;
   		old_level = intr_disable();
 
-  		const char * cmd_line= (const char *) read(f, 1);
+  		const char * cmd_line= (const char *) read(esp+1);
 
   		if (!is_valid_addr(cmd_line)) 
       {
@@ -106,9 +130,12 @@ syscall_handler (struct intr_frame *f)
   		break;
   	}
 
+
+
+
   	case SYS_WAIT:
     {
-      tid_t child_pid = (tid_t) read(f, 0);
+      tid_t child_pid = (tid_t) read(esp+1);
 
   		tid_t parent_pid = thread_current()->tid;
 
@@ -132,11 +159,14 @@ syscall_handler (struct intr_frame *f)
   	}
 
 
+
+
   	case SYS_CREATE:
   	{
   		//read arguments
-      const char *file = (const char *) read(f,1);
-      int size = read(f,1);
+      const char *file = (const char *) read(esp+1);
+      
+      int size = read(esp+2);
 
       if (!is_valid_addr(file)) 
       {
@@ -152,10 +182,13 @@ syscall_handler (struct intr_frame *f)
   		break;
   	}
 
+
+
+
   	case SYS_REMOVE:
   	{
   		//read arguments
-      const char *file = (const char *) read(f,1);
+      const char *file = (const char *) read(esp+1);
 
       if (!is_valid_addr(file)) 
       {
@@ -170,10 +203,15 @@ syscall_handler (struct intr_frame *f)
   		break;
   	}
 
+
+
+
+
+
   	case SYS_OPEN:
     {
   		//read arguments
-      const char *file_name = (const char *) read(f,1);
+      const char *file_name = (const char *) read(esp+1);
       char *tmp = "";
 
       if (!is_valid_addr(file_name)) 
@@ -205,9 +243,13 @@ syscall_handler (struct intr_frame *f)
   	}
 
 
+
+
+
+
   	case SYS_FILESIZE:
     {
-      int fd = read(f, 0);
+      int fd = read(esp+1);
       
       struct file_descript *descript = find_file_descript(fd);
 
@@ -226,11 +268,17 @@ syscall_handler (struct intr_frame *f)
   	
 
 
+
+
   	case SYS_READ:
     {
-      int fd = read(f,0);
-      const char *buffer = (const char *) read(f,1);
-      int size = read(f, 1);
+
+      int fd = read(esp+1);
+      
+      const char *buffer = (const char *) read(esp+2);
+
+      int size = read(esp+3);
+
 
       int read_size = 0;
       uint8_t tmp = 1;
@@ -255,7 +303,9 @@ syscall_handler (struct intr_frame *f)
         while (tmp != '\0'){
           tmp = input_getc();
           read_size++;
+          //putbuf();
         }
+
       } else {
         read_size = file_read(descript->file, buffer, (off_t) size);
       }
@@ -265,11 +315,15 @@ syscall_handler (struct intr_frame *f)
   	}
   	
 
+
+
+
   	case SYS_WRITE:
     { 
-      int fd = read(f,0);
-      const char *buffer = (const char *) read(f,1);
-  		int size = read(f, 1);
+
+      int fd = read(esp+1);
+      const char *buffer = (const char *) read(esp+2);
+  		int size = read(esp+3);
 
       int write_size = 0;
 
@@ -302,10 +356,15 @@ syscall_handler (struct intr_frame *f)
       lock_release(&sys_lock);
   		break;
   	}
+
+
+
+
+
   	case SYS_SEEK:
     {
-      int fd = read(f, 0);
-      int position = read(f, 1);
+      int fd = read(esp+1);
+      int position = read(esp+2);
 
       struct file_descript *descript = find_file_descript(fd);
 
@@ -324,7 +383,7 @@ syscall_handler (struct intr_frame *f)
   	}
   	case SYS_TELL:
     {
-      int fd = read(f, 0);
+      int fd = read(esp+1);
 
       struct file_descript *descript = find_file_descript(fd);
 
@@ -340,9 +399,14 @@ syscall_handler (struct intr_frame *f)
       lock_release(&sys_lock);
   		break;
   	}
+
+
+
+
+
   	case SYS_CLOSE:
     {
-      int fd = read(f, 0);
+      int fd = read(esp+1);
 
       struct file_descript *descript = find_file_descript(fd);
 
@@ -353,8 +417,9 @@ syscall_handler (struct intr_frame *f)
       
       lock_acquire(&sys_lock);
 
-      remove_file(&descript->fd_elem);
+      
       file_close(descript->file);
+        remove_file(&descript->fd_elem);
 
       lock_release(&sys_lock);
 
@@ -382,6 +447,7 @@ set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid)
   	insert_child(&info->elem);
 }
 
+/*
 int 
 read (struct intr_frame *f, int pointer)
 {
@@ -389,24 +455,45 @@ read (struct intr_frame *f, int pointer)
     terminate_error();
     return -1;
   }
+
   int result;
 
   if (pointer)
   {
     result = *(char **)f->esp;
+
   }else
+
   {
     result = *(char *)f->esp;
   }
-  
+
+  //printf("f->esp : %p \n", f->esp);
+  //printf("esp value : %s \n", *(char *)f->esp);
+  //printf("f->esp : %X \n", (unsigned)f->epi);
+  //printf("f->eip : %p \n", f->eip);
+
   f->esp += 4;
   return result;
 }
+*/
 
+void*
+read (void **esp){
+  if(!is_valid_addr(esp)){
+    terminate_error();
+    return -1;
+  }
+  return *esp;
+}
+
+/*
 bool 
 is_valid_addr(void *addr)
 {
   if (!is_user_vaddr(addr) || addr == NULL) return false;
+
+  //printf("%d \n", *(unsigned *)addr);
 
   uint32_t *pd, *pde, *pt, *pte;
   uintptr_t tmp;
@@ -429,7 +516,15 @@ is_valid_addr(void *addr)
 
   if (!(*pte&PTE_P)) return false; //page table entry not present
 
+  //if (!(*pte&PTE_U)) return false;
+
   return true;
+}
+*/
+
+bool 
+is_valid_addr(void *addr){
+  return (is_user_vaddr(addr) && pagedir_get_page(thread_current()->pagedir, addr) != NULL);
 }
 
 void terminate()

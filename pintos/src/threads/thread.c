@@ -298,6 +298,19 @@ thread_exit (void)
 
 #ifdef USERPROG
   process_exit ();
+
+  struct thread* cur = thread_current();
+  struct list_elem *e;
+  bool empty = list_empty(&cur->fd_list);
+  for (e= list_begin(&cur->fd_list); e != list_end(&cur->fd_list);
+       e= list_next(e))
+  {
+    if (e != list_begin(&cur->fd_list)){
+      struct file_descript *file = list_entry (list_prev(e), struct file_descript, fd_elem);
+      file_close(file->file);
+      free(file);
+    }
+  }
 #endif
 
   /* Remove thread from all threads list, set our status to dying,
