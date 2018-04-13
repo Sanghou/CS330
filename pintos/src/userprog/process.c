@@ -393,6 +393,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
   *esp -= sizeof(void *);
   memcpy(*esp, &tmp, sizeof(void *));
 
+  //hex_dump((uint8_t) *esp, *esp, 200, 1);
+
   success = true;
 
  done:
