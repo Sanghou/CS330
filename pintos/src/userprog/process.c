@@ -38,7 +38,7 @@ process_execute (const char *file_name)
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
-  tmp = palloc_get_page (1);
+  tmp = palloc_get_page (0);
   if (fn_copy == NULL)
     return TID_ERROR;
   if (tmp == NULL)
@@ -396,16 +396,12 @@ load (const char *file_name, void (**eip) (void), void **esp)
   *esp -= sizeof(void *);
   memcpy(*esp, &tmp, sizeof(void *));
 
-  //hex_dump((uint8_t) *esp, *esp, 200, 1);
-
   success = true;
 
  done:
   /* We arrive here whether the load is successful or not. */
   // file_close (file);
- if(t->file == NULL){
   t->file = file;
- }
   exec_sema_up();
 
   return success;
