@@ -5,3 +5,6 @@ pintos/src/examples/*
 .viminfo
 pintos/filesys.disk
 .bash_history
+pintos/src/document2.docx
+pintos/src/13_project2.tar.gz
+pintos/13_project2.tar.gz

@@ -6,7 +6,7 @@
 //frame table 
 struct frame_entry
 {
-	struct hash_elem *hash_elem;
+	struct hash_elem hash_elem;
 	int pa;
 	int va;
 	int evict;
