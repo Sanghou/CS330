@@ -19,6 +19,7 @@
 #include "threads/vaddr.h"
 #include "userprog/syscall.h"
 #include "threads/synch.h"
+#include "vm/frame.h"
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
@@ -38,7 +39,7 @@ process_execute (const char *file_name)
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
-  tmp = palloc_get_page (0);
+  tmp = palloc_get_page (1);
   if (fn_copy == NULL)
     return TID_ERROR;
   if (tmp == NULL)
@@ -127,7 +128,6 @@ process_exit (void)
   uint32_t *pd;
 
   file_close(cur->file);
-  cur->file = NULL;
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;
@@ -284,8 +284,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
       goto done; 
     }
 
-
-
   /* Read program headers. */
   file_ofs = ehdr.e_phoff;
   for (i = 0; i < ehdr.e_phnum; i++) 
@@ -396,12 +394,16 @@ load (const char *file_name, void (**eip) (void), void **esp)
   *esp -= sizeof(void *);
   memcpy(*esp, &tmp, sizeof(void *));
 
+  //hex_dump((uint8_t) *esp, *esp, 200, 1);
+
   success = true;
 
  done:
   /* We arrive here whether the load is successful or not. */
   // file_close (file);
+ if(t->file == NULL){
   t->file = file;
+ }
   exec_sema_up();
 
   return success;

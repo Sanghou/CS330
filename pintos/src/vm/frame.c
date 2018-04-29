@@ -1,7 +1,10 @@
-#include "frame.h"
 #include <debug.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <debug.h>
+#include <inttypes.h>
+
+#include "frame.h"
 #include "lib/kernel/hash.h"
 #include "threads/palloc.h"
 
@@ -39,7 +42,7 @@ bool deallocate_frame_elem(unsigned pa){
 	f.pa = pa;
 	e = hash_find(frame_table, &f.hash_elem);
 	if(e != NULL){
-		hash_delete(frame_table, &e); ////
+		hash_delete(frame_table, &e);
 		return true;
 	}
 	return false;

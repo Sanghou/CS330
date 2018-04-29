@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "vm/frame.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -296,11 +297,10 @@ thread_exit (void)
 {
   ASSERT (!intr_context ());
 
-  struct thread *cur = thread_current();
-
 #ifdef USERPROG
   process_exit ();
 
+  struct thread* cur = thread_current();
   struct list_elem *e;
   bool empty = list_empty(&cur->fd_list);
   for (e= list_begin(&cur->fd_list); e != list_end(&cur->fd_list);
@@ -312,15 +312,7 @@ thread_exit (void)
       free(file);
     }
   }
-  // if (empty){
-  //   struct file_descript *file = list_entry (list_prev(e), struct file_descript, fd_elem);
-  //   file_close(file->file);
-  //   free(file);
-  // }
-
 #endif
-
-  // printf("processocess_exit : %d\n",list_size(&thread_current()->fd_list));
 
   /* Remove thread from all threads list, set our status to dying,
      and schedule another process.  That process will destroy us
@@ -688,7 +680,6 @@ remove_file (struct list_elem *elem){
   struct file_descript *file_descript = list_entry(elem, struct file_descript, fd_elem);
   list_remove(elem);
   free(file_descript);
-  // palloc_free_page(file_descript);
 }
 
 
@@ -698,7 +689,6 @@ int
 set_file_descript(struct file *file){
   struct thread *t = thread_current();
   struct file_descript *file_descript = malloc(sizeof(struct file_descript));
-  // struct file_descript *file_descript = palloc_get_page (PAL_ZERO);
   int fd = 2;
   memset (file_descript, 0, sizeof *file_descript);
 
