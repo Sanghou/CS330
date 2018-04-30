@@ -38,19 +38,10 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f) 
 {
-
-   //printf ("system call!\n");
-  //read system call number 
 /*
   if(!is_valid_addr(f->esp) || !is_valid_addr(*f->eip)){
     terminate_error();
   }
-
-
-  void **esp = f->esp;
-
-  int sys_num = read(esp);
-  
 */
   //read system call number 
   int sys_num = read(f);
@@ -493,7 +484,6 @@ read (struct intr_frame *f)
 
   int result;
 /*
-<<<<<<< HEAD
   if (pointer)
   {
     result = *(char **)f->esp;
@@ -503,13 +493,7 @@ read (struct intr_frame *f)
   {
     result = *(char *)f->esp;
   }
-
-  //printf("f->esp : %p \n", f->esp);
-  //printf("esp value : %s \n", *(char *)f->esp);
-  //printf("f->esp : %X \n", (unsigned)f->epi);
-  //printf("f->eip : %p \n", f->eip);
-
-=======*/
+*/
   result = *(char **)f->esp;
   
   f->esp += 4;
