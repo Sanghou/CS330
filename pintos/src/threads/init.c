@@ -22,7 +22,6 @@
 #include "threads/palloc.h"
 #include "threads/pte.h"
 #include "threads/thread.h"
-#include "vm/frame.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #include "userprog/exception.h"
@@ -32,6 +31,11 @@
 #else
 #include "tests/threads/tests.h"
 #endif
+
+#ifdef VM
+#include "vm/frame.h"
+#endif
+
 #ifdef FILESYS
 #include "devices/block.h"
 #include "devices/ide.h"
@@ -99,8 +103,12 @@ main (void)
   palloc_init (user_page_limit);
   malloc_init ();
   paging_init ();
+
+#ifdef VM
+
   frame_init();
 
+#endif
   /* Segmentation. */
 #ifdef USERPROG
   tss_init ();

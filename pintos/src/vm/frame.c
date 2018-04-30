@@ -1,53 +1,45 @@
 #include <debug.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
-#include <inttypes.h>
-
-#include "frame.h"
-#include "lib/kernel/hash.h"
+#include <lib/kernel/list.h>
+#include "vm/frame.h"
+#include "threads/thread.h"
+#include "threads/interrupt.h"
+#include "threads/intr-stubs.h"
 #include "threads/palloc.h"
+#include "threads/switch.h"
+#include "threads/synch.h"
+#include "threads/vaddr.h"
 
-static struct hash *frame_table;
 
-
-bool frame_less_func (const struct hash_elem *a,
-                             const struct hash_elem *b,
-                             void *aux){
-	return true;
-}
-
-unsigned hash_map(const struct hash_elem *e, void *aux){
-	const struct frame_entry *p = hash_entry(e, struct frame_entry, hash_elem); ////
-	return hash_int(p->pa>>12);
-}
+static struct list frame_table;
 
 void frame_init(){
-	frame_table = palloc_get_page(PAL_ASSERT);
-	hash_init(frame_table,hash_map,frame_less_func, NULL);
+	list_init(&frame_table);
 }
 
-bool allocate_frame_elem(unsigned pa, unsigned va){
-	struct frame_entry *fe = malloc(sizeof(struct frame_entry));
-	fe->pa = pa;
-	fe->va = va;
+bool allocate_frame_elem(unsigned pn, unsigned fn){
+	struct frame_entry *fe;
+	fe = malloc(sizeof(struct frame_entry));
+	fe->thread = thread_current();
+	fe->page_number = pn;
+	fe->frame_number = fn;
 	fe->evict = 0;
-	ASSERT(hash_insert(frame_table, &fe->hash_elem) == NULL);
+	list_push_back(&frame_table, &fe->elem);
+
 }
 
-bool deallocate_frame_elem(unsigned pa){
-	struct frame_entry f;
-	struct hash_elem *e;
+bool deallocate_frame_elem(unsigned pn){
+	struct frame_entry *f;
+	struct list_elem *e;
 
-	f.pa = pa;
-	e = hash_find(frame_table, &f.hash_elem);
-	if(e != NULL){
-		hash_delete(frame_table, &e);
-		return true;
+	 for (e = list_begin(&frame_table); e != list_end(&frame_table); e = list_next(e)){
+    	f= list_entry(e, struct frame_entry, elem);
+    	if(f->page_number == pn){
+    		list_remove(e);
+    		free(f);
+    		return true;
+    	}
 	}
 	return false;
-
-}
-struct frame_entry* evict(){
-	return NULL;
 }
