@@ -10,9 +10,6 @@
 #include "threads/loader.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
-#ifdef VM
-#include "vm/frame.h"
-#endif
 /* Page allocator.  Hands out memory in page-size (or
    page-multiple) chunks.  See malloc.h for an allocator that
    hands out smaller chunks.
@@ -92,12 +89,6 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
     {
       if (flags & PAL_ZERO)
         memset (pages, 0, PGSIZE * page_cnt);
-    #ifdef VM 
-      if (flags & PAL_USER) {
-        unsigned page = (int) pages >> 12;
-        allocate_frame_elem(page, page);
-      }
-    #endif
     }
   else 
     {
@@ -143,13 +134,6 @@ palloc_free_multiple (void *pages, size_t page_cnt)
 
 #ifndef NDEBUG
   memset (pages, 0xcc, PGSIZE * page_cnt);
-#endif
-
-#ifdef VM
-  if (pool == &user_pool){
-    unsigned page = (int) pages >> 12;
-    deallocate_frame_elem(page);
-  }
 #endif
 
   ASSERT (bitmap_all (pool->used_map, page_idx, page_cnt));
