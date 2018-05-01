@@ -12,20 +12,29 @@
 #include "threads/vaddr.h"
 
 
-static struct list frame_table;
+static struct list page_table;
+
+static unsigned elem_number;
 
 void frame_init(){
-	list_init(&frame_table);
+	list_init(&page_table);
+	elem_number = 0;
 }
 
 bool allocate_frame_elem(unsigned pn, unsigned fn){
+
+	if(elem_number == 2^20){
+		PANIC();
+	}
+
 	struct frame_entry *fe;
 	fe = malloc(sizeof(struct frame_entry));
 	fe->thread = thread_current();
 	fe->page_number = pn;
 	fe->frame_number = fn;
 	fe->evict = 0;
-	list_push_back(&frame_table, &fe->elem);
+	elem_number++;
+	list_push_back(&page_table, &fe->elem);
 
 }
 
@@ -37,9 +46,14 @@ bool deallocate_frame_elem(unsigned pn){
     	f= list_entry(e, struct frame_entry, elem);
     	if(f->page_number == pn){
     		list_remove(e);
+    		elem_number--;
     		free(f);
     		return true;
     	}
 	}
 	return false;
+}
+
+struct frame_entry * evict(){
+	return NULL;
 }

@@ -37,8 +37,7 @@ bool allocate_frame_elem(unsigned pa, unsigned va){
 bool deallocate_frame_elem(unsigned pa){
 	struct frame_entry f;
 	struct hash_elem *e;
-
-	f.pa = pa;
+	f.pa = pa; 
 	e = hash_find(frame_table, &f.hash_elem);
 	if(e != NULL){
 		hash_delete(frame_table, &e);
