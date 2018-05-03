@@ -23,7 +23,7 @@ void frame_init(){
 
 bool allocate_frame_elem(unsigned pn, unsigned fn){
 
-	if(elem_number == 2^20){
+	if(elem_number == 1024){
 		PANIC();
 	}
 
