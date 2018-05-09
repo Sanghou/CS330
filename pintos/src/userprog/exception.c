@@ -170,31 +170,31 @@ page_fault (struct intr_frame *f)
   2. 
   */
 
-  if(fault_addr != NULL && is_user_vaddr(fault_addr) && not_present){
-    //swap something
-    unsigned * physical_address = palloc_get_page(0);
-    if( *physical_address != NULL || ((unsigned)physical_address & PTE_W) !=0 ){
+  if (fault_addr != NULL && is_user_vaddr(fault_addr) && not_present)
+    {
+      //swap something
+      unsigned * physical_address = palloc_get_page(0);
 
-      unsigned virtual_page = pg_no(fault_addr);
-      unsigned physical_page = pg_no(physical_address);
-      allocate_spage_elem(physical_address ,fault_addr);
-      allocate_frame_elem(physical_page, virtual_page);
-      pagedir_set_page (thread_current()->pagedir, fault_addr, physical_address, true);
+      if ( *physical_address != NULL || ((unsigned)physical_address & PTE_W) !=0 )
+        {
+          unsigned virtual_page = pg_no(fault_addr);
+          unsigned physical_page = pg_no(physical_address);
+          allocate_spage_elem(physical_address ,fault_addr);
+          allocate_frame_elem(physical_page, virtual_page);
+          pagedir_set_page (thread_current()->pagedir, fault_addr, physical_address, true);
+        }
+      else
+        {
+          //evict()
+        }
     }
-    else{
-      //evict()
-      // thread_current()->exit_status = -1;
-      // printf("%s: exit(%d)\n", thread_current()->name, -1);
-      // sema_up(&thread_current()->start);
-      // thread_exit();
+  else
+    {
+      thread_current()->exit_status = -1;
+      printf("%s: exit(%d)\n", thread_current()->name, -1);
+      sema_up(&thread_current()->start);
+      thread_exit();
     }
-  }
-  else{
-    thread_current()->exit_status = -1;
-    printf("%s: exit(%d)\n", thread_current()->name, -1);
-    sema_up(&thread_current()->start);
-    thread_exit();
-  }
   // kill (f);
 }
 

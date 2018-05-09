@@ -17,9 +17,12 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "threads/pte.h"
 #include "userprog/syscall.h"
 #include "threads/synch.h"
+#ifdef VM
 #include "vm/frame.h"
+#endif
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
@@ -39,7 +42,7 @@ process_execute (const char *file_name)
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
-  tmp = palloc_get_page (1);
+  tmp = palloc_get_page (0);
   if (fn_copy == NULL)
     return TID_ERROR;
   if (tmp == NULL)
@@ -377,10 +380,11 @@ load (const char *file_name, void (**eip) (void), void **esp)
   memcpy(*esp, &tmp, sizeof(char *));
 
   //writes each argv[i] location into the stack
-  for (i = count -1; i>=0; i--){
-    *esp -= sizeof(char *);
-    memcpy(*esp, &argv[i], sizeof(char *));
-  }
+  for (i = count -1; i>=0; i--)
+    {
+      *esp -= sizeof(char *);
+      memcpy(*esp, &argv[i], sizeof(char *));
+    }
   
   saved_ptr = *esp; 
   // writes argv pointer into the stack
@@ -401,9 +405,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
  done:
   /* We arrive here whether the load is successful or not. */
   // file_close (file);
- if(t->file == NULL){
-  t->file = file;
- }
+ if(t->file == NULL)
+  {
+    t->file = file;
+  }
   exec_sema_up();
 
   return success;
@@ -508,6 +513,14 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
           palloc_free_page (kpage);
           return false; 
         }
+      else 
+        {
+        #ifdef VM
+          unsigned virtual_page = pg_no(upage);
+          unsigned physical_page = pg_no(kpage);
+          allocate_frame_elem(physical_page, virtual_page);
+        #endif
+        }
 
       /* Advance. */
       read_bytes -= page_read_bytes;
@@ -530,6 +543,11 @@ setup_stack (void **esp)
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success){
         *esp = PHYS_BASE;
+      #ifdef VM
+        unsigned virtual_page = pg_no(((uint8_t *)PHYS_BASE) - PGSIZE);
+        unsigned physical_page = pg_no(kpage);
+        allocate_frame_elem(physical_page, virtual_page);
+      #endif
       }
       else
         palloc_free_page (kpage);

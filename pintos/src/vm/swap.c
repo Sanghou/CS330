@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <lib/kernel/list.h>
-#include "vm/frame.h"
+#include "vm/swap.h"
 #include "threads/malloc.h"
 #include "threads/thread.h"
 #include "threads/synch.h"
@@ -43,31 +43,34 @@ swap_in (struct thread *t, unsigned page_num){
    Manage the swap_table list
    returns false when swap table is full.
 */
-void
-swap_out (struct frame_entry *frame){
+void 
+swap_out (struct frame_entry *frame)
+{
 
 	enum block_type swap = BLOCK_SWAP;
 	struct swap_entry *se;
 
 	struct block *swap_slot = block_get_role(swap);
 
-	// se = malloc(sizeof(struct swap_entry));
+	se = malloc(sizeof(struct swap_entry));
 
-	if (swap_slot == NULL){    		//swap_slot is full
-		// PANIC();
-	}
+	if (swap_slot == NULL)
+		{ 
+			//swap_slot is full
+			//PANIC();
+		}
 
-	// se->page_number = frame->page_number; 		
-	// se->thread = frame->thread;
-	// // se->swap_block = swap_slot;
+	se->page_number = frame->page_number; 		
+	se->thread = frame->thread;
+	se->swap_block = swap_slot;
 
-	// void * paddr = (frame->frame_number) << 12;
+	void * paddr = frame->frame_number;
 
-	// //write to a swap block.
-	// block_write(swap_slot, sizeof(*paddr), paddr);
-	// deallocate_frame_elem(frame->frame_number);
+	//write to a swap block.
+	block_write(swap_slot, sizeof(*paddr), paddr);
+	deallocate_frame_elem(frame->frame_number);
 
-	// list_push_back(swap_table, &se->list_elem);
+	list_push_back(swap_table, &se->list_elem);
 	
 	// how to manage the supplementary page table?
 }

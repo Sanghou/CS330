@@ -16,16 +16,20 @@ static struct list page_table;
 
 static unsigned elem_number;
 
-void frame_init(){
+void 
+frame_init (void)
+{
 	list_init(&page_table);
 	elem_number = 0;
 }
 
-bool allocate_frame_elem(unsigned pn, unsigned fn){
-
-	if(elem_number == 1024){
+bool 
+allocate_frame_elem(unsigned pn, unsigned fn)
+{
+	if(elem_number == 1024)
+	  {
 		return NULL;
-	}
+	  }
 
 	struct frame_entry *fe;
 	fe = malloc(sizeof(struct frame_entry));
@@ -41,19 +45,23 @@ bool deallocate_frame_elem(unsigned pn){
 	struct frame_entry *f;
 	struct list_elem *e;
 
-	 for (e = list_begin(&page_table); e != list_end(&page_table); e = list_next(e)){
-    	f= list_entry(e, struct frame_entry, elem);
-    	if(f->page_number == pn){
+	for (e = list_begin(&page_table); e != list_end(&page_table); e = list_next(e))
+	  {
+    	f = list_entry(e, struct frame_entry, elem);
+    	if (f->page_number == pn)
+    	  {
     		list_remove(e);
     		elem_number--;
     		free(f);
     		return true;
-    	}
-	}
+    	  }
+	  }
 	return false;
 }
 
-struct frame_entry * evict(){
+struct frame_entry * 
+evict (void)
+{
 	return NULL;
 }
 
