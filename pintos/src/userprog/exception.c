@@ -170,7 +170,7 @@ page_fault (struct intr_frame *f)
   2. 
   */
 
-  if(is_user_vaddr(fault_addr)){
+  if(fault_addr != NULL && is_user_vaddr(fault_addr) && not_present){
     //swap something
     unsigned * physical_address = palloc_get_page(0);
     if( *physical_address != NULL || ((unsigned)physical_address & PTE_W) !=0 ){
@@ -183,10 +183,10 @@ page_fault (struct intr_frame *f)
     }
     else{
       //evict()
-      thread_current()->exit_status = -1;
-      printf("%s: exit(%d)\n", thread_current()->name, -1);
-      sema_up(&thread_current()->start);
-      thread_exit();
+      // thread_current()->exit_status = -1;
+      // printf("%s: exit(%d)\n", thread_current()->name, -1);
+      // sema_up(&thread_current()->start);
+      // thread_exit();
     }
   }
   else{

@@ -11,12 +11,12 @@
 # hlsearch on (H) or off (h):
 ~h
 # Command Line History (newest to oldest):
+:q
+|2,0,1525866606,,"q"
 :wq
 |2,0,1523620845,,"wq"
 :w
 |2,0,1523620711,,"w"
-:q
-|2,0,1523387022,,"q"
 :q!
 |2,0,1523383439,,"q!"
 :W
@@ -60,36 +60,78 @@
 |3,0,9,1,1,0,1523620782,">>>>>>> de4f6bf1f3f9ccf6090dfc555103aad90ffcff00"
 
 # File marks:
-'0  605  0  ~/pintos/src/userprog/syscall.c
-|4,48,605,0,1523620845,"~/pintos/src/userprog/syscall.c"
-'1  646  4  ~/pintos/src/threads/thread.c
-|4,49,646,4,1523620548,"~/pintos/src/threads/thread.c"
-'2  129  0  ~/pintos/src/userprog/build/grade
-|4,50,129,0,1523387022,"~/pintos/src/userprog/build/grade"
-'3  7  0  ~/.git/MERGE_MSG
-|4,51,7,0,1523383551,"~/.git/MERGE_MSG"
-'4  262  2  ~/pintos/src/userprog/syscall.c
-|4,52,262,2,1523383476,"~/pintos/src/userprog/syscall.c"
-'5  286  2  ~/pintos/src/userprog/syscall.c
-|4,53,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
-'6  156  4  ~/pintos/src/userprog/syscall.c
-|4,54,156,4,1523383439,"~/pintos/src/userprog/syscall.c"
-'7  160  4  ~/pintos/src/userprog/syscall.c
-|4,55,160,4,1523383439,"~/pintos/src/userprog/syscall.c"
-'8  171  4  ~/pintos/src/userprog/syscall.c
-|4,56,171,4,1523383439,"~/pintos/src/userprog/syscall.c"
-'9  175  4  ~/pintos/src/userprog/syscall.c
-|4,57,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
+'0  1  0  ~/pintos/src/vm/build/grade
+|4,48,1,0,1525866606,"~/pintos/src/vm/build/grade"
+'1  1  0  ~/pintos/src/vm/grade
+|4,49,1,0,1525866597,"~/pintos/src/vm/grade"
+'2  605  0  ~/pintos/src/userprog/syscall.c
+|4,50,605,0,1523620845,"~/pintos/src/userprog/syscall.c"
+'3  646  4  ~/pintos/src/threads/thread.c
+|4,51,646,4,1523620548,"~/pintos/src/threads/thread.c"
+'4  129  0  ~/pintos/src/userprog/build/grade
+|4,52,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+'5  7  0  ~/.git/MERGE_MSG
+|4,53,7,0,1523383551,"~/.git/MERGE_MSG"
+'6  262  2  ~/pintos/src/userprog/syscall.c
+|4,54,262,2,1523383476,"~/pintos/src/userprog/syscall.c"
+'7  286  2  ~/pintos/src/userprog/syscall.c
+|4,55,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
+'8  156  4  ~/pintos/src/userprog/syscall.c
+|4,56,156,4,1523383439,"~/pintos/src/userprog/syscall.c"
+'9  160  4  ~/pintos/src/userprog/syscall.c
+|4,57,160,4,1523383439,"~/pintos/src/userprog/syscall.c"
 
 # Jumplist (newest first):
+-'  1  0  ~/pintos/src/vm/build/grade
+|4,39,1,0,1525866606,"~/pintos/src/vm/build/grade"
+-'  1  0  ~/pintos/src/vm/grade
+|4,39,1,0,1525866597,"~/pintos/src/vm/grade"
+-'  1  0  ~/pintos/src/vm/grade
+|4,39,1,0,1525866597,"~/pintos/src/vm/grade"
 -'  605  0  ~/pintos/src/userprog/syscall.c
 |4,39,605,0,1523620845,"~/pintos/src/userprog/syscall.c"
+-'  605  0  ~/pintos/src/userprog/syscall.c
+|4,39,605,0,1523620845,"~/pintos/src/userprog/syscall.c"
+-'  605  0  ~/pintos/src/userprog/syscall.c
+|4,39,605,0,1523620845,"~/pintos/src/userprog/syscall.c"
+-'  605  0  ~/pintos/src/userprog/syscall.c
+|4,39,605,0,1523620845,"~/pintos/src/userprog/syscall.c"
+-'  262  2  ~/pintos/src/userprog/syscall.c
+|4,39,262,2,1523620559,"~/pintos/src/userprog/syscall.c"
+-'  262  2  ~/pintos/src/userprog/syscall.c
+|4,39,262,2,1523620559,"~/pintos/src/userprog/syscall.c"
+-'  262  2  ~/pintos/src/userprog/syscall.c
+|4,39,262,2,1523620559,"~/pintos/src/userprog/syscall.c"
 -'  262  2  ~/pintos/src/userprog/syscall.c
 |4,39,262,2,1523620559,"~/pintos/src/userprog/syscall.c"
 -'  646  4  ~/pintos/src/threads/thread.c
 |4,39,646,4,1523620548,"~/pintos/src/threads/thread.c"
 -'  646  4  ~/pintos/src/threads/thread.c
 |4,39,646,4,1523620548,"~/pintos/src/threads/thread.c"
+-'  646  4  ~/pintos/src/threads/thread.c
+|4,39,646,4,1523620548,"~/pintos/src/threads/thread.c"
+-'  646  4  ~/pintos/src/threads/thread.c
+|4,39,646,4,1523620548,"~/pintos/src/threads/thread.c"
+-'  646  4  ~/pintos/src/threads/thread.c
+|4,39,646,4,1523620548,"~/pintos/src/threads/thread.c"
+-'  646  4  ~/pintos/src/threads/thread.c
+|4,39,646,4,1523620548,"~/pintos/src/threads/thread.c"
+-'  646  4  ~/pintos/src/threads/thread.c
+|4,39,646,4,1523620548,"~/pintos/src/threads/thread.c"
+-'  646  4  ~/pintos/src/threads/thread.c
+|4,39,646,4,1523620548,"~/pintos/src/threads/thread.c"
+-'  1  0  ~/pintos/src/threads/thread.c
+|4,39,1,0,1523620500,"~/pintos/src/threads/thread.c"
+-'  1  0  ~/pintos/src/threads/thread.c
+|4,39,1,0,1523620500,"~/pintos/src/threads/thread.c"
+-'  1  0  ~/pintos/src/threads/thread.c
+|4,39,1,0,1523620500,"~/pintos/src/threads/thread.c"
+-'  1  0  ~/pintos/src/threads/thread.c
+|4,39,1,0,1523620500,"~/pintos/src/threads/thread.c"
+-'  1  0  ~/pintos/src/threads/thread.c
+|4,39,1,0,1523620500,"~/pintos/src/threads/thread.c"
+-'  1  0  ~/pintos/src/threads/thread.c
+|4,39,1,0,1523620500,"~/pintos/src/threads/thread.c"
 -'  1  0  ~/pintos/src/threads/thread.c
 |4,39,1,0,1523620500,"~/pintos/src/threads/thread.c"
 -'  1  0  ~/pintos/src/threads/thread.c
@@ -102,6 +144,54 @@
 |4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
 -'  129  0  ~/pintos/src/userprog/build/grade
 |4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  129  0  ~/pintos/src/userprog/build/grade
+|4,39,129,0,1523387022,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
+-'  1  0  ~/pintos/src/userprog/build/grade
+|4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
 -'  1  0  ~/pintos/src/userprog/build/grade
 |4,39,1,0,1523386930,"~/pintos/src/userprog/build/grade"
 -'  1  0  ~/pintos/src/userprog/build/grade
@@ -126,6 +216,54 @@
 |4,39,7,0,1523383551,"~/.git/MERGE_MSG"
 -'  7  0  ~/.git/MERGE_MSG
 |4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1523383551,"~/.git/MERGE_MSG"
 -'  1  0  ~/.git/MERGE_MSG
 |4,39,1,0,1523383542,"~/.git/MERGE_MSG"
 -'  1  0  ~/.git/MERGE_MSG
@@ -142,148 +280,18 @@
 |4,39,1,0,1523383542,"~/.git/MERGE_MSG"
 -'  1  0  ~/.git/MERGE_MSG
 |4,39,1,0,1523383542,"~/.git/MERGE_MSG"
--'  286  2  ~/pintos/src/userprog/syscall.c
-|4,39,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
--'  286  2  ~/pintos/src/userprog/syscall.c
-|4,39,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
--'  286  2  ~/pintos/src/userprog/syscall.c
-|4,39,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
--'  286  2  ~/pintos/src/userprog/syscall.c
-|4,39,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
--'  286  2  ~/pintos/src/userprog/syscall.c
-|4,39,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
--'  286  2  ~/pintos/src/userprog/syscall.c
-|4,39,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
--'  286  2  ~/pintos/src/userprog/syscall.c
-|4,39,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
--'  286  2  ~/pintos/src/userprog/syscall.c
-|4,39,286,2,1523383476,"~/pintos/src/userprog/syscall.c"
--'  156  4  ~/pintos/src/userprog/syscall.c
-|4,39,156,4,1523383440,"~/pintos/src/userprog/syscall.c"
--'  171  4  ~/pintos/src/userprog/syscall.c
-|4,39,171,4,1523383440,"~/pintos/src/userprog/syscall.c"
--'  171  4  ~/pintos/src/userprog/syscall.c
-|4,39,171,4,1523383440,"~/pintos/src/userprog/syscall.c"
--'  171  4  ~/pintos/src/userprog/syscall.c
-|4,39,171,4,1523383440,"~/pintos/src/userprog/syscall.c"
--'  171  4  ~/pintos/src/userprog/syscall.c
-|4,39,171,4,1523383440,"~/pintos/src/userprog/syscall.c"
--'  171  4  ~/pintos/src/userprog/syscall.c
-|4,39,171,4,1523383440,"~/pintos/src/userprog/syscall.c"
--'  171  4  ~/pintos/src/userprog/syscall.c
-|4,39,171,4,1523383440,"~/pintos/src/userprog/syscall.c"
--'  171  4  ~/pintos/src/userprog/syscall.c
-|4,39,171,4,1523383440,"~/pintos/src/userprog/syscall.c"
--'  171  4  ~/pintos/src/userprog/syscall.c
-|4,39,171,4,1523383440,"~/pintos/src/userprog/syscall.c"
--'  160  4  ~/pintos/src/userprog/syscall.c
-|4,39,160,4,1523383439,"~/pintos/src/userprog/syscall.c"
--'  175  4  ~/pintos/src/userprog/syscall.c
-|4,39,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
--'  175  4  ~/pintos/src/userprog/syscall.c
-|4,39,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
--'  175  4  ~/pintos/src/userprog/syscall.c
-|4,39,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
--'  175  4  ~/pintos/src/userprog/syscall.c
-|4,39,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
--'  175  4  ~/pintos/src/userprog/syscall.c
-|4,39,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
--'  175  4  ~/pintos/src/userprog/syscall.c
-|4,39,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
--'  175  4  ~/pintos/src/userprog/syscall.c
-|4,39,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
--'  175  4  ~/pintos/src/userprog/syscall.c
-|4,39,175,4,1523383439,"~/pintos/src/userprog/syscall.c"
--'  106  3  ~/pintos/src/userprog/syscall.c
-|4,39,106,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523383415,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
--'  115  3  ~/pintos/src/userprog/syscall.c
-|4,39,115,3,1523363852,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
--'  1  0  ~/pintos/src/userprog/syscall.c
-|4,39,1,0,1523361462,"~/pintos/src/userprog/syscall.c"
+-'  1  0  ~/.git/MERGE_MSG
+|4,39,1,0,1523383542,"~/.git/MERGE_MSG"
 
 # History of marks within files (newest to oldest):
+
+> ~/pintos/src/vm/build/grade
+	*	1525866601	0
+	"	1	0
+
+> ~/pintos/src/vm/grade
+	*	1525866596	0
+	"	1	0
 
 > ~/pintos/src/userprog/syscall.c
 	*	1523620844	0

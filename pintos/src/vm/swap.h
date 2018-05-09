@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <lib/kernel/list.h>
+#include "threads/thread.h"
 
 struct swap_entry{
 	struct list_elem list_elem; //swap_list elem;
@@ -12,5 +13,5 @@ struct swap_entry{
 };
 
 void swap_list_init();
-void swap_in();
+void swap_in (struct thread *t, unsigned page_num);
 void swap_out (struct frame_entry frame);
