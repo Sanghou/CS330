@@ -110,6 +110,11 @@ struct thread
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
+
+#ifdef VM
+    struct hash *supplement_page_table;
+#endif
+
   };
 
   struct child_info

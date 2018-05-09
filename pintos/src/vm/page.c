@@ -6,8 +6,8 @@
 #include "vm/page.h"
 #include "lib/kernel/hash.h"
 #include "threads/palloc.h"
+#include "threads/thread.h"
 
-static struct hash *page_table;
 
 
 bool spage_less_func (const struct hash_elem *a,
@@ -22,11 +22,13 @@ unsigned hash_map(const struct hash_elem *e, void *aux){
 }
 
 void spage_init(){
+	struct hash *page_table = thread_current()->supplement_page_table;
 	page_table = palloc_get_page(PAL_ASSERT);
 	hash_init(page_table,hash_map,spage_less_func, NULL);
 }
 
 bool allocate_spage_elem(unsigned pa, unsigned va){
+	struct hash *page_table = thread_current()->supplement_page_table;
 	struct spage_entry *fe = malloc(sizeof(struct spage_entry));
 	struct thread* t = thread_current();
 	fe->va = va;
@@ -39,6 +41,7 @@ bool allocate_spage_elem(unsigned pa, unsigned va){
 bool deallocate_spage_elem(unsigned pa){
 	struct spage_entry f;
 	struct hash_elem *e;
+	struct hash *page_table = thread_current()->supplement_page_table;
 	f.pa = pa; 
 	e = hash_find(page_table, &f.elem);
 	if(e != NULL){

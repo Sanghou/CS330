@@ -12,6 +12,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "vm/frame.h"
+#include "vm/page.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -496,6 +497,10 @@ init_thread (struct thread *t, const char *name, int priority)
     sema_init(&t->start,0);
     t->exit_status = 0;
     t->file = NULL;
+  #endif
+
+  #ifdef vm
+    spage_init();
   #endif
 
 }
