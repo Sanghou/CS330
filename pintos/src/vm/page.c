@@ -30,6 +30,8 @@ bool allocate_spage_elem(unsigned pa, unsigned va){
 	struct spage_entry *fe = malloc(sizeof(struct spage_entry));
 	fe->page_number = pa;
 	fe->va = va;
+	fe->thread = thread_current();
+	fe->evict = 0;
 	ASSERT(hash_insert(page_table, &fe->hash_elem) == NULL);
 }
 
@@ -43,4 +45,8 @@ bool deallocate_frame_elem(unsigned pa){
 		return true;
 	}
 	return false;
+}
+
+struct spage_entry *mapped_entry(unsigned va){
+
 }

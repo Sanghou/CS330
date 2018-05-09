@@ -8,8 +8,9 @@ struct spage_entry
 {
 	struct hash_elem elem;
 	struct thread * thread;
-	unsigned va;
-	unsigned pa;
+	unsigned va; //virtual address
+	unsigned pa; //physical address
+	unsigned evict;
 };
 
 void spage_init();

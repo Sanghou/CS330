@@ -8,8 +8,8 @@ struct frame_entry
 {
 	struct list_elem elem;
 	struct thread * thread;
-	unsigned page_number;
-	unsigned frame_number;
+	unsigned page_number; //virtual page number
+	unsigned frame_number; //frame table number
 	unsigned evict;
 };
 

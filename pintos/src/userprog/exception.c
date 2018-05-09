@@ -5,6 +5,10 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "userprog/syscall.h"
+#include "threads/vaddr.h"
+#include "threads/palloc.h"
+#include "vm/page.h"
+#include "vm/frame.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -149,9 +153,6 @@ page_fault (struct intr_frame *f)
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
 
-  thread_current()->exit_status = -1;
-  terminate();
-
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
      which fault_addr refers. */
@@ -161,11 +162,32 @@ page_fault (struct intr_frame *f)
   //         write ? "writing" : "reading",
   //         user ? "user" : "kernel");
 
+  /*
 
-  thread_current()->exit_status = -1;
-  printf("%s: exit(%d)\n", thread_current()->name, -1);
-  sema_up(&thread_current()->start);
-  thread_exit();
+  page fault handling.
+  1. va is kernel?
+  2. 
+  */
+
+  if(is_user_vaddr(fault_addr)){
+    //swap something
+    void * physical_address = palloc_get_page(0);
+    if( *physical_address != NULL || physical_address&PTE_W !=0 ){
+      unsigned virtual_page = pg_no(fault_addr);
+      unsigned physical_page = pg_no(physical_address);
+      allocate_spage_elem(physical_address ,fault_addr);
+      allocate_frame_elem(physical_page, virtual_page_number);
+    }
+    else{
+      //evict()
+    }
+  }
+  else{
+    thread_current()->exit_status = -1;
+    printf("%s: exit(%d)\n", thread_current()->name, -1);
+    sema_up(&thread_current()->start);
+    thread_exit();
+  }
   // kill (f);
 }
 
