@@ -46,6 +46,7 @@ swap_in (struct thread *t, unsigned page_num){
 void 
 swap_out (struct frame_entry *frame)
 {
+	//swap block initialize in where?
 
 	enum block_type swap = BLOCK_SWAP;
 	struct swap_entry *se;
@@ -73,6 +74,7 @@ swap_out (struct frame_entry *frame)
 	list_push_back(swap_table, &se->list_elem);
 	
 	// how to manage the supplementary page table?
+	//pagedir clear? 
 }
 
 

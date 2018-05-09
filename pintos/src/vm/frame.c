@@ -13,6 +13,7 @@
 
 
 static struct list page_table;
+static struct lock frame_lock;
 
 static unsigned elem_number;
 

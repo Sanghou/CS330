@@ -14,7 +14,12 @@ bool
 spage_less_func	(const struct hash_elem *a,
                  const struct hash_elem *b, void *aux)
 {
-	return true;
+	struct spage_entry *pa = hash_entry(a, struct spage_entry, elem); 	
+	struct spage_entry *pb = hash_entry(b, struct spage_entry, elem); 	
+
+	if (pa->va < pb->va) 
+		return true;
+	return false;
 }
 
 unsigned 
@@ -56,6 +61,7 @@ deallocate_spage_elem (unsigned pa)
 	if (e != NULL)
 		{
 			hash_delete(page_table, &e);
+			free(&f);
 			return true;
 		}
 	return false;
