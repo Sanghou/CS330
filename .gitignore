@@ -4,6 +4,7 @@ pintos/src/examples/*
 .ssh
 .viminfo
 pintos/filesys.disk
+pintos/swap.dsk
 .bash_history
 pintos/src/document2.docx
 pintos/src/13_project2.tar.gz
