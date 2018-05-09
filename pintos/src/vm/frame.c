@@ -24,8 +24,9 @@ void frame_init(){
 bool allocate_frame_elem(unsigned pn, unsigned fn){
 
 	if(elem_number == 1024){
-		PANIC();
+		return NULL;
 	}
+
 	struct frame_entry *fe;
 	fe = malloc(sizeof(struct frame_entry));
 	fe->thread = thread_current();
@@ -40,7 +41,7 @@ bool deallocate_frame_elem(unsigned pn){
 	struct frame_entry *f;
 	struct list_elem *e;
 
-	 for (e = list_begin(&frame_table); e != list_end(&frame_table); e = list_next(e)){
+	 for (e = list_begin(&page_table); e != list_end(&page_table); e = list_next(e)){
     	f= list_entry(e, struct frame_entry, elem);
     	if(f->page_number == pn){
     		list_remove(e);
@@ -56,13 +57,13 @@ struct frame_entry * evict(){
 	return NULL;
 }
 
-//find empty space function
+// //find empty space function
 
-unsigned find_empty_frame(){
-	if(elem_number == 1024){
-		//evict();
-	}
-	else{
-		
-	}
-}
+// unsigned find_empty_frame(){
+// 	if(elem_number == 1024){
+// 		//evict();
+// 	}
+// 	else{
+
+// 	}
+// }
