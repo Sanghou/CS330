@@ -497,6 +497,8 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
+
+      /*
       uint8_t *kpage = palloc_get_page (PAL_USER);
 
       if (kpage == NULL){
@@ -508,6 +510,9 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
           kpage = palloc_get_page(PAL_USER);
           ASSERT(kpage != NULL);
       }
+      */
+
+      uint8_t *kpage = allocate_frame_elem(upage)->frame_number;
 
       /* Load this page. */
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
@@ -525,17 +530,21 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
         }
       else 
         {
+
+          /*
         #ifdef VM
           
           unsigned virtual_page = pg_round_down(upage);
           unsigned physical_page = pg_round_down(kpage);
           allocate_frame_elem(physical_page, virtual_page);
           printf("virtual_page : %u , physical_page : %u \n", virtual_page, physical_page);
+          #endif
+
+          */
           /*
           allocate_frame_elem(kpage, upage);
           printf("virtual_page : %u , physical_page : %u \n", upage, kpage);
           */
-        #endif
         }
 
       /* Advance. */
@@ -554,8 +563,11 @@ setup_stack (void **esp)
   uint8_t *kpage;
   bool success = false;
 
+
+  
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
 
+  /*
   if(kpage == NULL){
     struct frame_entry* t = evict();
 
@@ -566,17 +578,22 @@ setup_stack (void **esp)
     free(t);
     kpage = palloc_get_page(PAL_USER);
   }
+  */
+
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success){
         *esp = PHYS_BASE;
+        /*
       #ifdef VM
         unsigned virtual_page = ((uint8_t *)PHYS_BASE) - PGSIZE;
         unsigned physical_page = kpage;
         allocate_frame_elem(physical_page, virtual_page);
         printf("virtual : %u , physical : %u \n", virtual_page, physical_page);
       #endif
+      }
+      */
       }
       else
         palloc_free_page (kpage);

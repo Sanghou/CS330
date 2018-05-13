@@ -14,6 +14,6 @@ struct frame_entry
  	};
 
 void frame_init (void);
-bool allocate_frame_elem (unsigned pn, unsigned fn);
+struct frame_entry * allocate_frame_elem (uint8_t *upage);
 bool deallocate_frame_elem (unsigned pn);
-struct frame_entry * evict (void);
+void evict (void);

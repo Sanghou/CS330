@@ -157,11 +157,11 @@ page_fault (struct intr_frame *f)
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
      which fault_addr refers. */
-  // printf ("Page fault at %p: %s error %s page in %s context.\n",
-  //         fault_addr,
-  //         not_present ? "not present" : "rights violation",
-  //         write ? "writing" : "reading",
-  //         user ? "user" : "kernel");
+   printf ("Page fault at %p: %s error %s page in %s context.\n",
+           fault_addr,
+           not_present ? "not present" : "rights violation",
+           write ? "writing" : "reading",
+           user ? "user" : "kernel");
 
   /*
 
@@ -174,7 +174,17 @@ page_fault (struct intr_frame *f)
 
   if (!not_present && is_user_vaddr(fault_addr) && user)
     {
+
+      printf ("Page fault at %p: %s error %s page in %s context.\n",
+           fault_addr,
+           not_present ? "not present" : "rights violation",
+           write ? "writing" : "reading",
+           user ? "user" : "kernel"); 
+
+      printf("%d \n", fault_addr);
+
       //swap something
+      /*
       unsigned * physical_address = palloc_get_page(PAL_USER);
       if(physical_address == NULL){
           printf("page fault null \n");
@@ -197,6 +207,7 @@ page_fault (struct intr_frame *f)
         {
         //evict()
         }
+        */
     }
   else
     {
@@ -208,3 +219,7 @@ page_fault (struct intr_frame *f)
   // kill (f);
 }
 
+void page_fault_handling(bool not_present, bool write, bool user, void *fault_addr, struct intr_frame *f){
+
+  
+}
