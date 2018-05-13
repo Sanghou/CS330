@@ -1,6 +1,8 @@
 #include <debug.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
+//#include <stdio.h>
 #include <lib/kernel/list.h>
 #include "vm/frame.h"
 #include "threads/thread.h"
@@ -25,14 +27,15 @@ frame_init (void)
 }
 
 bool 
-allocate_frame_elem(unsigned pn, unsigned fn)
+allocate_frame_elem(unsigned fn, unsigned pn)
 {
 	// if(elem_number == 1024)
 	//   {
 	// 	struct frame_entry * f  = evict();
 	// 	elem_number--;	  	
 	//   }
-
+	
+	
 	struct frame_entry *fe;
 	fe = malloc(sizeof(struct frame_entry));
 	fe->thread = thread_current();
@@ -68,7 +71,6 @@ evict (void) // FIFO;
 	e = list_pop_front(&page_table);
 	struct frame_entry *f = list_entry(e, struct frame_entry, elem);
 	return f;
-
 	//return NULL;
 }
 

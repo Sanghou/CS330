@@ -170,11 +170,20 @@ page_fault (struct intr_frame *f)
   2. 
   */
 
-  if (fault_addr != NULL && is_user_vaddr(fault_addr) && user)
+  //printf("fault address : %p \n", fault_addr);
+
+  if (!not_present && is_user_vaddr(fault_addr) && user)
     {
       //swap something
       unsigned * physical_address = palloc_get_page(PAL_USER);
-      
+      if(physical_address == NULL){
+          printf("page fault null \n");
+          struct frame_entry* t = evict();
+          palloc_free_page( (t->page_number) << 12);
+          free(t);
+          physical_address = palloc_get_page(PAL_USER);
+      }
+
       if ( *physical_address != NULL || ((unsigned)physical_address & PTE_W) !=0 )
         {
           printf("page fault \n");
@@ -183,7 +192,7 @@ page_fault (struct intr_frame *f)
           allocate_spage_elem(physical_address ,fault_addr);
           allocate_frame_elem(physical_page, virtual_page);
           pagedir_set_page (thread_current()->pagedir, fault_addr, physical_address, true);
-        }
+        } 
       else
         {
         //evict()

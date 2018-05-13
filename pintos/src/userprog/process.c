@@ -345,7 +345,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
           break;
         }
     }
-
   /* Set up stack. */
   if (!setup_stack (esp))
     goto done;
@@ -410,6 +409,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
     t->file = file;
   }
   exec_sema_up();
+
+  //printf("end load file\n");
 
   return success;
 }
@@ -497,15 +498,15 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 
       /* Get a page of memory. */
       uint8_t *kpage = palloc_get_page (PAL_USER);
+
       if (kpage == NULL){
 
-        struct frame_entry* t = evict();
-
-        palloc_free_page( (t->page_number) << 12);
-        
-        free(t);
-        continue;
-        return false;
+          struct frame_entry* t = evict();
+          pagedir_clear_page(t->thread->pagedir, t->page_number);
+          palloc_free_page(t->page_number);
+          free(t);
+          kpage = palloc_get_page(PAL_USER);
+          ASSERT(kpage != NULL);
       }
 
       /* Load this page. */
@@ -525,10 +526,15 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       else 
         {
         #ifdef VM
-          unsigned virtual_page = pg_no(upage);
-          unsigned physical_page = pg_no(kpage);
+          
+          unsigned virtual_page = pg_round_down(upage);
+          unsigned physical_page = pg_round_down(kpage);
           allocate_frame_elem(physical_page, virtual_page);
           printf("virtual_page : %u , physical_page : %u \n", virtual_page, physical_page);
+          /*
+          allocate_frame_elem(kpage, upage);
+          printf("virtual_page : %u , physical_page : %u \n", upage, kpage);
+          */
         #endif
         }
 
@@ -537,6 +543,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       zero_bytes -= page_zero_bytes;
       upage += PGSIZE;
     }
+    //printf("asdfwqfefwe\n");
   return true;
 }
 /* Create a minimal stack by mapping a zeroed page at the top of
@@ -548,15 +555,27 @@ setup_stack (void **esp)
   bool success = false;
 
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+
+  if(kpage == NULL){
+    struct frame_entry* t = evict();
+
+    printf("%u \n", t->page_number);
+    
+    pagedir_clear_page(t->thread->pagedir, t->page_number);
+    palloc_free_page(t->page_number);
+    free(t);
+    kpage = palloc_get_page(PAL_USER);
+  }
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success){
         *esp = PHYS_BASE;
       #ifdef VM
-        unsigned virtual_page = pg_no(((uint8_t *)PHYS_BASE) - PGSIZE);
-        unsigned physical_page = pg_no(kpage);
+        unsigned virtual_page = ((uint8_t *)PHYS_BASE) - PGSIZE;
+        unsigned physical_page = kpage;
         allocate_frame_elem(physical_page, virtual_page);
+        printf("virtual : %u , physical : %u \n", virtual_page, physical_page);
       #endif
       }
       else

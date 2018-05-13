@@ -13,7 +13,7 @@ struct frame_entry
 	 	unsigned evict;
  	};
 
-void frame_init ();
+void frame_init (void);
 bool allocate_frame_elem (unsigned pn, unsigned fn);
 bool deallocate_frame_elem (unsigned pn);
-struct frame_entry * evict ();
+struct frame_entry * evict (void);
