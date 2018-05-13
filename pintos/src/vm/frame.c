@@ -76,6 +76,7 @@ evict (void)
 	swap_out(f);
 
 	//temporary
+
 	lock_acquire(&frame_lock);
 	list_remove(e);
 	lock_release(&frame_lock);
