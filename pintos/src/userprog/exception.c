@@ -177,6 +177,7 @@ page_fault (struct intr_frame *f)
       
       if ( *physical_address != NULL || ((unsigned)physical_address & PTE_W) !=0 )
         {
+          printf("page fault \n");
           unsigned virtual_page = pg_no(fault_addr);
           unsigned physical_page = pg_no(physical_address);
           allocate_spage_elem(physical_address ,fault_addr);

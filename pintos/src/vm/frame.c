@@ -27,10 +27,11 @@ frame_init (void)
 bool 
 allocate_frame_elem(unsigned pn, unsigned fn)
 {
-	if(elem_number == 1024)
-	  {
-		return NULL;
-	  }
+	// if(elem_number == 1024)
+	//   {
+	// 	struct frame_entry * f  = evict();
+	// 	elem_number--;	  	
+	//   }
 
 	struct frame_entry *fe;
 	fe = malloc(sizeof(struct frame_entry));
@@ -60,10 +61,15 @@ bool deallocate_frame_elem(unsigned pn){
 	return false;
 }
 
-struct frame_entry * 
-evict (void)
+struct frame_entry *
+evict (void) // FIFO;
 {
-	return NULL;
+	struct list_elem *e;
+	e = list_pop_front(&page_table);
+	struct frame_entry *f = list_entry(e, struct frame_entry, elem);
+	return f;
+
+	//return NULL;
 }
 
 // //find empty space function

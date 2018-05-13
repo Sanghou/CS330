@@ -17,7 +17,7 @@ spage_less_func	(const struct hash_elem *a,
 	struct spage_entry *pa = hash_entry(a, struct spage_entry, elem); 	
 	struct spage_entry *pb = hash_entry(b, struct spage_entry, elem); 	
 
-	if (pa->va < pb->va) 
+	if (pa->va < pb->va)
 		return true;
 	return false;
 }
