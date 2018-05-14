@@ -22,6 +22,7 @@
 #include "threads/synch.h"
 #ifdef VM
 #include "vm/frame.h"
+#include "vm/page.h"
 #endif
 
 static thread_func start_process NO_RETURN;
@@ -349,6 +350,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   /* Set up stack. */
   if (!setup_stack (esp))
     goto done;
+  
   /* Start address. */  
   *eip = (void (*) (void)) ehdr.e_entry;
 
@@ -496,8 +498,14 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 
       /* Get a page of memory. */
       uint8_t *kpage = palloc_get_page (PAL_USER);
-      if (kpage == NULL)
-        return false;
+      if (kpage == NULL){
+        #ifdef VM
+          evict();
+          continue;
+        #else
+          return false;
+        #endif
+      }
 
       /* Load this page. */
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
@@ -516,9 +524,10 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       else 
         {
         #ifdef VM
-          unsigned virtual_page = pg_no(upage);
-          unsigned physical_page = pg_no(kpage);
-          allocate_frame_elem(physical_page, virtual_page);
+          // unsigned virtual_page = pg_no(kpage);
+          // unsigned physical_page = pg_no(upage);
+          // allocate_frame_elem(physical_page, virtual_page);
+          allocate_frame_elem(upage, kpage);
         #endif
         }
 
@@ -538,20 +547,30 @@ setup_stack (void **esp)
   bool success = false;
 
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+  #ifdef VM
+    if (kpage == NULL)
+    {
+      evict();
+      kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+    }
+  #endif
+
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success){
         *esp = PHYS_BASE;
       #ifdef VM
-        unsigned virtual_page = pg_no(((uint8_t *)PHYS_BASE) - PGSIZE);
-        unsigned physical_page = pg_no(kpage);
-        allocate_frame_elem(physical_page, virtual_page);
+        // unsigned virtual_page = pg_no(kpage);
+        // unsigned physical_page = pg_no(((uint8_t *)PHYS_BASE) - PGSIZE);
+        // allocate_frame_elem(physical_page, virtual_page);
+        allocate_frame_elem(((uint8_t *)PHYS_BASE) - PGSIZE, kpage);
+
       #endif
       }
       else
         palloc_free_page (kpage);
-    }
+    } 
   return success;
 }
 

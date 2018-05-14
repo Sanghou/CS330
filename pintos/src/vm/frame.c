@@ -15,23 +15,23 @@
 static struct list page_table;
 static struct lock frame_lock;
 
-static unsigned elem_number;
+// static unsigned elem_number;
 
 void 
 frame_init (void)
 {
 	list_init(&page_table);
 	lock_init(&frame_lock);
-	elem_number = 0;
+	// elem_number = 0;
 }
 
 bool 
 allocate_frame_elem(unsigned pn, unsigned fn)
 {
-	if(elem_number == 1024)
-	  {
-		return NULL;
-	  }
+	// if(elem_number == 1024)
+	//   {
+	// 	return NULL;
+	//   }
 
 	struct frame_entry *fe;
 	fe = malloc(sizeof(struct frame_entry));
@@ -39,7 +39,7 @@ allocate_frame_elem(unsigned pn, unsigned fn)
 	fe->page_number = pn;
 	fe->frame_number = fn;
 	fe->evict = 0;
-	elem_number++;
+	// elem_number++;
 	lock_acquire(&frame_lock);
 	list_push_back(&page_table, &fe->elem);
 	lock_release(&frame_lock);
@@ -56,7 +56,7 @@ bool deallocate_frame_elem(unsigned pn){
     	if (f->page_number == pn)
     	  {
     		list_remove(e);
-    		elem_number--;
+    		// elem_number--;
     		free(f);
     		lock_release(&frame_lock);
     		return true;
@@ -73,7 +73,7 @@ evict (void)
 	struct frame_entry *f = list_entry(e, struct frame_entry, elem);
 
 	//swap_out
-	swap_out(f);
+	// swap_out(f);
 
 	//temporary
 
@@ -81,7 +81,8 @@ evict (void)
 	list_remove(e);
 	lock_release(&frame_lock);
 
-	palloc_free_page((void *)((f->frame_number)<< 12));
+	// palloc_free_page((void *)((f->frame_number)<< 12));
+	palloc_free_page((void *)f->frame_number);
 	free(f);
 	return NULL;
 }

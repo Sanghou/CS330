@@ -169,8 +169,8 @@ page_fault (struct intr_frame *f)
   1. va is kernel?
   2. 
   */
-
-  if (fault_addr != NULL && is_user_vaddr(fault_addr) && user)
+  // printf("fault_addr : %d\n", fault_addr);
+  if (fault_addr != NULL && is_user_vaddr(fault_addr) && user && not_present)
     {
       //swap something
       unsigned * physical_address = palloc_get_page(PAL_USER);
@@ -185,11 +185,20 @@ page_fault (struct intr_frame *f)
         }
       else
         {
-        //evict()
+          //find in swap
+          // bool success = swap_in(thread_current(), pg_no(fault_addr));
+          // if (!success)
+          evict(); 
         }
     }
   else
     {
+      // if (user &&)
+      // {
+      //   //stack growth
+
+      //   return;
+      // }
       thread_current()->exit_status = -1;
       printf("%s: exit(%d)\n", thread_current()->name, -1);
       sema_up(&thread_current()->start);
