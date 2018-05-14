@@ -13,6 +13,6 @@ struct spage_entry
 		unsigned evict;
 	};
 
-void spage_init ();
+void spage_init (void);
 bool allocate_spage_elem(unsigned va, unsigned pa);
 bool deallocate_spage_elem(unsigned va);

@@ -44,13 +44,17 @@ swap_in (struct thread *t, unsigned page_num){
 
 	    if(t == se->thread && page_num == se->page_number)
 	      {
+	      	struct frame_entry* t = allocate_frame_elem(se->page_number);
+	      	block_read (swap_slot, se->sector, t->frame_number);
+	      	free(se);
+	      	/*
       		uint8_t *kpage = palloc_get_page (PAL_USER);
       		if (kpage == NULL){
       			evict();
       			int8_t *kpage = palloc_get_page (PAL_USER);
       		}
 	        unsigned physical_page = pg_no(kpage);
-	        allocate_frame_elem(physical_page, se->page_number);
+	        allocate_frame_elem_both(physical_page, se->page_number);
 
 			block_read (swap_slot, se->sector, kpage);
 
@@ -58,7 +62,7 @@ swap_in (struct thread *t, unsigned page_num){
 
 	        list_remove(e);
 	        free(se);
-
+			*/
 	        return true;
 	      }
 	  }

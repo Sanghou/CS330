@@ -1,6 +1,8 @@
 #include <debug.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
+//#include <stdio.h>
 #include <lib/kernel/list.h>
 #include "vm/frame.h"
 #include "threads/thread.h"
@@ -25,13 +27,53 @@ frame_init (void)
 	// elem_number = 0;
 }
 
+
+struct frame_entry * allocate_frame_elem(uint8_t *upage){
+	
+	uint8_t *kpage = palloc_get_page (PAL_USER);
+	
+	if(kpage == NULL){
+		evict();
+        kpage = palloc_get_page(PAL_USER);
+        ASSERT(kpage != NULL);
+	}
+	
+	struct frame_entry *fe;
+	lock_acquire(&frame_lock);
+	fe = malloc(sizeof(struct frame_entry));
+	fe->thread = thread_current();
+	fe->page_number = upage;
+	fe->frame_number = kpage;
+	fe->evict = 0;
+	elem_number++;
+	list_push_back(&page_table, &fe->elem);
+	lock_release(&frame_lock);
+
+	return fe;
+}
+
+/*
+struct frame_entry * allocate_frame_elem_both(uint8_t kpage, uint8_t upage){
+	
+	struct frame_entry *fe;
+	lock_acquire(&frame_lock);
+	fe = malloc(sizeof(struct frame_entry));
+	fe->thread = thread_current();
+	fe->page_number = upage;
+	fe->frame_number = kpage;
+	fe->evict = 0;
+	elem_number++;
+	list_push_back(&page_table, &fe->elem);
+	lock_release(&frame_lock);
+
+	return fe;
+}
+*/
+
+/*
 bool 
-allocate_frame_elem(unsigned pn, unsigned fn)
+allocate_frame_elem(unsigned fn, unsigned pn)
 {
-	// if(elem_number == 1024)
-	//   {
-	// 	return NULL;
-	//   }
 
 	struct frame_entry *fe;
 	fe = malloc(sizeof(struct frame_entry));
@@ -44,7 +86,7 @@ allocate_frame_elem(unsigned pn, unsigned fn)
 	list_push_back(&page_table, &fe->elem);
 	lock_release(&frame_lock);
 }
-
+*/
 bool deallocate_frame_elem(unsigned pn){
 	struct frame_entry *f;
 	struct list_elem *e;
@@ -66,8 +108,8 @@ bool deallocate_frame_elem(unsigned pn){
 	return false;
 }
 
-struct frame_entry * 
-evict (void)
+void
+evict (void) // FIFO;
 {
 	struct list_elem *e = list_pop_front(&page_table);
 	struct frame_entry *f = list_entry(e, struct frame_entry, elem);
@@ -81,19 +123,8 @@ evict (void)
 	list_remove(e);
 	lock_release(&frame_lock);
 
-	// palloc_free_page((void *)((f->frame_number)<< 12));
-	palloc_free_page((void *)f->frame_number);
+
+	pagedir_clear_page(f->thread->pagedir, f->page_number);
+	palloc_free_page((void *)(f->frame_number));
 	free(f);
-	return NULL;
 }
-
-// //find empty space function
-
-// unsigned find_empty_frame(){
-// 	if(elem_number == 1024){
-// 		//evict();
-// 	}
-// 	else{
-
-// 	}
-// }
