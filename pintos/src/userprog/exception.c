@@ -212,13 +212,15 @@ void
 page_fault_handling (bool not_present, bool write, bool user, void *fault_addr, struct intr_frame *f)
 {
   bool success;
+  struct thread *t = thread_current();
 
   if (not_present && is_user_vaddr(fault_addr) && user)
     {
-      success = swap_in(thread_current(), (unsigned) fault_addr);
+      success = swap_in(t, (unsigned) fault_addr);
       if (!success)
       {
-         allocate_frame_elem(pg_round_down(fault_addr));
+        struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr));
+        pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
       }
    
     }

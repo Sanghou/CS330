@@ -121,8 +121,6 @@ evict (void) // FIFO;
 	swap_out(f);
 	//printf("end swap \n");
 
-	//temporary
-
 	lock_acquire(&frame_lock);
 	list_remove(e);
 	lock_release(&frame_lock);

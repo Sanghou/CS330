@@ -55,7 +55,9 @@ swap_in (struct thread *t, unsigned page_num){
 	      		return false;
 	      	}
 	      	list_remove(e);	
-	      	block_read (se->swap_slot, se->sector, (void *) fe->frame_number);
+	      	void * tmp = malloc(PGSIZE);
+	      	block_read (se->swap_slot, se->sector, tmp);
+	      	memset((void *) fe->frame_number, tmp, PGSIZE);
 	      	free(se);
 	        return true;
 	      }
@@ -83,7 +85,7 @@ swap_out (struct frame_entry *frame)
 	se = malloc(sizeof(struct swap_entry));
 
 	if (swap_slot == NULL)
-		{ 
+		{
 			//swap_slot is full
 			PANIC("SWAP BLOCK IS FULL");
 		}
@@ -93,6 +95,7 @@ swap_out (struct frame_entry *frame)
 	se->swap_slot = swap_slot;
 	se->sector = sector;
 
+	//여기 block
 	void * paddr = (frame->frame_number);
 
 	//write to a swap block.
