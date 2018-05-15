@@ -22,6 +22,7 @@
 #include "threads/synch.h"
 #ifdef VM
 #include "vm/frame.h"
+#include "vm/page.h"
 #endif
 
 static thread_func start_process NO_RETURN;
@@ -354,8 +355,11 @@ load (const char *file_name, void (**eip) (void), void **esp)
         }
     }
   /* Set up stack. */
-  if (!setup_stack (esp))
+  if (!setup_stack (esp)){
+    // printf("setup_stack fail \n");
     goto done;
+  }
+  
   /* Start address. */  
   //printf("end setup_stack \n");
   *eip = (void (*) (void)) ehdr.e_entry;
@@ -507,12 +511,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 
       /* Get a page of memory. */
 
-      struct frame_entry * t = allocate_frame_elem(upage);
-      
-      if(t == NULL){
-        //printf("this is error!! \n");
-      }
-      uint8_t *kpage = t->frame_number;
+      uint8_t *kpage = allocate_frame_elem(upage)->frame_number;
 
       /* Load this page. */
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
@@ -527,7 +526,10 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
           palloc_free_page (kpage);
           return false; 
         }
-      //printf("end install_page \n");
+      else 
+        {
+        }
+
       /* Advance. */
       read_bytes -= page_read_bytes;
       zero_bytes -= page_zero_bytes;
@@ -548,36 +550,20 @@ setup_stack (void **esp)
   
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
 
-  /*
-  if(kpage == NULL){
-    struct frame_entry* t = evict();
-
-    printf("%u \n", t->page_number);
-    
-    pagedir_clear_page(t->thread->pagedir, t->page_number);
-    palloc_free_page(t->page_number);
-    free(t);
-    kpage = palloc_get_page(PAL_USER);
-  }
-  */
+  if (kpage == NULL)
+    {
+      evict();
+      kpage = palloc_get_page(PAL_USER | PAL_ZERO);
+    }
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success){
         *esp = PHYS_BASE;
-        /*
-      #ifdef VM
-        unsigned virtual_page = ((uint8_t *)PHYS_BASE) - PGSIZE;
-        unsigned physical_page = kpage;
-        allocate_frame_elem(physical_page, virtual_page);
-        printf("virtual : %u , physical : %u \n", virtual_page, physical_page);
-      #endif
-      }
-      */
       }
       else
         palloc_free_page (kpage);
-    }
+    } 
   return success;
 }
 

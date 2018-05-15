@@ -161,7 +161,7 @@ page_fault (struct intr_frame *f)
            fault_addr,
            not_present ? "not present" : "rights violation",
            write ? "writing" : "reading",
-           user ? "user" : "kernel");
+           user ? "user" : "kernel"); 
 
    page_fault_handling(not_present, write, user, fault_addr,f);
   
