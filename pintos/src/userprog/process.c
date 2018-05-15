@@ -291,14 +291,18 @@ load (const char *file_name, void (**eip) (void), void **esp)
   file_ofs = ehdr.e_phoff;
   for (i = 0; i < ehdr.e_phnum; i++) 
     {
+      //printf("start for state \n");
       struct Elf32_Phdr phdr;
 
       if (file_ofs < 0 || file_ofs > file_length (file))
         goto done;
+      
       file_seek (file, file_ofs);
+
 
       if (file_read (file, &phdr, sizeof phdr) != sizeof phdr)
         goto done;
+
       file_ofs += sizeof phdr;
       switch (phdr.p_type) 
         {
@@ -336,9 +340,13 @@ load (const char *file_name, void (**eip) (void), void **esp)
                   read_bytes = 0;
                   zero_bytes = ROUND_UP (page_offset + phdr.p_memsz, PGSIZE);
                 }
+
               if (!load_segment (file, file_page, (void *) mem_page,
-                                 read_bytes, zero_bytes, writable))
-                goto done;
+                                 read_bytes, zero_bytes, writable))  
+                            goto done;
+              else{
+                //printf("load_segment success \n");
+              }
             }
           else
             goto done;
@@ -349,6 +357,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   if (!setup_stack (esp))
     goto done;
   /* Start address. */  
+  //printf("end setup_stack \n");
   *eip = (void (*) (void)) ehdr.e_entry;
 
   token = file_name;
@@ -498,21 +507,12 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 
       /* Get a page of memory. */
 
-      /*
-      uint8_t *kpage = palloc_get_page (PAL_USER);
-
-      if (kpage == NULL){
-
-          struct frame_entry* t = evict();
-          pagedir_clear_page(t->thread->pagedir, t->page_number);
-          palloc_free_page(t->page_number);
-          free(t);
-          kpage = palloc_get_page(PAL_USER);
-          ASSERT(kpage != NULL);
+      struct frame_entry * t = allocate_frame_elem(upage);
+      
+      if(t == NULL){
+        //printf("this is error!! \n");
       }
-      */
-
-      uint8_t *kpage = allocate_frame_elem(upage)->frame_number;
+      uint8_t *kpage = t->frame_number;
 
       /* Load this page. */
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
@@ -521,38 +521,19 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
           return false; 
         }
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
-
       /* Add the page to the process's address space. */
       if (!install_page (upage, kpage, writable)) 
         {
           palloc_free_page (kpage);
           return false; 
         }
-      else 
-        {
-
-          /*
-        #ifdef VM
-          
-          unsigned virtual_page = pg_round_down(upage);
-          unsigned physical_page = pg_round_down(kpage);
-          allocate_frame_elem(physical_page, virtual_page);
-          printf("virtual_page : %u , physical_page : %u \n", virtual_page, physical_page);
-          #endif
-
-          */
-          /*
-          allocate_frame_elem(kpage, upage);
-          printf("virtual_page : %u , physical_page : %u \n", upage, kpage);
-          */
-        }
-
+      //printf("end install_page \n");
       /* Advance. */
       read_bytes -= page_read_bytes;
       zero_bytes -= page_zero_bytes;
       upage += PGSIZE;
     }
-    //printf("asdfwqfefwe\n");
+  //printf("asdfwqfefwe\n");
   return true;
 }
 /* Create a minimal stack by mapping a zeroed page at the top of
@@ -579,7 +560,6 @@ setup_stack (void **esp)
     kpage = palloc_get_page(PAL_USER);
   }
   */
-
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);

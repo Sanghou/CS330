@@ -99,7 +99,7 @@ swap_out (struct frame_entry *frame)
 	se->thread = frame->thread;
 	se->sector = sector;
 
-	void * paddr = (frame->frame_number) << 12;
+	void * paddr = (frame->frame_number);
 
 	//write to a swap block.
 	block_write(swap_slot, sector, paddr);

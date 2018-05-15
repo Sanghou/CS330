@@ -163,6 +163,8 @@ page_fault (struct intr_frame *f)
            write ? "writing" : "reading",
            user ? "user" : "kernel");
 
+   page_fault_handling(not_present, write, user, fault_addr,f);
+  
   /*
 
   page fault handling.
@@ -172,54 +174,60 @@ page_fault (struct intr_frame *f)
 
   //printf("fault address : %p \n", fault_addr);
 
-  if (!not_present && is_user_vaddr(fault_addr) && user)
-    {
+  // if (!not_present && is_user_vaddr(fault_addr) && user)
+  //   {
+  //     //swap something
+      
+  //     unsigned * physical_address = palloc_get_page(PAL_USER);
+  //     if(physical_address == NULL){
+  //         printf("page fault null \n");
+  //         struct frame_entry* t = evict();
+  //         palloc_free_page( (t->page_number) << 12);
+  //         free(t);
+  //         physical_address = palloc_get_page(PAL_USER);
+  //     }
 
-      printf ("Page fault at %p: %s error %s page in %s context.\n",
-           fault_addr,
-           not_present ? "not present" : "rights violation",
-           write ? "writing" : "reading",
-           user ? "user" : "kernel"); 
-
-      printf("%d \n", fault_addr);
-
-      //swap something
-      /*
-      unsigned * physical_address = palloc_get_page(PAL_USER);
-      if(physical_address == NULL){
-          printf("page fault null \n");
-          struct frame_entry* t = evict();
-          palloc_free_page( (t->page_number) << 12);
-          free(t);
-          physical_address = palloc_get_page(PAL_USER);
-      }
-
-      if ( *physical_address != NULL || ((unsigned)physical_address & PTE_W) !=0 )
-        {
-          printf("page fault \n");
-          unsigned virtual_page = pg_no(fault_addr);
-          unsigned physical_page = pg_no(physical_address);
-          allocate_spage_elem(physical_address ,fault_addr);
-          allocate_frame_elem(physical_page, virtual_page);
-          pagedir_set_page (thread_current()->pagedir, fault_addr, physical_address, true);
-        } 
-      else
-        {
-        //evict()
-        }
-        */
-    }
-  else
-    {
-      thread_current()->exit_status = -1;
-      printf("%s: exit(%d)\n", thread_current()->name, -1);
-      sema_up(&thread_current()->start);
-      thread_exit();
-  }
+  //     if ( *physical_address != NULL || ((unsigned)physical_address & PTE_W) !=0 )
+  //       {
+  //         printf("page fault \n");
+  //         unsigned virtual_page = pg_no(fault_addr);
+  //         unsigned physical_page = pg_no(physical_address);
+  //         allocate_spage_elem(physical_address ,fault_addr);
+  //         allocate_frame_elem(physical_page, virtual_page);
+  //         pagedir_set_page (thread_current()->pagedir, fault_addr, physical_address, true);
+  //       } 
+  //     else
+  //       {
+  //       //evict()
+  //       }
+        
+  //   }
+  // else
+  //   {
+  //     thread_current()->exit_status = -1;
+  //     printf("%s: exit(%d)\n", thread_current()->name, -1);
+  //     sema_up(&thread_current()->start);
+  //     thread_exit();
+  // }
   // kill (f);
 }
 
 void page_fault_handling(bool not_present, bool write, bool user, void *fault_addr, struct intr_frame *f){
 
-  
+  if (!not_present && is_user_vaddr(fault_addr)){
+    allocate_frame_elem(pg_round_down(fault_addr));
+  }
+
+  else if(false){
+    //for growable region
+    //then grow user stack
+  }
+
+  else{
+    thread_current()->exit_status = -1;
+    printf("%s: exit(%d)\n", thread_current()->name, -1);
+    sema_up(&thread_current()->start);
+    thread_exit();
+  }
+
 }
