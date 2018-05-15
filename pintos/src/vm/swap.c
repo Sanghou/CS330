@@ -14,9 +14,7 @@
 
 static struct list swap_table;
 static struct lock swap_lock;
-int sector;
-
-// static bool install_page (struct thread *t, void *upage, void *kpage, bool writable);
+int sector;	//sector 대신에 pool 로 관리 
 
 /*
    Creates a swap table list
