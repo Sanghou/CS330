@@ -3,16 +3,20 @@
 #include <stdbool.h>
 #include <lib/kernel/list.h>
 #include "vm/swap.h"
+#include "devices/block.h"
 #include "threads/malloc.h"
 #include "threads/thread.h"
 #include "threads/synch.h"
-#include "devices/block.h"
 #include "threads/palloc.h"
 #include "threads/vaddr.h"
+#include "threads/pte.h"
+#include "userprog/pagedir.h"
 
 static struct list swap_table;
 static struct lock swap_lock;
 int sector;
+
+// static bool install_page (struct thread *t, void *upage, void *kpage, bool writable);
 
 /*
    Creates a swap table list
@@ -23,7 +27,7 @@ swap_list_init (void){
 
 	list_init(&swap_table);
 	sector = 0;
-	// lock_init(&swap_lock);
+	lock_init(&swap_lock);
 }
 
 /*
@@ -33,40 +37,31 @@ swap_list_init (void){
 bool 
 swap_in (struct thread *t, unsigned page_num){
 	//find the proper swap slot in the swap_table
-
 	struct list_elem *e;
 
-	struct block *swap_slot = block_get_role(BLOCK_SWAP);
-
-	for(e=list_begin(&swap_table); e != list_end(&swap_table);e=list_next(e))
+	// struct block *swap_slot = block_get_role(BLOCK_SWAP);
+	for (e = list_begin(&swap_table); e != list_end(&swap_table); e = list_next(e))
 	  {
 	    struct swap_entry *se = list_entry(e, struct swap_entry, list_elem);
 
-	    if(t == se->thread && page_num == se->page_number)
+	    if (t == se->thread && pg_no(se->page_number) == pg_no(page_num))
 	      {
-	      	struct frame_entry* t = allocate_frame_elem(se->page_number);
-	      	block_read (swap_slot, se->sector, t->frame_number);
+	      	printf("FIND!!\n");
+	      	struct frame_entry* fe = allocate_frame_elem(se->page_number);
+
+	      	// allocate_spage_elem(t->page_number, t->frame_number);
+	      	bool success = pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
+	      	if (!success) 
+	      	{
+	      		printf("no success\n");
+	      		return false;
+	      	}
+	      	list_remove(e);	
+	      	block_read (se->swap_slot, se->sector, (void *) fe->frame_number);
 	      	free(se);
-	      	/*
-      		uint8_t *kpage = palloc_get_page (PAL_USER);
-      		if (kpage == NULL){
-      			evict();
-      			int8_t *kpage = palloc_get_page (PAL_USER);
-      		}
-	        unsigned physical_page = pg_no(kpage);
-	        allocate_frame_elem_both(physical_page, se->page_number);
-
-			block_read (swap_slot, se->sector, kpage);
-
-			// pagedir_set_page (t->pagedir,, kpage, true);
-
-	        list_remove(e);
-	        free(se);
-			*/
 	        return true;
 	      }
 	  }
-
 	return false;
 
 	//block_read to the physical address pointer. 
@@ -97,18 +92,18 @@ swap_out (struct frame_entry *frame)
 
 	se->page_number = frame->page_number; 		
 	se->thread = frame->thread;
+	se->swap_slot = swap_slot;
 	se->sector = sector;
 
-	void * paddr = (frame->frame_number) << 12;
+	void * paddr = (frame->frame_number);
 
 	//write to a swap block.
 	block_write(swap_slot, sector, paddr);
 	// deallocate_frame_elem(frame->frame_number);
 
 	sector++;
-
 	list_push_back(&swap_table, &se->list_elem);
 	
 	// how to manage the supplementary page table?
-	//pagedir clear? 
+	
 }

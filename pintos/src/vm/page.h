@@ -13,6 +13,13 @@ struct spage_entry
 		unsigned evict;
 	};
 
+enum spage_type
+	{
+    /* Block device types that play a role in Pintos. */
+    PHYS_MEMORY,
+    SWAP_DISK
+	};
+
 void spage_init (void);
 bool allocate_spage_elem(unsigned va, unsigned pa);
 bool deallocate_spage_elem(unsigned va);
