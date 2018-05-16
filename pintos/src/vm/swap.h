@@ -11,7 +11,7 @@ struct swap_entry
 		unsigned page_number; 		//page once assigned to this
 		void *thread; 				//pointer to the thread which owned this virtual page.
 		struct block *swap_slot;
-		int sector; 				//size of blocks. 
+		int sector; 		//size of blocks. 
 	};
 
 void swap_list_init ();
