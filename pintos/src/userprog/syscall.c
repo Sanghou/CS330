@@ -140,6 +140,8 @@ syscall_handler (struct intr_frame *f)
   		}
 
   		info->is_waiting = true;
+      printf("thread_current() : %d\n", parent_pid);
+      printf("child. : %d\n", child_pid);
   		sema_down(info->sema);
 
   		f->eax = info->exit_status;

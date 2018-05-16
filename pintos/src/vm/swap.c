@@ -111,7 +111,7 @@ swap_out (struct frame_entry *frame)
 	if (swap_slot == NULL)
 		{
 			//swap_slot is full
-			PANIC("SWAP BLOCK IS FULL");
+			PANIC("CANNOT FIND SWAP DISK");
 		}
 
 	se->page_number = frame->page_number; 		
