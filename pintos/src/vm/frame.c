@@ -99,6 +99,14 @@ bool deallocate_frame_elem(unsigned pn){
     	f = list_entry(e, struct frame_entry, elem);
     	if (f->page_number == pn)
     	  {
+
+    	  	if (pointer == e)
+    	  	{
+    	  		pointer = list_next(e);
+    	  		if (pointer == list_end(&page_table))
+    	  			pointer = list_begin(&page_table);
+    	  	}
+    	  	
     		list_remove(e);
     		pagedir_clear_page(f->thread->pagedir, f->page_number);
     		palloc_free_page((void *)(f->frame_number));

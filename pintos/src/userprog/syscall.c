@@ -66,7 +66,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXIT:
     {
-  		//int status = read(esp+1);
   		int status = read(f);
 
   		tid_t child_pid = thread_current()->tid;
@@ -127,7 +126,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_WAIT:
     {
-     // tid_t child_pid = (tid_t) read(esp+1);
       tid_t child_pid = (tid_t) read(f);
 
   		tid_t parent_pid = thread_current()->tid;
@@ -156,9 +154,6 @@ syscall_handler (struct intr_frame *f)
   	case SYS_CREATE:
   	{
   		//read arguments
-     // const char *file = (const char *) read(esp+1);
-      
-      //int size = read(esp+2);
       const char *file = (const char *) read(f);
       int size = read(f);
 
@@ -182,7 +177,6 @@ syscall_handler (struct intr_frame *f)
   	case SYS_REMOVE:
   	{
   		//read arguments
-//      const char *file = (const char *) read(esp+1);
       const char *file = (const char *) read(f);
 
       if (!is_valid_addr(file)) 
@@ -270,13 +264,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_READ:
     {
-
-//      int fd = read(esp+1);
-      
-  //    const char *buffer = (const char *) read(esp+2);
-
-    //  int size = read(esp+3);
-
       int fd = read(f);
       const char *buffer = (const char *) read(f);
       int size = read(f);
@@ -479,17 +466,7 @@ read (struct intr_frame *f)
   }
 
   int result;
-/*
-  if (pointer)
-  {
-    result = *(char **)f->esp;
 
-  }else
-
-  {
-    result = *(char *)f->esp;
-  }
-*/
   result = *(char **)f->esp;
   
   f->esp += 4;
