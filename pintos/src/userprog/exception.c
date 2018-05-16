@@ -129,7 +129,7 @@ static void
 page_fault (struct intr_frame *f) 
 {
   bool not_present;  /* True: not-present page, false: writing r/o page. */
-    bool write;        /* True: access was write, false: access was read. */
+  bool write;        /* True: access was write, false: access was read. */
   bool user;         /* True: access by user, false: access by kernel. */
   void *fault_addr;  /* Fault address. */
 
@@ -157,41 +157,63 @@ page_fault (struct intr_frame *f)
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
      which fault_addr refers. */
-      printf ("Page fault at %p: %s error %s page in %s context.\n",
-              fault_addr,
-              not_present ? "not present" : "rights violation",
-              write ? "writing" : "reading",
-              user ? "user" : "kernel"); 
+      // printf ("Page fault at %p: %s error %s page in %s context.\n",
+      //         fault_addr,
+      //         not_present ? "not present" : "rights violation",
+      //         write ? "writing" : "reading",
+      //         user ? "user" : "kernel"); 
 
    page_fault_handling(not_present, write, user, fault_addr,f);
   
+}
+
+bool is_stack(void *fault_addr, struct intr_frame *f){
+
+  //printf("fault_addr : %p, frame : %p \n", fault_addr, f->esp);
+  //printf("fault_addr - frame : %d \n",fault_addr - f->esp);
+  
+  if(fault_addr - f->esp < -32){
+    burst();
+  }
+  else if ( fault_addr - f->esp < 8 *1024 * 1024){
+    return true;
+  }
+  return false;
 }
 
 void page_fault_handling (bool not_present, bool write, bool user, void *fault_addr, struct intr_frame *f)
  {
    bool success;
    struct thread *t = thread_current();
- 
-   if (not_present && is_user_vaddr(fault_addr) && user)
+   
+   if(is_stack(fault_addr,f)){
+        
+      }
+
+  else if (fault_addr < 0x08048000){
+    burst();
+  }
+
+   else if (not_present && is_user_vaddr(fault_addr) && user)
      {
       
       success = swap_in(t, (unsigned) fault_addr);
        
        if (!success)
        {
-        //printf("here \n");
         struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr));
-        //printf("here2 \n");
         pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
-        //printf("here3 \n");
-       }    
+       }
      }
 
    else{
-    //printf("before stopping!! \n");
-      thread_current()->exit_status = -1;
-      printf("%s: exit(%d)\n", thread_current()->name, -1);
-      sema_up(&thread_current()->start);
-      thread_exit();
+      burst();
      }
   }
+
+void burst(){
+  thread_current()->exit_status = -1;
+  printf("%s: exit(%d)\n", thread_current()->name, -1);
+  sema_up(&thread_current()->start);
+  thread_exit();
+}
