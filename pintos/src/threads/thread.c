@@ -319,7 +319,7 @@ thread_exit (void)
 
 #ifdef VM
   //clear supplementary page table
-
+    swap_remove(cur);
 #endif
 
   /* Remove thread from all threads list, set our status to dying,

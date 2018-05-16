@@ -17,3 +17,4 @@ struct swap_entry
 void swap_list_init ();
 bool swap_in (struct thread *t, unsigned page_num);
 void swap_out (struct frame_entry *frame);
+void swap_remove (struct thread *t);

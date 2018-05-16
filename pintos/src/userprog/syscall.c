@@ -66,7 +66,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXIT:
     {
-  		//int status = read(esp+1);
+      // printf("SYS_EXIT start\n");
   		int status = read(f);
 
   		tid_t child_pid = thread_current()->tid;
@@ -77,17 +77,16 @@ syscall_handler (struct intr_frame *f)
 
   		if (info == NULL)
       {
-  			// sema_up(&thread_current()->start);
   			terminate();
    			break;
   		}
 
   		info->exit_status = status;
 
-  		// sema_up(&thread_current()->start);
-
   		info->is_waiting = false;
+      // sema_up(&info->sema);
 
+      // printf("SYS_EXIT end\n");
   		terminate();
   		break;
   	}
@@ -100,7 +99,8 @@ syscall_handler (struct intr_frame *f)
   		enum intr_level old_level;
   		old_level = intr_disable();
 
-//  		const char * cmd_line= (const char *) read(esp+1);
+      // printf("SYS_EXEC start\n");
+
   		const char * cmd_line= (const char *) read(f);
 
   		if (!is_valid_addr(cmd_line)) 
@@ -117,10 +117,13 @@ syscall_handler (struct intr_frame *f)
         break;
       }
 
+
   		f->eax = child_pid;
   		struct child_info *info = malloc(sizeof(struct child_info));
   		set_child_info(info, child_pid, thread_current()->tid);
+
   		intr_set_level(old_level);
+      // printf("SYS_EXEC end \n");
 
   		break;
   	}
@@ -130,7 +133,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_WAIT:
     {
-     // tid_t child_pid = (tid_t) read(esp+1);
+      // printf("SYS_WAIT start\n");
       tid_t child_pid = (tid_t) read(f);
 
   		tid_t parent_pid = thread_current()->tid;
@@ -141,16 +144,16 @@ syscall_handler (struct intr_frame *f)
       {
   			//when given argument pid_t is not a child of current thread.
   			f->eax = -1;
-  			break;
+        break;
   		}
 
   		info->is_waiting = true;
-  		sema_down(info->sema);
+      sema_down(&info->sema);
 
   		f->eax = info->exit_status;
   		remove_child(&info->elem);
   		free(info);
-
+      // printf("SYS_WAIT end\n");
   		break;
   	}
 
@@ -160,9 +163,6 @@ syscall_handler (struct intr_frame *f)
   	case SYS_CREATE:
   	{
   		//read arguments
-     // const char *file = (const char *) read(esp+1);
-      
-      //int size = read(esp+2);
       const char *file = (const char *) read(f);
       int size = read(f);
 
@@ -186,7 +186,6 @@ syscall_handler (struct intr_frame *f)
   	case SYS_REMOVE:
   	{
   		//read arguments
-//      const char *file = (const char *) read(esp+1);
       const char *file = (const char *) read(f);
 
       if (!is_valid_addr(file)) 
@@ -274,13 +273,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_READ:
     {
-
-//      int fd = read(esp+1);
-      
-  //    const char *buffer = (const char *) read(esp+2);
-
-    //  int size = read(esp+3);
-
       int fd = read(f);
       const char *buffer = (const char *) read(f);
       int size = read(f);
@@ -466,12 +458,12 @@ set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid)
 
 	memset (info, 0, sizeof *info);
 	info->child_pid = child_pid;
-  	info->parent_pid = parent_pid;
-  	info->sema = &child->start;
-  	info->exit_status = -1;
-  	info->is_waiting = false;
+  info->parent_pid = parent_pid;
+  sema_init(&info->sema,0);
+  info->exit_status = -1;
+  info->is_waiting = false;
 
-  	insert_child(&info->elem);
+  insert_child(&info->elem);
 }
 
 int 
@@ -483,17 +475,7 @@ read (struct intr_frame *f)
   }
 
   int result;
-/*
-  if (pointer)
-  {
-    result = *(char **)f->esp;
 
-  }else
-
-  {
-    result = *(char *)f->esp;
-  }
-*/
   result = *(char **)f->esp;
   
   f->esp += 4;
@@ -553,6 +535,9 @@ is_valid_addr(void *addr){
 
 void terminate()
 { 
+  struct child_info *info = find_info(thread_current()->tid);
+  if (info != NULL)
+    sema_up(&info->sema);
   sema_up(&thread_current()->start);
   printf("%s: exit(%d)\n", thread_current()->name, thread_current()->exit_status);
   thread_exit();
@@ -560,6 +545,9 @@ void terminate()
 
 void terminate_error(void)
 {
+  struct child_info *info = find_info(thread_current()->tid);
+  if (info != NULL)
+    sema_up(&info->sema);
   thread_current()->exit_status = -1;
   printf("%s: exit(%d)\n", thread_current()->name, -1);
   sema_up(&thread_current()->start);
