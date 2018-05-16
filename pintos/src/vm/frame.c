@@ -101,7 +101,7 @@ bool deallocate_frame_elem(unsigned pn){
 }
 
 void
-evict (void) // FIFO;
+evict (void) // 2-chance
 {
 
 	struct frame_entry *f;
