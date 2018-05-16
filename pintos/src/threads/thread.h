@@ -121,7 +121,7 @@ struct thread
   {
     tid_t parent_pid;
     tid_t child_pid;
-    struct semaphore* sema;
+    struct semaphore sema;
     int exit_status;
     struct list_elem elem;
     bool is_waiting;                    /* Default value of is_waiting is false */
