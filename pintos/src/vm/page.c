@@ -68,6 +68,14 @@ deallocate_spage_elem (unsigned pa)
 }
 
 struct spage_entry *
-mapped_entry (unsigned va){
+mapped_entry (struct thread *t, unsigned va){
+	struct spage_entry *page_entry;	
+	page_entry->va = va;
+	struct hash_elem *hash = hash_find(&t->supplement_page_table, &page_entry->elem);
 
+	if(hash == NULL){
+	 	return NULL;
+	}
+
+	return hash_entry(hash , struct spage_entry, elem);
 }

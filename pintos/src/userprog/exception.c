@@ -129,7 +129,7 @@ static void
 page_fault (struct intr_frame *f) 
 {
   bool not_present;  /* True: not-present page, false: writing r/o page. */
-  bool write;        /* True: access was write, false: access was read. */
+    bool write;        /* True: access was write, false: access was read. */
   bool user;         /* True: access by user, false: access by kernel. */
   void *fault_addr;  /* Fault address. */
 
@@ -180,7 +180,7 @@ page_fault (struct intr_frame *f)
       
   //     unsigned * physical_address = palloc_get_page(PAL_USER);
   //     if(physical_address == NULL){
-  //         printf("page fault null \n");
+  //         printf("page f`ault null \n");
   //         struct frame_entry* t = evict();
   //         palloc_free_page( (t->page_number) << 12);
   //         free(t);
@@ -215,15 +215,16 @@ page_fault (struct intr_frame *f)
 void page_fault_handling(bool not_present, bool write, bool user, void *fault_addr, struct intr_frame *f){
 
   if (!not_present && is_user_vaddr(fault_addr)){
-    allocate_frame_elem(pg_round_down(fault_addr));
+    allocate_frame_elem(fault_addr);
   }
 
-  else if(false){
+  else if(!not_present){
     //for growable region
     //then grow user stack
   }
 
   else{
+    //PANIC("wrong page error!! \n");
     thread_current()->exit_status = -1;
     printf("%s: exit(%d)\n", thread_current()->name, -1);
     sema_up(&thread_current()->start);
