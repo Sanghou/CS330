@@ -15,6 +15,7 @@
 
 static struct list swap_table;
 static struct lock swap_lock;
+static struct semaphore sema;
 static struct bitmap *used_sector;
 
 
@@ -26,6 +27,7 @@ void
 swap_list_init (void){
 	list_init(&swap_table);
 	lock_init(&swap_lock);
+	sema_init(&sema, 1);
 
 	struct block * block = block_get_role(BLOCK_SWAP);
 	block_sector_t sector_size = block_size(block);
@@ -84,10 +86,6 @@ swap_in (struct thread *t, unsigned page_num){
 	      }
 	  }
 	return false;
-
-	//block_read to the physical address pointer. 
-
-	//delete the list element 
 }
 
 /*
@@ -142,5 +140,38 @@ swap_out (struct frame_entry *frame)
 	list_push_back(&swap_table, &se->list_elem);
 	
 	// how to manage the supplementary page table?
+}
+
+void 
+swap_remove (struct thread *t)
+{
+	struct list_elem *e;
+	bool success = false;
+
+	for (e = list_begin(&swap_table); e != list_end(&swap_table); e = list_next(e))
+	  {
+	    struct swap_entry *se = list_entry(e, struct swap_entry, list_elem);
+
+	    if (success){
+	    	struct swap_entry *se = list_entry(list_prev(e), struct swap_entry, list_elem);
+	    	list_remove(list_prev(e));
+	    	free(se);
+	    }
+	    success = false;
+
+	    if (t == se->thread)
+	      {
+	      	success = true;
+
+			int sector_per_page = PGSIZE / 512;
+			int sector = se->sector;
+
+			lock_acquire(&swap_lock);
+			bitmap_set_multiple (used_sector, se->sector, sector_per_page, false);
+			lock_release(&swap_lock);
+
+	      	// free(se);
+	      }
+	  }
 	
 }

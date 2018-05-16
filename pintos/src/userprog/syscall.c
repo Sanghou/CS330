@@ -77,14 +77,11 @@ syscall_handler (struct intr_frame *f)
 
   		if (info == NULL)
       {
-  			// sema_up(&thread_current()->start);
   			terminate();
    			break;
   		}
 
   		info->exit_status = status;
-
-  		// sema_up(&thread_current()->start);
 
   		info->is_waiting = false;
 
@@ -100,7 +97,6 @@ syscall_handler (struct intr_frame *f)
   		enum intr_level old_level;
   		old_level = intr_disable();
 
-//  		const char * cmd_line= (const char *) read(esp+1);
   		const char * cmd_line= (const char *) read(f);
 
   		if (!is_valid_addr(cmd_line)) 
@@ -122,6 +118,7 @@ syscall_handler (struct intr_frame *f)
   		set_child_info(info, child_pid, thread_current()->tid);
   		intr_set_level(old_level);
 
+
   		break;
   	}
 
@@ -141,7 +138,7 @@ syscall_handler (struct intr_frame *f)
       {
   			//when given argument pid_t is not a child of current thread.
   			f->eax = -1;
-  			break;
+        break;
   		}
 
   		info->is_waiting = true;
@@ -150,7 +147,6 @@ syscall_handler (struct intr_frame *f)
   		f->eax = info->exit_status;
   		remove_child(&info->elem);
   		free(info);
-
   		break;
   	}
 
@@ -466,12 +462,12 @@ set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid)
 
 	memset (info, 0, sizeof *info);
 	info->child_pid = child_pid;
-  	info->parent_pid = parent_pid;
-  	info->sema = &child->start;
-  	info->exit_status = -1;
-  	info->is_waiting = false;
+  info->parent_pid = parent_pid;
+  info->sema = &child->start;
+  info->exit_status = -1;
+  info->is_waiting = false;
 
-  	insert_child(&info->elem);
+  insert_child(&info->elem);
 }
 
 int 
