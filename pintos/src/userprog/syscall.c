@@ -284,21 +284,21 @@ syscall_handler (struct intr_frame *f)
       int fd = read(f);
       const char *buffer = (const char *) read(f);
       int size = read(f);
-
       int read_size = 0;
       int8_t tmp = 1;
 
+      //printf("%p \n", buffer);
+
       if (!is_valid_addr(buffer)) 
       {
+
         f->eax = -1;
         terminate_error();
         break;
       }
-
       lock_acquire(&sys_lock);
 
       struct file_descript *descript = find_file_descript(fd);
-
       if (fd != 0 && descript == NULL){
         f->eax = -1;
         lock_release(&sys_lock);
@@ -547,6 +547,7 @@ is_valid_addr(void *addr)
 
 bool 
 is_valid_addr(void *addr){
+  
   return (is_user_vaddr(addr) && pagedir_get_page(thread_current()->pagedir, addr) != NULL);
 }
 

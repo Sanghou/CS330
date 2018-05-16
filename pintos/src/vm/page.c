@@ -33,7 +33,7 @@ void
 spage_init()
 {
 	struct hash *page_table = thread_current()->supplement_page_table;
-	page_table = palloc_get_page(PAL_ASSERT);
+		page_table = palloc_get_page(PAL_ASSERT);
 	hash_init(page_table,hash_map,spage_less_func, NULL);
 }
 

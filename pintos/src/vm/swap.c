@@ -20,6 +20,7 @@ int sector;	//sector 대신에 pool 로 관리
    Creates a swap table list
    which manages swap slots.
 */
+
 void 
 swap_list_init (void){
 
@@ -32,6 +33,7 @@ swap_list_init (void){
    Writes frame information in swap disk.
    Manage the swap_table list
 */
+
 bool 
 swap_in (struct thread *t, unsigned page_num){
 	//find the proper swap slot in the swap_table
@@ -44,7 +46,7 @@ swap_in (struct thread *t, unsigned page_num){
 
 	    if (t == se->thread && pg_no(se->page_number) == pg_no(page_num))
 	      {
-	      	printf("FIND!!\n");
+	      	//printf("FIND!!\n");
 	      	struct frame_entry* fe = allocate_frame_elem(se->page_number);
 
 	      	// allocate_spage_elem(t->page_number, t->frame_number);
@@ -59,9 +61,11 @@ swap_in (struct thread *t, unsigned page_num){
 	      	block_read (se->swap_slot, se->sector, tmp);
 	      	memset((void *) fe->frame_number, tmp, PGSIZE);
 	      	free(se);
+	      	free(tmp);
 	        return true;
 	      }
 	  }
+	  //printf("cannot find swap \n");
 	return false;
 
 	//block_read to the physical address pointer. 
