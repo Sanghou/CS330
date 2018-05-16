@@ -15,6 +15,6 @@ struct frame_entry
 
 void frame_init (void);
 struct frame_entry * allocate_frame_elem (uint8_t *upage);
-// struct frame_entry * allocate_frame_elem_both(uint8_t kpage, uint8_t upage);
 bool deallocate_frame_elem (unsigned pn);
 void evict (void);
+void deallocate_frame_all_thread(struct thread *t);

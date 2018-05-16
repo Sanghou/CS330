@@ -547,9 +547,10 @@ setup_stack (void **esp)
   bool success = false;
 
 
-  
-  kpage = palloc_get_page (PAL_USER | PAL_ZERO);
-
+  kpage = palloc_get_page(PAL_USER | PAL_ZERO);
+  // struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE);
+  // kpage = fe->frame_number;
+  // memset(fe->frame_number, 0, PGSIZE);
   if (kpage == NULL)
     {
       evict();
@@ -563,6 +564,7 @@ setup_stack (void **esp)
       }
       else
         palloc_free_page (kpage);
+        // deallocate_frame_elem(fe->page_number);
     } 
   return success;
 }

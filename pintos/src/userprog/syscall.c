@@ -38,11 +38,8 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f) 
 {
-/*
-  if(!is_valid_addr(f->esp) || !is_valid_addr(*f->eip)){
-    terminate_error();
-  }
-*/
+  // printf("syscall\n");
+
   //read system call number 
   int sys_num = read(f);
 
@@ -84,7 +81,6 @@ syscall_handler (struct intr_frame *f)
   		info->exit_status = status;
 
   		info->is_waiting = false;
-      // sema_up(&info->sema);
 
       // printf("SYS_EXIT end\n");
   		terminate();
@@ -163,6 +159,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_CREATE:
   	{
   		//read arguments
+      // printf("SYS_CREATE\n");
       const char *file = (const char *) read(f);
       int size = read(f);
 
@@ -186,6 +183,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_REMOVE:
   	{
   		//read arguments
+      // printf("SYS_REMOVE\n");
       const char *file = (const char *) read(f);
 
       if (!is_valid_addr(file)) 
@@ -209,7 +207,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_OPEN:
     {
   		//read arguments
-      //const char *file_name = (const char *) read(esp+1);
+      // printf("SYS_OPEN\n");
       const char *file_name = (const char *) read(f);
       char *tmp = "";
 
@@ -249,7 +247,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_FILESIZE:
     {
-      //int fd = read(esp+1);
+      printf("SYS_FILESIZE\n");
       int fd = read(f);
       
       struct file_descript *descript = find_file_descript(fd);
@@ -273,6 +271,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_READ:
     {
+      // printf("SYS_READ\n");
       int fd = read(f);
       const char *buffer = (const char *) read(f);
       int size = read(f);
@@ -309,8 +308,16 @@ syscall_handler (struct intr_frame *f)
         }
 
       } else {
-
-        read_size = file_read(descript->file, buffer, (off_t) size);
+        // int page_per_buffer = size / PGSIZE;
+        // // printf("page_per_buffer : %d\n",page_per_buffer);
+        // int i;
+        // for (i = 0; i< page_per_buffer; i++)
+        // {
+        //   int mini_buf = (size < PGSIZE) ? size: PGSIZE;
+        //   read_size += file_read(descript->file, buffer, (off_t) mini_buf);
+        //   size -= mini_buf;
+        // }
+        read_size += file_read(descript->file, buffer, (off_t) size);
       }
       f->eax = read_size;
       lock_release(&sys_lock);
@@ -324,10 +331,8 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_WRITE:
     { 
+      // printf("SYS_WRITE\n");
 
-//      int fd = read(esp+1);
-  //    const char *buffer = (const char *) read(esp+2);
-  //		int size = read(esp+3);
       int fd = read(f);
       const char *buffer = (const char *) read(f);
   		int size = read(f);
@@ -374,8 +379,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_SEEK:
     {
-      //int fd = read(esp+1);
-      //int position = read(esp+2);
+      // printf("SYS_SEEK\n");
       int fd = read(f);
       int position = read(f);
 
@@ -395,7 +399,6 @@ syscall_handler (struct intr_frame *f)
   	}
   	case SYS_TELL:
     {
-      //int fd = read(esp+1);
       int fd = read(f);
 
       struct file_descript *descript = find_file_descript(fd);
@@ -419,8 +422,8 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_CLOSE:
     {
-      //int fd = read(esp+1);
       int fd = read(f);
+      // printf("SYS_CLOSE\n");
 
       struct file_descript *descript = find_file_descript(fd);
 
