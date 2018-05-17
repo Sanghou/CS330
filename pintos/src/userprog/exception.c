@@ -172,7 +172,7 @@ bool is_stack(void *fault_addr, struct intr_frame *f){
   printf("fault_addr : %p, frame : %p \n", fault_addr, f->esp);
   printf("fault_addr - frame_pointer : %d \n",fault_addr - f->esp);
   printf("need page 1 : %d \n" ,(fault_addr - f->esp)/PGSIZE);
-  printf("0xC0000000-(unsigned)fault_addr : %d \n", 0xC0000000-(unsigned)fault_addr);
+  printf("0xC0000000-fault_addr : %d \n", 0xC0000000-(unsigned)fault_addr);
   
   if(!is_user_vaddr(fault_addr) || fault_addr - f->esp < -32 || fault_addr < 0x08048000){
     burst();
@@ -193,13 +193,15 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
 
    if(is_stack(fault_addr,f)){     
 
-        int need_page =  (fault_addr - f->esp)/PGSIZE;
-        need_page = (need_page * PGSIZE < (fault_addr - f->esp)) ? need_page + 1 : need_page;
+        int need_page =  (0xC0000000-(unsigned)fault_addr)/PGSIZE;
+        need_page = (need_page * PGSIZE < (0xC0000000-(unsigned)fault_addr)) ? need_page + 1 : need_page;
+        
         if(need_page <2){
           printf("check point1 \n");
           struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr));
           pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
         }
+        
         else{
           printf("check point2 \n");
           int i;
@@ -208,11 +210,13 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
             struct frame_entry * fe = allocate_frame_elem(stack_position);
             pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
             stack_position += PGSIZE;
+            printf("need_page : %d \n", need_page);
+            printf("check time : %d \n", i);
           }
         }
       }
 
-   else if (not_present && is_user_vaddr(fault_addr) && user)
+   else if (not_present && user)
      {
       success = swap_in(t, (unsigned) fault_addr); 
        if (!success)
