@@ -1,3 +1,4 @@
+.gitconfig
 pintos/src/examples/*
 .viminfo
 pintos/filesys.disk
