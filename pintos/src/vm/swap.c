@@ -44,6 +44,7 @@ bool
 swap_in (struct thread *t, unsigned page_num){
 	//find the proper swap slot in the swap_table
 	struct list_elem *e;
+	struct block *swap_slot = block_get_role(BLOCK_SWAP);
 
 	// struct block *swap_slot = block_get_role(BLOCK_SWAP);
 	for (e = list_begin(&swap_table); e != list_end(&swap_table); e = list_next(e))
@@ -58,22 +59,23 @@ swap_in (struct thread *t, unsigned page_num){
 	      	bool success = pagedir_set_page(t->pagedir, (void *) fe->page_number, (void *) fe->frame_number, true);
 	      	if (!success) 
 	      	{
-	      		// printf("no success\n");
+	      		palloc_free_page((void *)fe->frame_number);
 	      		return false;
 	      	}
 
 	      	list_remove(e);	
 
 	      	int i;
-			int sector_per_page = PGSIZE / 512;
+			int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
 			int sector = se->sector;
 
 	      	for (i = 0 ; i < sector_per_page; i++)
 			{
-				void * tmp = malloc(512);
-				
-				block_read (se->swap_slot, sector, tmp);
-				memcpy(((void *) fe->frame_number+512*i), tmp, 512);
+				void * tmp = malloc(BLOCK_SECTOR_SIZE);
+				acquire_sys_lock();
+				block_read (swap_slot, sector, tmp);
+				release_sys_lock();
+				memcpy(((void *) fe->frame_number+BLOCK_SECTOR_SIZE*i), tmp, BLOCK_SECTOR_SIZE);
 	      		free(tmp);
 				sector++;
 			}
@@ -104,7 +106,7 @@ swap_out (struct frame_entry *frame)
 	struct block *swap_slot = block_get_role(BLOCK_SWAP);
 
 	int sector_number;
-	int sector_per_page = PGSIZE / 512;
+	int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
 
 	int i;
 
@@ -118,7 +120,6 @@ swap_out (struct frame_entry *frame)
 
 	se->page_number = frame->page_number; 		
 	se->thread = frame->thread;
-	se->swap_slot = swap_slot;
 
 	//여기 block
 	void * paddr = (frame->frame_number);
@@ -134,8 +135,10 @@ swap_out (struct frame_entry *frame)
 	//write to a swap block.
 	for (i = 0 ; i < sector_per_page; i++)
 	{
-		paddr = ((void *) frame->frame_number) + 512 * i;
+		acquire_sys_lock();
+		paddr = ((void *) frame->frame_number) + BLOCK_SECTOR_SIZE * i;
 		block_write(swap_slot, sector, paddr);
+		release_sys_lock();
 		sector++;
 	}
 	
@@ -165,7 +168,7 @@ swap_remove (struct thread *t)
 	      {
 	      	success = true;
 
-			int sector_per_page = PGSIZE / 512;
+			int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
 			int sector = se->sector;
 
 			lock_acquire(&swap_lock);

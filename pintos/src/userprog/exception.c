@@ -164,15 +164,16 @@ page_fault (struct intr_frame *f)
       //         user ? "user" : "kernel"); 
 
    page_fault_handling(not_present, write, user, fault_addr,f);
+  // burst();
   
 }
 
 bool is_stack(void *fault_addr, struct intr_frame *f){
 
-  printf("fault_addr : %p, frame : %p \n", fault_addr, f->esp);
-  printf("fault_addr - frame_pointer : %d \n",fault_addr - f->esp);
-  printf("need page 1 : %d \n" ,(fault_addr - f->esp)/PGSIZE);
-  printf("0xC0000000-(unsigned)fault_addr : %d \n", 0xC0000000-(unsigned)fault_addr);
+  // printf("fault_addr : %p, frame : %p \n", fault_addr, f->esp);
+  // printf("fault_addr - frame_pointer : %d \n",fault_addr - f->esp);
+  // printf("need page 1 : %d \n" ,(fault_addr - f->esp)/PGSIZE);
+  // printf("0xC0000000-(unsigned)fault_addr : %d \n", 0xC0000000-(unsigned)fault_addr);
   
   if(!is_user_vaddr(fault_addr) || fault_addr - f->esp < -32 || fault_addr < 0x08048000){
     burst();
@@ -191,17 +192,22 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
    bool success;
    struct thread *t = thread_current();
 
-   if(is_stack(fault_addr,f)){     
+   if(is_stack(fault_addr,f)){
+
+        success = swap_in(t, (unsigned) fault_addr);
+        if (success){
+          return;
+        }
 
         int need_page =  (fault_addr - f->esp)/PGSIZE;
         need_page = (need_page * PGSIZE < (fault_addr - f->esp)) ? need_page + 1 : need_page;
         if(need_page <2){
-          printf("check point1 \n");
+          // printf("check point1 \n");
           struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr));
           pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
         }
         else{
-          printf("check point2 \n");
+          // printf("check point2 \n");
           int i;
           int stack_position = pg_round_down(fault_addr);
           for(i=0;i<need_page;i++){
@@ -212,7 +218,7 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
         }
       }
 
-   else if (not_present && is_user_vaddr(fault_addr) && user)
+   else if (fault_addr != NULL && not_present && is_user_vaddr(fault_addr))
      {
       success = swap_in(t, (unsigned) fault_addr); 
        if (!success)

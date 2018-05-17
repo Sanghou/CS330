@@ -39,7 +39,6 @@ process_execute (const char *file_name)
   tid_t tid;
   struct thread *t;
 
-  acquire_sys_lock();
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -64,7 +63,6 @@ process_execute (const char *file_name)
   palloc_free_page (tmp);
 
   if (t == NULL) tid = TID_ERROR;
-  release_sys_lock();
   return tid;
 }
 
@@ -265,7 +263,9 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
   // lock_acquire(&sys_lock);
   /* Open executable file. */
+  acquire_sys_lock();
   file = filesys_open (file_name);
+  release_sys_lock();
 
   if (file == NULL) 
     {
@@ -273,9 +273,12 @@ load (const char *file_name, void (**eip) (void), void **esp)
       goto done; 
     }
 
+  acquire_sys_lock();
   file_deny_write(file);
+  release_sys_lock();
 
    // Read and verify executable header. 
+  acquire_sys_lock();
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
       || memcmp (ehdr.e_ident, "\177ELF\1\1\1", 7)
       || ehdr.e_type != 2
@@ -285,8 +288,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
       || ehdr.e_phnum > 1024) 
     {
       printf ("load: %s: error loading executable\n", file_name);
+      release_sys_lock();
       goto done; 
     }
+    release_sys_lock();
 
   /* Read program headers. */
   file_ofs = ehdr.e_phoff;
@@ -510,24 +515,24 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
-
       uint8_t *kpage = allocate_frame_elem(upage)->frame_number;
+      // uint8_t *kpage = palloc_get_page(PAL_USER);
 
       /* Load this page. */
+      acquire_sys_lock();
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
         {
+          release_sys_lock();
           palloc_free_page (kpage);
           return false; 
         }
+      release_sys_lock();
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
       /* Add the page to the process's address space. */
       if (!install_page (upage, kpage, writable)) 
         {
           palloc_free_page (kpage);
           return false; 
-        }
-      else 
-        {
         }
 
       /* Advance. */
@@ -547,15 +552,15 @@ setup_stack (void **esp)
   bool success = false;
 
 
-  kpage = palloc_get_page(PAL_USER | PAL_ZERO);
-  // struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE);
-  // kpage = fe->frame_number;
-  // memset(fe->frame_number, 0, PGSIZE);
-  if (kpage == NULL)
-    {
-      evict();
-      kpage = palloc_get_page(PAL_USER | PAL_ZERO);
-    }
+  // kpage = palloc_get_page(PAL_USER | PAL_ZERO);
+  struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE);
+  kpage = fe->frame_number;
+  memset(fe->frame_number, 0, PGSIZE);
+  // if (kpage == NULL)
+  //   {
+  //     evict();
+  //     kpage = palloc_get_page(PAL_USER | PAL_ZERO);
+  //   }
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
@@ -563,8 +568,8 @@ setup_stack (void **esp)
         *esp = PHYS_BASE;
       }
       else
-        palloc_free_page (kpage);
-        // deallocate_frame_elem(fe->page_number);
+        // palloc_free_page (kpage);
+        deallocate_frame_elem(fe->page_number);
     } 
   return success;
 }

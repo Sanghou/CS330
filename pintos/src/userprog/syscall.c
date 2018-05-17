@@ -226,9 +226,10 @@ syscall_handler (struct intr_frame *f)
 
       struct file *file = filesys_open(file_name);
 
+      lock_release(&sys_lock);
+
       if (file == NULL){
         f->eax = -1;
-        lock_release(&sys_lock);
         break;
       }
 
@@ -236,7 +237,6 @@ syscall_handler (struct intr_frame *f)
 
       f->eax = fd;
 
-      lock_release(&sys_lock);
   		break;
   	}
 
@@ -247,7 +247,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_FILESIZE:
     {
-      printf("SYS_FILESIZE\n");
+      // printf("SYS_FILESIZE\n");
       int fd = read(f);
       
       struct file_descript *descript = find_file_descript(fd);
@@ -287,12 +287,10 @@ syscall_handler (struct intr_frame *f)
         terminate_error();
         break;
       }
-      lock_acquire(&sys_lock);
 
       struct file_descript *descript = find_file_descript(fd);
       if (fd != 0 && descript == NULL){
         f->eax = -1;
-        lock_release(&sys_lock);
         terminate_error();
         break;
       }
@@ -317,10 +315,12 @@ syscall_handler (struct intr_frame *f)
         //   read_size += file_read(descript->file, buffer, (off_t) mini_buf);
         //   size -= mini_buf;
         // }
+
+        lock_acquire(&sys_lock);
         read_size += file_read(descript->file, buffer, (off_t) size);
+        lock_release(&sys_lock);
       }
       f->eax = read_size;
-      lock_release(&sys_lock);
       
   		break;
   	}
@@ -346,29 +346,29 @@ syscall_handler (struct intr_frame *f)
         break;
       }
 
-      lock_acquire(&sys_lock);
-
       struct file_descript *descript = find_file_descript(fd);
 
       if (fd != 1 && descript == NULL){
         f->eax = 0;
-        lock_release(&sys_lock);
         terminate_error();
         break;
       }
 
   		if (fd == 1)
       {
+        lock_acquire(&sys_lock);
   			putbuf(buffer, size);
+        lock_release(&sys_lock);
   			f->eax = size;
   		}
       else
       {
+        lock_acquire(&sys_lock);
         write_size = file_write(descript->file, buffer, size);
+        lock_release(&sys_lock);
         f->eax = write_size;
       }
 
-      lock_release(&sys_lock);
 
   		break;
   	}
@@ -397,6 +397,7 @@ syscall_handler (struct intr_frame *f)
 
   		break;
   	}
+
   	case SYS_TELL:
     {
       int fd = read(f);
@@ -437,9 +438,10 @@ syscall_handler (struct intr_frame *f)
 //      file_close(descript->file);
 //        remove_file(&descript->fd_elem);
       file_close(descript->file);
+      lock_release(&sys_lock);
+      
       remove_file(&descript->fd_elem); 
 
-      lock_release(&sys_lock);
 
   		break;
   	}
