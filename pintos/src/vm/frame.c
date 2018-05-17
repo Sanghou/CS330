@@ -56,20 +56,30 @@ struct frame_entry * allocate_frame_elem(uint8_t *upage){
 }
 
 
-// struct frame_entry * allocate_frame_elem_both(uint8_t kpage, uint8_t upage){
+struct frame_entry * allocate_frame_elem_both(uint8_t upage){
 	
-// 	struct frame_entry *fe;
-// 	fe = malloc(sizeof(struct frame_entry));
-// 	fe->thread = thread_current();
-// 	fe->page_number = upage;
-// 	fe->frame_number = kpage;
-// 	fe->evict = 1;
-// 	lock_acquire(&frame_lock);
-// 	list_push_back(&page_table, &fe->elem);
-// 	lock_release(&frame_lock);
+	uint8_t *kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+	
+	if(kpage == NULL){
+		evict();
+        kpage = palloc_get_page(PAL_USER | PAL_ZERO);
+        ASSERT(kpage != NULL);
+	}
+	
+	struct frame_entry *fe;
+	
+	fe = malloc(sizeof(struct frame_entry));
+	fe->thread = thread_current();
+	fe->page_number = upage;
+	fe->frame_number = kpage;
+	fe->evict = 1;
+	lock_acquire(&frame_lock);
+	list_push_back(&page_table, &fe->elem);	
+	lock_release(&frame_lock);
+	pointer_set();
 
-// 	return fe;
-// }
+	return fe;
+}
 
 bool deallocate_frame_elem(unsigned pn){
 	struct frame_entry *f;
