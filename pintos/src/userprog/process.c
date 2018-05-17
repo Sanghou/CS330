@@ -55,7 +55,7 @@ process_execute (const char *file_name)
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
 
-  exec_sema_down();
+  load_exec_sync_down();
   t = get_thread_from_tid(tid);
 
   if (tid == TID_ERROR)
@@ -63,6 +63,8 @@ process_execute (const char *file_name)
   palloc_free_page (tmp);
 
   if (t == NULL) tid = TID_ERROR;
+  
+  exec_sema_up();
   return tid;
 }
 
@@ -130,6 +132,8 @@ process_exit (void)
   uint32_t *pd;
 
   file_close(cur->file);
+
+
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;
@@ -249,8 +253,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
   char *token, *saved_ptr;
   char* argv[32];
 
-  // struct lock *sys_lock = get_sys_lock();
-
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();
   if (t->pagedir == NULL) 
@@ -261,24 +263,22 @@ load (const char *file_name, void (**eip) (void), void **esp)
   token = strtok_r (file_name, " ", &saved_ptr);
   file_name = token;
 
-  // lock_acquire(&sys_lock);
   /* Open executable file. */
+
   acquire_sys_lock();
+  
   file = filesys_open (file_name);
-  release_sys_lock();
 
   if (file == NULL) 
     {
       printf ("load: %s: open failed\n", file_name);
+      release_sys_lock();
       goto done; 
     }
-
-  acquire_sys_lock();
   file_deny_write(file);
-  release_sys_lock();
+
 
    // Read and verify executable header. 
-  acquire_sys_lock();
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
       || memcmp (ehdr.e_ident, "\177ELF\1\1\1", 7)
       || ehdr.e_type != 2
@@ -291,7 +291,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       release_sys_lock();
       goto done; 
     }
-    release_sys_lock();
+  release_sys_lock();
 
   /* Read program headers. */
   file_ofs = ehdr.e_phoff;
@@ -300,14 +300,16 @@ load (const char *file_name, void (**eip) (void), void **esp)
       //printf("start for state \n");
       struct Elf32_Phdr phdr;
 
-      if (file_ofs < 0 || file_ofs > file_length (file))
+      if (file_ofs < 0 || file_ofs > file_length (file)){
         goto done;
+      }
       
       file_seek (file, file_ofs);
 
 
-      if (file_read (file, &phdr, sizeof phdr) != sizeof phdr)
+      if (file_read (file, &phdr, sizeof phdr) != sizeof phdr){
         goto done;
+      }
 
       file_ofs += sizeof phdr;
       switch (phdr.p_type) 
@@ -426,7 +428,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   {
     t->file = file;
   }
-  exec_sema_up();
+  load_exec_sync_up();  
 
   //printf("end load file\n");
 
@@ -504,7 +506,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   ASSERT (pg_ofs (upage) == 0);
   ASSERT (ofs % PGSIZE == 0); 
 
-  //printf("load segment!!!! \n");
   file_seek (file, ofs);
   while (read_bytes > 0 || zero_bytes > 0) 
     {

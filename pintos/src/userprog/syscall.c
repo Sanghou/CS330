@@ -24,12 +24,14 @@ void terminate_error (void);
 void terminate (void);
 
 struct lock sys_lock;
+struct semaphore load_exec_sync;
 struct semaphore exec_sema;
 
 void
 syscall_init (void) 
 {
   	lock_init(&sys_lock);
+    sema_init(&load_exec_sync, 0);
     sema_init(&exec_sema, 0);
   	intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
 }
@@ -92,10 +94,11 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXEC:
     {
+      // printf("SYS_EXEC START\n");
   		enum intr_level old_level;
   		old_level = intr_disable();
 
-      // printf("SYS_EXEC start\n");
+      exec_sema_down();
 
   		const char * cmd_line= (const char *) read(f);
 
@@ -120,7 +123,6 @@ syscall_handler (struct intr_frame *f)
 
   		intr_set_level(old_level);
       // printf("SYS_EXEC end \n");
-
   		break;
   	}
 
@@ -571,6 +573,16 @@ acquire_sys_lock (void)
   lock_acquire(&sys_lock);
 }
 
+void
+load_exec_sync_up (void)
+{
+  sema_up(&load_exec_sync);
+}
+void
+load_exec_sync_down (void)
+{
+  sema_down(&load_exec_sync);
+}
 void
 exec_sema_up (void)
 {
