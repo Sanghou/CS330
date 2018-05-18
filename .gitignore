@@ -3,6 +3,7 @@ pintos/src/examples/*
 pintos/filesys.disk
 pintos/swap.dsk
 .bash_history
+.gitconfig
 pintos/src/document2.docx
 pintos/src/13_project2.tar.gz
 pintos/13_project2.tar.gz

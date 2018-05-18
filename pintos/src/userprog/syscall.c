@@ -40,8 +40,6 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f) 
 {
-  // printf("syscall\n");
-
   //read system call number 
   int sys_num = read(f);
 
@@ -66,6 +64,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_EXIT:
     {
       // printf("SYS_EXIT start\n");
+      exec_sema_down();
   		int status = read(f);
 
   		tid_t child_pid = thread_current()->tid;
@@ -80,7 +79,7 @@ syscall_handler (struct intr_frame *f)
    			break;
   		}
 
-  		info->exit_status = status;
+      info->exit_status = status;
 
   		info->is_waiting = false;
 
@@ -98,8 +97,6 @@ syscall_handler (struct intr_frame *f)
   		enum intr_level old_level;
   		old_level = intr_disable();
 
-      exec_sema_down();
-
   		const char * cmd_line= (const char *) read(f);
 
   		if (!is_valid_addr(cmd_line)) 
@@ -108,6 +105,7 @@ syscall_handler (struct intr_frame *f)
   			terminate_error();
   			break;
   		}
+      exec_sema_down();
 
   		tid_t child_pid = process_execute (cmd_line);
 
@@ -118,6 +116,8 @@ syscall_handler (struct intr_frame *f)
 
 
   		f->eax = child_pid;
+      exec_sema_up();
+      
   		struct child_info *info = malloc(sizeof(struct child_info));
   		set_child_info(info, child_pid, thread_current()->tid);
 
@@ -160,7 +160,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_CREATE:
   	{
-  		//read arguments
       // printf("SYS_CREATE\n");
       const char *file = (const char *) read(f);
       int size = read(f);
@@ -464,9 +463,9 @@ set_child_info(struct child_info *info, tid_t child_pid, tid_t parent_pid)
 	struct thread *child = get_thread_from_tid(child_pid);
 
 	memset (info, 0, sizeof *info);
+  sema_init(&info->sema,0);
 	info->child_pid = child_pid;
   info->parent_pid = parent_pid;
-  sema_init(&info->sema,0);
   info->exit_status = -1;
   info->is_waiting = false;
 
@@ -543,9 +542,9 @@ is_valid_addr(void *addr){
 void terminate()
 { 
   struct child_info *info = find_info(thread_current()->tid);
+  sema_up(&thread_current()->start);
   if (info != NULL)
     sema_up(&info->sema);
-  sema_up(&thread_current()->start);
   printf("%s: exit(%d)\n", thread_current()->name, thread_current()->exit_status);
   thread_exit();
 }

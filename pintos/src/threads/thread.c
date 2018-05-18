@@ -507,7 +507,7 @@ init_thread (struct thread *t, const char *name, int priority)
   #endif
 
   #ifdef vm
-    spage_init();
+    // spage_init();
   #endif
 
 }
