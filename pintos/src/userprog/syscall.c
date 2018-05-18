@@ -203,8 +203,6 @@ syscall_handler (struct intr_frame *f)
 
 
 
-
-
   	case SYS_OPEN:
     {
   		//read arguments
@@ -244,8 +242,6 @@ syscall_handler (struct intr_frame *f)
 
 
 
-
-
   	case SYS_FILESIZE:
     {
       // printf("SYS_FILESIZE\n");
@@ -278,8 +274,6 @@ syscall_handler (struct intr_frame *f)
       int size = read(f);
       int read_size = 0;
       int8_t tmp = 1;
-
-      //printf("%p \n", buffer);
 
       if (!is_valid_addr(buffer)) 
       {
@@ -434,10 +428,6 @@ syscall_handler (struct intr_frame *f)
       }
       
       lock_acquire(&sys_lock);
-
-      
-//      file_close(descript->file);
-//        remove_file(&descript->fd_elem);
       file_close(descript->file);
       lock_release(&sys_lock);
       
@@ -446,15 +436,22 @@ syscall_handler (struct intr_frame *f)
 
   		break;
   	}
+
+
+    case SYS_MMAP:
+    {
+      terminate();
+    }
+
+    case SYS_MUNMAP:
+    {
+      terminate();
+    }
   	default:
   		terminate();
   		break;
   }
 
-  // printf("%p\n", f->eip);
-  // if (is_user_vaddr((char *)f->eip)){
-  //   terminate_error();
-  // }
 }
 
 void 
