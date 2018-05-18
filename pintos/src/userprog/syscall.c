@@ -537,6 +537,7 @@ bool
 is_valid_addr(void *addr){
   
   return (is_user_vaddr(addr) && pagedir_get_page(thread_current()->pagedir, addr) != NULL);
+
 }
 
 void terminate()

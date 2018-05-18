@@ -201,15 +201,12 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
         }
 
         int need_page =  (0xC0000000-(unsigned)fault_addr)/PGSIZE;
-        
         if(need_page <2){
-          //printf("check point1 \n");
           struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr));
           pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
         }
         
         else{
-          // printf("check point2 \n");
           int i;
           int stack_position = pg_round_down(fault_addr);
           for(i=0;i<need_page;i++){
