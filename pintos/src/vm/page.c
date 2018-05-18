@@ -33,30 +33,28 @@ void
 spage_init()
 {
 	struct hash *page_table = thread_current()->supplement_page_table;
-		page_table = palloc_get_page(PAL_ASSERT);
 	hash_init(page_table,hash_map,spage_less_func, NULL);
 }
 
 bool 
-allocate_spage_elem (unsigned pa, unsigned va)
+allocate_spage_elem (unsigned va, enum spage_type flag, void * entry)
 {
 	struct hash *page_table = thread_current()->supplement_page_table;
 	struct spage_entry *fe = malloc(sizeof(struct spage_entry));
 	struct thread* t = thread_current();
 	fe->va = va;
-	fe->pa = pa;
-	fe->thread = t;
-	fe->evict = 0;
+	fe->pointer = entry;
+	fe->page_type = flag;
 	ASSERT(hash_insert(page_table, &fe->elem) == NULL);
 }
 
 bool 
-deallocate_spage_elem (unsigned pa)
+deallocate_spage_elem (unsigned va)
 {
 	struct spage_entry f;
 	struct hash_elem *e;
 	struct hash *page_table = thread_current()->supplement_page_table;
-	f.pa = pa; 
+	f.va = va; 
 	e = hash_find(page_table, &f.elem);
 	if (e != NULL)
 		{
@@ -68,10 +66,10 @@ deallocate_spage_elem (unsigned pa)
 }
 
 struct spage_entry *
-mapped_entry (struct thread *t, unsigned va){
+mapped_entry (unsigned va){
 	struct spage_entry *page_entry;	
 	page_entry->va = va;
-	struct hash_elem *hash = hash_find(&t->supplement_page_table, &page_entry->elem);
+	struct hash_elem *hash = hash_find(&thread_current()->supplement_page_table, &page_entry->elem);
 
 	if(hash == NULL){
 	 	return NULL;
