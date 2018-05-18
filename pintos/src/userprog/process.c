@@ -38,7 +38,7 @@ process_execute (const char *file_name)
   char *fn_copy, *saved_ptr, *tmp;
   tid_t tid;
   struct thread *t;
-
+  
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -51,7 +51,7 @@ process_execute (const char *file_name)
   strlcpy (tmp, file_name, PGSIZE);
 
   file_name = strtok_r (tmp, " ", &saved_ptr);
-
+  
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
 
@@ -63,7 +63,6 @@ process_execute (const char *file_name)
   palloc_free_page (tmp);
 
   if (t == NULL) tid = TID_ERROR;
-  
   exec_sema_up();
   return tid;
 }
@@ -428,7 +427,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   {
     t->file = file;
   }
-  load_exec_sync_up();  
+  load_exec_sync_up(); 
 
   //printf("end load file\n");
 

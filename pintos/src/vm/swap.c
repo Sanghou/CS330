@@ -72,9 +72,9 @@ swap_in (struct thread *t, unsigned page_num){
 	      	for (i = 0 ; i < sector_per_page; i++)
 			{
 				void * tmp = malloc(BLOCK_SECTOR_SIZE);
-				acquire_sys_lock();
+				// acquire_sys_lock();
 				block_read (swap_slot, sector, tmp);
-				release_sys_lock();
+				// release_sys_lock();
 				memcpy(((void *) fe->frame_number+BLOCK_SECTOR_SIZE*i), tmp, BLOCK_SECTOR_SIZE);
 	      		free(tmp);
 				sector++;
@@ -135,10 +135,10 @@ swap_out (struct frame_entry *frame)
 	//write to a swap block.
 	for (i = 0 ; i < sector_per_page; i++)
 	{
-		acquire_sys_lock();
+		// acquire_sys_lock();
 		paddr = ((void *) frame->frame_number) + BLOCK_SECTOR_SIZE * i;
 		block_write(swap_slot, sector, paddr);
-		release_sys_lock();
+		// release_sys_lock();
 		sector++;
 	}
 	
