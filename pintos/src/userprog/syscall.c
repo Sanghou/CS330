@@ -444,7 +444,7 @@ syscall_handler (struct intr_frame *f)
       int fd = read(f);
       void *addr =(void *)read(f);
 
-      if(fd <= 1 || !is_valid_addr(addr) ||addr==0){
+      if(fd <= 1 || !is_valid_addr(addr) ||addr==0 ){
         f->eax = -1;
         terminate();
       }
@@ -459,6 +459,9 @@ syscall_handler (struct intr_frame *f)
         f->eax = -1;
         terminate_error();
       }
+
+      while
+
 
     }
 
