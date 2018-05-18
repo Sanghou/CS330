@@ -3,6 +3,7 @@
 
 #include <debug.h>
 #include <list.h>
+#include <hash.h>
 #include <stdint.h>
 #include "threads/synch.h"
 
@@ -112,7 +113,7 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
 
 #ifdef VM
-    struct hash *supplement_page_table;
+    struct hash supplement_page_table;
     struct list mapping_table;
 #endif
 

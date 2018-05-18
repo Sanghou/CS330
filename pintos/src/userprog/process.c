@@ -64,6 +64,7 @@ process_execute (const char *file_name)
   palloc_free_page (tmp);
 
   if (t == NULL) tid = TID_ERROR;
+  else spage_init(t);
   exec_sema_up();
   return tid;
 }
@@ -132,6 +133,11 @@ process_exit (void)
   uint32_t *pd;
 
   file_close(cur->file);
+
+  spage_destroy(cur->supplement_page_table);
+
+//****************page well destroy.
+  //when process is dead.
 
 
   /* Destroy the current process's page directory and switch back
@@ -428,9 +434,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   {
     t->file = file;
   }
-  load_exec_sync_up(); 
-
-  //printf("end load file\n");
+  load_exec_sync_up();
 
   return success;
 }
@@ -507,6 +511,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   ASSERT (ofs % PGSIZE == 0); 
 
   file_seek (file, ofs);
+
   while (read_bytes > 0 || zero_bytes > 0) 
     {
       /* Calculate how to fill this page.
@@ -516,7 +521,8 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
-      uint8_t *kpage = allocate_frame_elem(upage)->frame_number;
+      uint8_t *kpage = allocate_frame_elem(upage, writable)->frame_number;
+      allocate_spage_elem(upage, PHYS_MEMORY);
       // uint8_t *kpage = palloc_get_page(PAL_USER);
 
       /* Load this page. */
@@ -541,7 +547,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       zero_bytes -= page_zero_bytes;
       upage += PGSIZE;
     }
-  //printf("asdfwqfefwe\n");
   return true;
 }
 /* Create a minimal stack by mapping a zeroed page at the top of
@@ -555,7 +560,8 @@ setup_stack (void **esp)
 
 
   // kpage = palloc_get_page(PAL_USER | PAL_ZERO);
-  struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE);
+  struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE, true);
+  allocate_spage_elem(((uint8_t *) PHYS_BASE) - PGSIZE, PHYS_MEMORY);
   kpage = fe->frame_number;
   memset(fe->frame_number, 0, PGSIZE);
   // if (kpage == NULL)
@@ -608,6 +614,8 @@ load_file (struct file *file, uint8_t *upage,
 
   file_seek (file, 0);
 
+  off_t ofs = 0;
+
   while (read_bytes > 0 || zero_bytes > 0) 
     {
       /* Calculate how to fill this page.
@@ -617,7 +625,8 @@ load_file (struct file *file, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
-      uint8_t *kpage = allocate_frame_elem(upage)->frame_number;
+      uint8_t *kpage = allocate_frame_elem(upage, writable)->frame_number;
+      allocate_spage_elem(upage, PHYS_MEMORY);
       // uint8_t *kpage = palloc_get_page(PAL_USER);
 
       /* Load this page. */
@@ -642,6 +651,7 @@ load_file (struct file *file, uint8_t *upage,
       /* Advance. */
       struct addr_elem *address = malloc(sizeof(struct addr_elem));
       
+      address->ofs = ofs;
       address->virtual_address = upage;
       address->physical_address = kpage;
 
@@ -649,6 +659,7 @@ load_file (struct file *file, uint8_t *upage,
       
       read_bytes -= page_read_bytes;
       zero_bytes -= page_zero_bytes;
+      ofs += PGSIZE;
       upage += PGSIZE;
     }
   //printf("asdfwqfefwe\n");

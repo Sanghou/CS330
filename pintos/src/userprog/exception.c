@@ -171,7 +171,7 @@ page_fault (struct intr_frame *f)
 bool is_stack(void *fault_addr, struct intr_frame *f){
 
 
-  // printf("fault_addr : %p, frame : %p \n", fault_addr, f->esp);
+   printf("fault_addr : %p, frame : %p \n", fault_addr, f->esp);
   // printf("fault_addr - frame_pointer : %d \n",fault_addr - f->esp);
   // printf("need page 1 : %d \n" ,(fault_addr - f->esp)/PGSIZE);
   // printf("0xC0000000-(unsigned)fault_addr : %d \n", 0xC0000000-(unsigned)fault_addr);
@@ -202,16 +202,18 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
 
         int need_page =  (0xC0000000-(unsigned)fault_addr)/PGSIZE;
         if(need_page <2){
-          struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr));
+          struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr), true);
           pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
+          allocate_spage_elem(pg_round_down(fault_addr), PHYS_MEMORY);
         }
         
         else{
           int i;
           int stack_position = pg_round_down(fault_addr);
           for(i=0;i<need_page;i++){
-            struct frame_entry * fe = allocate_frame_elem(stack_position);
+            struct frame_entry * fe = allocate_frame_elem(stack_position, true);
             pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
+            allocate_spage_elem(stack_position, PHYS_MEMORY);
             stack_position += PGSIZE;
 
             //printf("need_page : %d \n", need_page);
@@ -220,14 +222,14 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
         }
       }
 
-   else if (fault_addr != NULL && not_present && is_user_vaddr(fault_addr))
+   else if (not_present && mapped_entry(t, pg_round_down(fault_addr)))
      {
       success = swap_in(t, (unsigned) fault_addr); 
-       if (!success)
-       {
-        struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr));
-        pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
-       }
+       // if (!success)
+       // {
+       //  struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr));
+       //  pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
+       // }
      }
    else{
       burst();

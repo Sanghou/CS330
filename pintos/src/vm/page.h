@@ -22,8 +22,8 @@ struct spage_entry
 	};
 
 
-void spage_init (void);
-bool allocate_spage_elem(unsigned va, enum spage_type flag, void * entry);
+void spage_init (struct thread*);
+bool allocate_spage_elem(unsigned va, enum spage_type flag);
 bool deallocate_spage_elem(unsigned va);
 struct spage_entry * mapped_entry (struct thread *t, unsigned va);
 

@@ -445,8 +445,7 @@ syscall_handler (struct intr_frame *f)
 
     case SYS_MMAP:
     {
-
-      int fd = read(f);
+      unsigned int fd = read(f);
       void *addr =(void *)read(f);
 
       if(fd <= 1 || !is_user_vaddr(addr) || addr==0 ){
@@ -454,33 +453,32 @@ syscall_handler (struct intr_frame *f)
         break;
       }
 
-
       struct file_descript *descript = find_file_descript(fd);
 
-      int file_len = file_length(descript->file);
-
-
-      if(descript == NULL || file_len==0 ){
+      if(descript == NULL) {
         f->eax = -1;
         break;
       }
 
-      //ROUND_UP(file_len,PGSIZE) - file_len;
+      struct file *file = file_reopen(descript->file);
 
-      struct file_map* mapped_file = load_file(descript->file, (uint8_t*)addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
+      int file_len = file_length(file);
+
+      if(file_len==0 ){
+        f->eax = -1;
+        break;
+      }
+
+      struct file_map* mapped_file = load_file(file, (uint8_t*)addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
       if(mapped_file == NULL){
         f->eax = -1;
         break;
       }
       mapped_file->t = thread_current();
-      mapped_file->fd = fd;
+      mapped_file->file = file;
       mapped_file->mmap_id = global_mmap_id;
       global_mmap_id++;
 
-      if(thread_current()->mapping_table == NULL || mapped_file->elem == NULL){
-        printf("something null!! \n");
-      }
-      
       list_push_back(&thread_current()->mapping_table,&mapped_file->elem);
 
       f->eax = mapped_file->mmap_id;
@@ -489,6 +487,8 @@ syscall_handler (struct intr_frame *f)
 
     case SYS_MUNMAP:
     {
+      //list_init(&thread_current()->mapping_table);
+
       int mmap_id = read(f);
 
       struct list* mapping_table = &thread_current()->mapping_table;
@@ -502,23 +502,16 @@ syscall_handler (struct intr_frame *f)
             struct list_elem* e2;
             e2 = list_pop_front(&mapped_file->addr);
             struct addr_elem *pointer = list_entry(e2,struct addr_elem, elem);
-
-
-            if((unsigned)pointer->physical_address&PTE_D){ //check dirty bit
-
-
-              struct file_descript *descript = find_file_descript(mapped_file->fd);
-              //if change write file.
-              if(descript==NULL){
-                terminate_error();
-              }
+            
+            //if((unsigned)pointer->physical_address&PTE_D){ //check dirty bit
+            if(pagedir_is_dirty(thread_current()->pagedir, pointer->virtual_address)){ //check dirty bit
               acquire_sys_lock();
-              file_write(descript->file, pointer->virtual_address, PGSIZE);
+              file_write_at(mapped_file->file, pointer->physical_address, PGSIZE, pointer->ofs);
               release_sys_lock();
-
             }
 
-            deallocate_frame_elem(pointer->physical_address);
+            deallocate_spage_elem(pointer->virtual_address);
+            deallocate_frame_elem(pointer->virtual_address);
             free(pointer);
           }
 

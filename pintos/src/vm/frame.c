@@ -30,14 +30,12 @@ frame_init (void)
 }
 
 
-struct frame_entry * allocate_frame_elem(uint8_t *upage){
+struct frame_entry * allocate_frame_elem(uint8_t *upage, bool writable){
 	
 	uint8_t *kpage = palloc_get_page (PAL_USER);
 	
 	if(kpage == NULL){
-		evict();
-        kpage = palloc_get_page(PAL_USER);
-        ASSERT(kpage != NULL);
+		kpage = evict();
 	}
 	
 	struct frame_entry *fe;
@@ -47,6 +45,7 @@ struct frame_entry * allocate_frame_elem(uint8_t *upage){
 	fe->page_number = upage;
 	fe->frame_number = kpage;
 	fe->evict = 1;
+	fe->writable = writable;
 	lock_acquire(&frame_lock);
 	list_push_back(&page_table, &fe->elem);	
 	lock_release(&frame_lock);
@@ -55,31 +54,6 @@ struct frame_entry * allocate_frame_elem(uint8_t *upage){
 	return fe;
 }
 
-
-struct frame_entry * allocate_frame_elem_both(uint8_t upage){
-	
-	uint8_t *kpage = palloc_get_page (PAL_USER | PAL_ZERO);
-	
-	if(kpage == NULL){
-		evict();
-        kpage = palloc_get_page(PAL_USER | PAL_ZERO);
-        ASSERT(kpage != NULL);
-	}
-	
-	struct frame_entry *fe;
-	
-	fe = malloc(sizeof(struct frame_entry));
-	fe->thread = thread_current();
-	fe->page_number = upage;
-	fe->frame_number = kpage;
-	fe->evict = 1;
-	lock_acquire(&frame_lock);
-	list_push_back(&page_table, &fe->elem);	
-	lock_release(&frame_lock);
-	pointer_set();
-
-	return fe;
-}
 
 bool deallocate_frame_elem(unsigned pn){
 	struct frame_entry *f;
@@ -91,7 +65,6 @@ bool deallocate_frame_elem(unsigned pn){
     	f = list_entry(e, struct frame_entry, elem);
     	if (f->page_number == pn)
     	  {
-
     	  	if (pointer == e)
     	  	{
     	  		pointer = list_next(e);
@@ -99,11 +72,12 @@ bool deallocate_frame_elem(unsigned pn){
     	  			pointer = list_begin(&page_table);
     	  	}
 
-    		list_remove(e);    		
-    		lock_release(&frame_lock);
     		pagedir_clear_page(f->thread->pagedir, f->page_number);
     		palloc_free_page((void *)(f->frame_number));
     		free(f);
+
+    		list_remove(e);
+    		lock_release(&frame_lock);
     		return true;
     	  }
 	  }
@@ -111,7 +85,7 @@ bool deallocate_frame_elem(unsigned pn){
 	return false;
 }
 
-void
+uint8_t*
 evict (void) // 2-chance
 {
 
@@ -155,8 +129,9 @@ evict (void) // 2-chance
 	}
 
 	pagedir_clear_page(f->thread->pagedir, f->page_number);
-	palloc_free_page((void *)(f->frame_number));
+	uint8_t *frame = f->frame_number;
 	free(f);
+	return frame;
 }
 
 void

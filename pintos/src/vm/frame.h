@@ -11,9 +11,10 @@ struct frame_entry
 		unsigned page_number; //virtual page number
 		unsigned frame_number; //frame table number
 	 	unsigned evict;
+	 	bool writable;
  	};
 
 void frame_init (void);
-struct frame_entry * allocate_frame_elem (uint8_t *upage);
+struct frame_entry * allocate_frame_elem (uint8_t *upage, bool writable);
 bool deallocate_frame_elem (unsigned pn);
-void evict (void);
+uint8_t* evict (void);

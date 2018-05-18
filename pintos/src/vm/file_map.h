@@ -6,7 +6,7 @@
 
 struct file_map{
 	struct thread *t;
-	int fd;
+	struct file *file;
 	int mmap_id;
 	struct list addr;
 	struct list_elem elem;
@@ -14,6 +14,7 @@ struct file_map{
 
 struct addr_elem{
 	struct list_elem elem;
+	off_t ofs;
 	void * virtual_address;
 	void * physical_address;
 };

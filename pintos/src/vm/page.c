@@ -30,20 +30,45 @@ hash_map (const struct hash_elem *e, void *aux)
 }
 
 void 
-spage_init()
+spage_init(struct thread *t)
 {
-	struct hash *page_table = thread_current()->supplement_page_table;
+	struct hash *page_table = &t->supplement_page_table;
 	hash_init(page_table,hash_map,spage_less_func, NULL);
 }
 
+void
+element_destroy(struct hash_elem *e, void *aux)
+{
+	//***************
+	// to do destroy : hash entry return type -> 
+	// save kpage.
+
+	// not swapped -> palloc free
+
+
+	// if mmap, dirty : write back.
+	// dirty check : pagedir_is_dirty();
+
+	// else -> just die.
+
+
+
+}
+
+void
+spage_destroy(struct hash *spt)
+{
+	hash_destroy(spt, element_destroy);
+}
+
+
 bool 
-allocate_spage_elem (unsigned va, enum spage_type flag, void * entry)
+allocate_spage_elem (unsigned va, enum spage_type flag)
 {
 	struct hash *page_table = thread_current()->supplement_page_table;
 	struct spage_entry *fe = malloc(sizeof(struct spage_entry));
 	struct thread* t = thread_current();
 	fe->va = va;
-	fe->pointer = entry;
 	fe->page_type = flag;
 	ASSERT(hash_insert(page_table, &fe->elem) == NULL);
 }
@@ -59,7 +84,6 @@ deallocate_spage_elem (unsigned va)
 	if (e != NULL)
 		{
 			hash_delete(page_table, &e);
-			free(&f);
 			return true;
 		}
 	return false;

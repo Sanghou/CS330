@@ -10,7 +10,8 @@ struct swap_entry
 		struct list_elem list_elem; //swap_list elem;
 		unsigned page_number; 		//page once assigned to this
 		void *thread; 				//pointer to the thread which owned this virtual page.
-		int sector; 		//size of blocks. 
+		int sector; 		//size of blocks.
+		bool writable;
 	};
 
 void swap_list_init ();
