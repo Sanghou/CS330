@@ -4,23 +4,24 @@
 #include <lib/kernel/list.h>
 #include <lib/kernel/hash.h>
 
-struct spage_entry
-	{
-		struct hash_elem elem;
-		struct thread * thread;
-		unsigned va; //virtual address
-		unsigned pa; //physical address
-		unsigned evict;
-	};
-
 enum spage_type
 	{
     /* Block device types that play a role in Pintos. */
     PHYS_MEMORY,
-    SWAP_DISK
+    SWAP_DISK,
+    MMAP
 	};
 
+struct spage_entry
+	{
+		struct hash_elem elem;
+		unsigned va; //virtual address
+		enum spage_type page_type;
+		void * pointer;
+	};
+
+
 void spage_init (void);
-bool allocate_spage_elem(unsigned va, unsigned pa);
+bool allocate_spage_elem(unsigned va, enum spage_type flag, void * entry);
 bool deallocate_spage_elem(unsigned va);
-struct spage_entry * mapped_entry (struct thread *t, unsigned va);
+struct spage_entry * mapped_entry (unsigned va);
