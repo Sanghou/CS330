@@ -93,7 +93,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXEC:
     {
-      printf("SYS_EXEC START\n");
+      // printf("SYS_EXEC START\n");
   		enum intr_level old_level;
   		old_level = intr_disable();
 
@@ -122,7 +122,7 @@ syscall_handler (struct intr_frame *f)
   		set_child_info(info, child_pid, thread_current()->tid);
 
   		intr_set_level(old_level);
-      printf("SYS_EXEC end \n");
+      // printf("SYS_EXEC end \n");
   		break;
   	}
 
@@ -131,7 +131,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_WAIT:
     {
-      printf("SYS_WAIT start\n");
+      // printf("SYS_WAIT start\n");
       tid_t child_pid = (tid_t) read(f);
 
   		tid_t parent_pid = thread_current()->tid;
@@ -151,7 +151,7 @@ syscall_handler (struct intr_frame *f)
   		f->eax = info->exit_status;
   		remove_child(&info->elem);
   		free(info);
-      printf("SYS_WAIT end\n");
+      // printf("SYS_WAIT end\n");
   		break;
   	}
 
@@ -446,7 +446,7 @@ syscall_handler (struct intr_frame *f)
 
       struct file_descript *descript = find_file_descript(fd);
 
-      if( fd == 0 || fd == 1 || descript == NULL || !is_valid_addr(addr))
+      if( fd <= 1 || descript == NULL || !is_valid_addr(addr))
       {
         terminate_error();
         break;

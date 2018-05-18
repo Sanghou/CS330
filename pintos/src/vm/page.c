@@ -3,10 +3,10 @@
 #include <stdbool.h>
 #include <debug.h>
 #include <inttypes.h>
-#include "vm/page.h"
 #include "lib/kernel/hash.h"
 #include "threads/palloc.h"
 #include "threads/thread.h"
+#include "vm/page.h"
 
 
 
@@ -66,7 +66,7 @@ deallocate_spage_elem (unsigned va)
 }
 
 struct spage_entry *
-mapped_entry (unsigned va){
+mapped_entry (struct thread *t, unsigned va){
 	struct spage_entry *page_entry;	
 	page_entry->va = va;
 	struct hash_elem *hash = hash_find(&thread_current()->supplement_page_table, &page_entry->elem);
