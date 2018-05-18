@@ -440,11 +440,24 @@ syscall_handler (struct intr_frame *f)
 
     case SYS_MMAP:
     {
+      int fd = read(f);
+      void *addr = read(f);
+
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (descript == NULL || !is_valid_addr(addr))
+      {
+        terminate_error();
+        break;
+      }
+
+
       terminate();
     }
 
     case SYS_MUNMAP:
     {
+      int mapping = read(f);
       terminate();
     }
   	default:
