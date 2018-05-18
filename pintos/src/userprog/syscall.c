@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <syscall-nr.h>
 #include <list.h>
+#include <round.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/synch.h"
@@ -10,6 +11,8 @@
 #include "threads/vaddr.h"
 #include "threads/pte.h"
 #include "userprog/pagedir.h"
+#include "vm/file_map.h"
+#include "vm/frame.h"
 
 static void syscall_handler (struct intr_frame *);
 
@@ -26,6 +29,8 @@ void terminate (void);
 struct lock sys_lock;
 struct semaphore load_exec_sync;
 struct semaphore exec_sema;
+
+int global_mmap_id = 0;
 
 void
 syscall_init (void) 
@@ -93,7 +98,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXEC:
     {
-      printf("SYS_EXEC START\n");
+      //printf("SYS_EXEC START\n");
   		enum intr_level old_level;
   		old_level = intr_disable();
 
@@ -122,7 +127,7 @@ syscall_handler (struct intr_frame *f)
   		set_child_info(info, child_pid, thread_current()->tid);
 
   		intr_set_level(old_level);
-      printf("SYS_EXEC end \n");
+      //printf("SYS_EXEC end \n");
   		break;
   	}
 
@@ -131,7 +136,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_WAIT:
     {
-      printf("SYS_WAIT start\n");
+      // printf("SYS_WAIT start\n");
       tid_t child_pid = (tid_t) read(f);
 
   		tid_t parent_pid = thread_current()->tid;
@@ -151,7 +156,7 @@ syscall_handler (struct intr_frame *f)
   		f->eax = info->exit_status;
   		remove_child(&info->elem);
   		free(info);
-      printf("SYS_WAIT end\n");
+      // printf("SYS_WAIT end\n");
   		break;
   	}
 
@@ -444,31 +449,89 @@ syscall_handler (struct intr_frame *f)
       int fd = read(f);
       void *addr =(void *)read(f);
 
-      if(fd <= 1 || !is_valid_addr(addr) ||addr==0 ){
+      if(fd <= 1 || !is_user_vaddr(addr) || addr==0 ){
         f->eax = -1;
-        terminate();
+        break;
       }
 
-      acquire_sys_lock();
+
       struct file_descript *descript = find_file_descript(fd);
-      release_sys_lock();
 
       int file_len = file_length(descript->file);
 
+
       if(descript == NULL || file_len==0 ){
         f->eax = -1;
-        terminate_error();
+        break;
       }
 
-      while
+      //ROUND_UP(file_len,PGSIZE) - file_len;
 
+      struct file_map* mapped_file = load_file(descript->file, (uint8_t*)addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
+      if(mapped_file == NULL){
+        f->eax = -1;
+        break;
+      }
+      mapped_file->t = thread_current();
+      mapped_file->fd = fd;
+      mapped_file->mmap_id = global_mmap_id;
+      global_mmap_id++;
 
+      if(thread_current()->mapping_table == NULL || mapped_file->elem == NULL){
+        printf("something null!! \n");
+      }
+      
+      list_push_back(&thread_current()->mapping_table,&mapped_file->elem);
+
+      f->eax = mapped_file->mmap_id;
+      break;
     }
 
     case SYS_MUNMAP:
     {
-      terminate();
+      int mmap_id = read(f);
+
+      struct list* mapping_table = &thread_current()->mapping_table;
+      struct list_elem* e;
+      for(e=list_begin(mapping_table); e!= list_end(mapping_table); e=list_next(e)){
+
+        struct file_map * mapped_file = list_entry(e,struct file_map,elem);
+
+        if(mapped_file->mmap_id == mmap_id){
+          while(!list_empty(&mapped_file->addr)){
+            struct list_elem* e2;
+            e2 = list_pop_front(&mapped_file->addr);
+            struct addr_elem *pointer = list_entry(e2,struct addr_elem, elem);
+
+
+            if((unsigned)pointer->physical_address&PTE_D){ //check dirty bit
+
+
+              struct file_descript *descript = find_file_descript(mapped_file->fd);
+              //if change write file.
+              if(descript==NULL){
+                terminate_error();
+              }
+              acquire_sys_lock();
+              file_write(descript->file, pointer->virtual_address, PGSIZE);
+              release_sys_lock();
+
+            }
+
+            deallocate_frame_elem(pointer->physical_address);
+            free(pointer);
+          }
+
+          list_remove(&mapped_file->elem); 
+          free(mapped_file);
+
+          break;
+        }
+      }
+
+      break;  
     }
+
   	default:
   		terminate();
   		break;
@@ -506,51 +569,8 @@ read (struct intr_frame *f)
   f->esp += 4;
   return result;
 }
-/*
-void*
-read (void **esp){
-  if(!is_valid_addr(esp)){
-    terminate_error();
-    return -1;
-  }
-  return *esp;
-}
-*/
 
-/*
-bool 
-is_valid_addr(void *addr)
-{
-  if (!is_user_vaddr(addr) || addr == NULL) return false;
 
-  //printf("%d \n", *(unsigned *)addr);
-
-  uint32_t *pd, *pde, *pt, *pte;
-  uintptr_t tmp;
-  asm volatile ("movl %%cr3, %0" : "=r" (tmp));
-  pd = ptov (tmp);
-
-  if (pd == NULL) return false;
-
-  pde = pd + pd_no(addr);
-
-  if (*pde == 0) return false;
-
-  pt = pde_get_pt(*pde);
-
-  if (pt == NULL) return false;
-
-  pte = &pt[pt_no(addr)];
-
-  if (pte == NULL) return false; //page table doesn't exist
-
-  if (!(*pte&PTE_P)) return false; //page table entry not present
-
-  //if (!(*pte&PTE_U)) return false;
-
-  return true;
-}
-*/
 
 bool 
 is_valid_addr(void *addr){

@@ -113,6 +113,7 @@ struct thread
 
 #ifdef VM
     struct hash *supplement_page_table;
+    struct list mapping_table;
 #endif
 
   };

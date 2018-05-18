@@ -10,4 +10,11 @@ struct file_map{
 	int mmap_id;
 	struct list addr;
 	struct list_elem elem;
-}
+};
+
+struct addr_elem{
+	struct list_elem elem;
+	void * virtual_address;
+	void * physical_address;
+};
+

@@ -508,6 +508,7 @@ init_thread (struct thread *t, const char *name, int priority)
 
   #ifdef vm
     // spage_init();
+    list_init(&t->mapping_table);
   #endif
 
 }

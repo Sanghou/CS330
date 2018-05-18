@@ -101,7 +101,7 @@ bool deallocate_frame_elem(unsigned pn){
 
     		list_remove(e);    		
     		lock_release(&frame_lock);
-    		// pagedir_clear_page(f->thread->pagedir, f->page_number);
+    		pagedir_clear_page(f->thread->pagedir, f->page_number);
     		palloc_free_page((void *)(f->frame_number));
     		free(f);
     		return true;

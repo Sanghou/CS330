@@ -4,12 +4,16 @@
 #include <stdlib.h>
 //#include <stdio.h>
 #include <lib/kernel/list.h>
-#include "vm/frame.h"
-#include "vm/file_map.h"
 #include "threads/thread.h"
-#include "threads/interrupt.h"
-#include "threads/intr-stubs.h"
 #include "threads/palloc.h"
-#include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"	
+#include "filesys/directory.h"
+#include "filesys/file.h"
+#include "filesys/filesys.h"
+#include "vm/frame.h"
+#include "vm/file_map.h"
+
+
+
+
