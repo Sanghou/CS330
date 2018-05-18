@@ -440,7 +440,21 @@ syscall_handler (struct intr_frame *f)
 
     case SYS_MMAP:
     {
-      terminate();
+
+      int fd = read(f);
+      void *addr =(void *)read(f);
+
+      if(fd <= 1 || addr == 0){
+        terminate();
+      }
+
+      struct file_descript *descript = find_file_descript(fd);
+
+      if(descript == NULL || file_length(descript->file)==0 ){
+        terminate_error();
+      }
+
+      
     }
 
     case SYS_MUNMAP:
