@@ -440,21 +440,23 @@ syscall_handler (struct intr_frame *f)
     {
 
       int fd = read(f);
-      void *addr =(void *)read(f);
+      void *addr =(void *) read(f);
 
-      if(fd <= 1 || !is_user_vaddr(addr) ||addr==0){
-        f->eax = -1;
-        terminate();
-      }
 
       struct file_descript *descript = find_file_descript(fd);
 
+      if( fd <= 1 || descript == NULL || !is_valid_addr(addr))
+      {
+        terminate_error();
+        break;
+      }
 
       int file_len = file_length(descript->file);
 
-      if(descript == NULL || file_len==0 ){
-        f->eax = -1;
+      if ( file_len == 0)
+      {
         terminate_error();
+        break;
       }
       break;
 
@@ -462,6 +464,7 @@ syscall_handler (struct intr_frame *f)
 
     case SYS_MUNMAP:
     {
+      int mapping = read(f);
       terminate();
     }
   	default:

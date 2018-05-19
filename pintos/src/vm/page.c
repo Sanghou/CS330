@@ -9,7 +9,6 @@
 #include "threads/thread.h"
 #include "threads/synch.h"
 
-
 // struct lock hash_lock;
 
 bool 
@@ -101,6 +100,7 @@ mapped_entry (struct thread *t, unsigned va){
 	struct spage_entry page_entry;	
 	page_entry.va = va;
 	struct hash_elem *hash = hash_find(&t->supplement_page_table, &page_entry.elem);
+
 
 	if(hash == NULL){
 	 	return NULL;
