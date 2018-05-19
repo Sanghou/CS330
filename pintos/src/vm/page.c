@@ -73,13 +73,38 @@ spage_init(struct hash *page_table)
 	// lock_init(&hash_lock);
 }
 
+void
+element_destroy(struct hash_elem *e, void *aux)
+{
+	//***************
+	// to do destroy : hash entry return type -> 
+	// save kpage.
+
+	// not swapped -> palloc free
+
+
+	// if mmap, dirty : write back.
+	// dirty check : pagedir_is_dirty();
+
+	// else -> just die.
+
+
+
+}
+
+void
+spage_destroy(struct hash *spt)
+{
+	hash_destroy(spt, element_destroy);
+}
+
+
 bool 
 allocate_spage_elem (unsigned va, enum spage_type flag, void * entry, bool writable)
 {
 	struct hash *page_table = &thread_current()->supplement_page_table;
 	struct spage_entry *fe = malloc(sizeof(struct spage_entry));
 	fe->va = va;
-	fe->pointer = entry;
 	fe->page_type = flag;
 	fe->writable = writable;
 	// lock_acquire(&hash_lock);

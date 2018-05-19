@@ -11,10 +11,15 @@
 #include "threads/vaddr.h"
 #include "threads/pte.h"
 #include "userprog/pagedir.h"
+<<<<<<< HEAD
+#include "vm/file_map.h"
+#include "vm/frame.h"
+=======
 #ifdef VM
 #include "vm/file_map.h"    
 #include "vm/frame.h"
 #endif
+>>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 
 static void syscall_handler (struct intr_frame *);
 
@@ -101,7 +106,11 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXEC:
     {
+<<<<<<< HEAD
+      //printf("SYS_EXEC START\n");
+=======
       // printf("SYS_EXEC START\n");
+>>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
   		enum intr_level old_level;
   		old_level = intr_disable();
 
@@ -130,7 +139,11 @@ syscall_handler (struct intr_frame *f)
   		set_child_info(info, child_pid, thread_current()->tid);
 
   		intr_set_level(old_level);
+<<<<<<< HEAD
+      //printf("SYS_EXEC end \n");
+=======
       // printf("SYS_EXEC end \n");
+>>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
   		break;
   	}
 
@@ -461,6 +474,14 @@ syscall_handler (struct intr_frame *f)
       }
 
       struct file *file = file_reopen(descript->file);
+<<<<<<< HEAD
+
+      int file_len = file_length(file);
+
+      if(file_len==0 ){
+        f->eax = -1;
+        break;
+=======
 
       int file_len = file_length(file);
 
@@ -473,6 +494,18 @@ syscall_handler (struct intr_frame *f)
       if(mapped_file == NULL){
         f->eax = -1;
         break;
+>>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
+      }
+      mapped_file->t = thread_current();
+      mapped_file->file = file;
+      mapped_file->mmap_id = global_mmap_id;
+      global_mmap_id++;
+
+<<<<<<< HEAD
+      struct file_map* mapped_file = load_file(file, (uint8_t*)addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
+      if(mapped_file == NULL){
+        f->eax = -1;
+        break;
       }
       mapped_file->t = thread_current();
       mapped_file->file = file;
@@ -480,15 +513,24 @@ syscall_handler (struct intr_frame *f)
       global_mmap_id++;
 
       list_push_back(&thread_current()->mapping_table,&mapped_file->elem);
+=======
+      list_push_back(&thread_current()->mapping_table,&mapped_file->elem);
 
       f->eax = mapped_file->mmap_id;
       break;
+>>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 
+      f->eax = mapped_file->mmap_id;
+      break;
     }
 
     case SYS_MUNMAP:
     {
+<<<<<<< HEAD
+      //list_init(&thread_current()->mapping_table);
+=======
       // printf("SYS_MUNMAP\n");
+>>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 
       int mmap_id = read(f);
 
@@ -496,6 +538,37 @@ syscall_handler (struct intr_frame *f)
       struct list_elem* e;
       for(e=list_begin(mapping_table); e!= list_end(mapping_table); e=list_next(e)){
 
+<<<<<<< HEAD
+        struct file_map * mapped_file = list_entry(e,struct file_map,elem);
+
+        if(mapped_file->mmap_id == mmap_id){
+          while(!list_empty(&mapped_file->addr)){
+            struct list_elem* e2;
+            e2 = list_pop_front(&mapped_file->addr);
+            struct addr_elem *pointer = list_entry(e2,struct addr_elem, elem);
+            
+            //if((unsigned)pointer->physical_address&PTE_D){ //check dirty bit
+            if(pagedir_is_dirty(thread_current()->pagedir, pointer->virtual_address)){ //check dirty bit
+              acquire_sys_lock();
+              file_write_at(mapped_file->file, pointer->physical_address, PGSIZE, pointer->ofs);
+              release_sys_lock();
+            }
+
+            deallocate_spage_elem(pointer->virtual_address);
+            deallocate_frame_elem(pointer->virtual_address);
+            free(pointer);
+          }
+
+          list_remove(&mapped_file->elem); 
+          free(mapped_file);
+
+          break;
+        }
+      }
+
+      break;  
+    }
+=======
         struct file_map * mapped_file = list_entry(e, struct file_map,elem);
 
         if(mapped_file->mmap_id == mmap_id){
@@ -549,6 +622,7 @@ syscall_handler (struct intr_frame *f)
   }
 
 
+>>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 
   	default:
   		terminate();
@@ -588,6 +662,10 @@ read (struct intr_frame *f)
   return result;
 }
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 
 bool 
 is_valid_addr(void *addr){

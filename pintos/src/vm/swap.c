@@ -39,6 +39,15 @@ swap_list_init (void){
    Writes frame information in swap disk.
    Manage the swap_table list
 */
+//*****************
+
+//swap out, in , supplement page table entry flag change.
+
+
+
+// when swapping, kpage and vpage changing save properly.
+
+
 
 void 
 swap_in (struct spage_entry *spage_entry){
@@ -98,7 +107,11 @@ swap_in (struct thread *t, unsigned page_num){
 
 	    if (t == se->thread && pg_no(se->page_number) == pg_no(page_num))
 	      {
+<<<<<<< HEAD
+	      	struct frame_entry* fe = allocate_frame_elem(se->page_number, se->writable);
+=======
 	      	struct frame_entry* fe = allocate_frame_elem(se->page_number, false);
+>>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 
 	      	// allocate_spage_elem(t->page_number, t->frame_number);
 	      	bool success = pagedir_set_page(t->pagedir, (void *) fe->page_number, (void *) fe->frame_number, true);
@@ -145,6 +158,7 @@ swap_in (struct thread *t, unsigned page_num){
 void 
 swap_out (struct frame_entry *frame)
 {
+	//printf("swap out! %p %p\n", frame->frame_number, frame->page_number);
 	//swap block initialize in where?
 	struct swap_entry *se;
 
@@ -164,6 +178,7 @@ swap_out (struct frame_entry *frame)
 
 	se->page_number = frame->page_number; 		
 	se->thread = frame->thread;
+	se->writable = frame->writable;
 
 	enum spage_type type = SWAP_DISK;
 	struct spage_entry * spage_entry= mapped_entry (frame->thread, frame->page_number);

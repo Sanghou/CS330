@@ -63,6 +63,7 @@ process_execute (const char *file_name)
   palloc_free_page (tmp);
 
   if (t == NULL) tid = TID_ERROR;
+  else spage_init(t);
   exec_sema_up();
   return tid;
 }
@@ -131,6 +132,11 @@ process_exit (void)
   uint32_t *pd;
 
   file_close(cur->file);
+
+  spage_destroy(cur->supplement_page_table);
+
+//****************page well destroy.
+  //when process is dead.
 
 
   /* Destroy the current process's page directory and switch back
@@ -427,9 +433,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   {
     t->file = file;
   }
-  load_exec_sync_up(); 
-
-  //printf("end load file\n");
+  load_exec_sync_up();
 
   return success;
 }
@@ -506,6 +510,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   ASSERT (ofs % PGSIZE == 0); 
 
   file_seek (file, ofs);
+
   while (read_bytes > 0 || zero_bytes > 0) 
     {
       /* Calculate how to fill this page.
@@ -540,7 +545,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       zero_bytes -= page_zero_bytes;
       upage += PGSIZE;
     }
-  //printf("asdfwqfefwe\n");
   return true;
 }
 /* Create a minimal stack by mapping a zeroed page at the top of

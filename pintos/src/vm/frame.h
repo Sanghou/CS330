@@ -12,6 +12,7 @@ struct frame_entry
 		unsigned page_number; //virtual page number
 		unsigned frame_number; //frame table number
 	 	unsigned evict;
+	 	bool writable;
  	};
 
 void frame_init (void);
