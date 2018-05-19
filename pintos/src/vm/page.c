@@ -55,24 +55,8 @@ destory_hash_action(struct hash_elem *e, void *aux)
 			struct file_map * mapped_file = spage_entry->file_map;
 			hash_insert(&thread_current()->supplement_page_table, &spage_entry->elem);
 
-          	while(!list_empty(&mapped_file->addr)){
+			unmap(mapped_file);
 
-            	struct list_elem* e = list_pop_front(&mapped_file->addr);
-
-           		struct addr_elem *addr_elem = list_entry(e,struct addr_elem, elem);
-            	struct spage_entry *se = addr_elem->spage_elem;
-           
-                struct frame_entry *fe = (struct frame_entry *) se->pointer;
-
-                if(pagedir_is_dirty(thread_current()->pagedir, se->va)){ //check dirty bit
-                  acquire_sys_lock();
-                  file_write_at(mapped_file->file, fe->frame_number, PGSIZE, addr_elem->ofs);
-                  release_sys_lock();
-                }
-                deallocate_frame_elem(fe->thread, fe->page_number);
-
-                free(addr_elem);
-              }
             list_remove(&mapped_file->elem); 
             free(mapped_file);
             break; 
