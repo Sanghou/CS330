@@ -14,7 +14,8 @@ struct swap_entry
 		bool writable;
 	};
 
-void swap_list_init ();
-bool swap_in (struct thread *t, unsigned page_num);
+void swap_list_init (void);
+void swap_in (struct spage_entry *spage_entry);
+// bool swap_in (struct thread *t, unsigned page_num);
 void swap_out (struct frame_entry *frame);
-void swap_remove (struct thread *t);
+void swap_remove (struct spage_entry *spage_entry);
