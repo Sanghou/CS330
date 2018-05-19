@@ -226,27 +226,18 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
             pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
             stack_position += PGSIZE;
 
-            //printf("need_page : %d \n", need_page);
-            //printf("check time : %d \n", i);
           }
         }
       }
 
    else if (not_present && mapped_entry(t, pg_round_down(fault_addr)))
      {
-      //printf("need swap \n\n");
       struct spage_entry *spage_entry = mapped_entry(t, pg_round_down(fault_addr));
       if (spage_entry != NULL && spage_entry->page_type != PHYS_MEMORY){
         swap_in(spage_entry);
       } 
-      else
-      {
-        //printf("nothing \n\n");
-        burst();
-      }
      }
    else{
-    //printf("nothing2 \n\n");
       burst();
      }
   }
@@ -254,6 +245,10 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
 void burst(){
   thread_current()->exit_status = -1;
   printf("%s: exit(%d)\n", thread_current()->name, -1);
+  struct child_info *info = find_info(thread_current()->tid);
+  if (info != NULL){
+    sema_up(&info->sema);
+  }
   sema_up(&thread_current()->start);
   thread_exit();
 }

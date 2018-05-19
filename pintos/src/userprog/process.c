@@ -43,10 +43,10 @@ process_execute (const char *file_name)
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
   tmp = palloc_get_page (0);
-  if (fn_copy == NULL)
+  if (fn_copy == NULL || tmp == NULL){
+    exec_sema_up();
     return TID_ERROR;
-  if (tmp == NULL)
-    return TID_ERROR;
+  }
   strlcpy (fn_copy, file_name, PGSIZE);
   strlcpy (tmp, file_name, PGSIZE);
 
@@ -132,7 +132,6 @@ process_exit (void)
 
   file_close(cur->file);
 
-
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;
@@ -148,8 +147,7 @@ process_exit (void)
       cur->pagedir = NULL;
       pagedir_activate (NULL);
       pagedir_destroy (pd);
-    }
-}
+    }}
 
 /* Sets up the CPU for running user code in the current
    thread.
@@ -349,9 +347,12 @@ load (const char *file_name, void (**eip) (void), void **esp)
                 }
 
               if (!load_segment (file, file_page, (void *) mem_page,
-                                 read_bytes, zero_bytes, writable))  
+                                 read_bytes, zero_bytes, writable)){
+
                             goto done;
+                }
               else{
+
                 //printf("load_segment success \n");
               }
             }
@@ -421,14 +422,13 @@ load (const char *file_name, void (**eip) (void), void **esp)
   success = true;
 
  done:
+  load_exec_sync_up(); 
   /* We arrive here whether the load is successful or not. */
   // file_close (file);
  if(t->file == NULL)
   {
     t->file = file;
   }
-  load_exec_sync_up(); 
-
   //printf("end load file\n");
 
   return success;
@@ -540,6 +540,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       zero_bytes -= page_zero_bytes;
       upage += PGSIZE;
     }
+
   //printf("asdfwqfefwe\n");
   return true;
 }

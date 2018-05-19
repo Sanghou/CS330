@@ -50,8 +50,6 @@ syscall_handler (struct intr_frame *f)
   //read system call number 
   int sys_num = read(f);
 
-  // printf("syscall_number : %d\n", sys_num);
-
   switch(sys_num)
   {
   	/* System call for pintos proj2 */
@@ -71,7 +69,7 @@ syscall_handler (struct intr_frame *f)
 
 
   	case SYS_EXIT:
-    {
+    {    
       exec_sema_down();
   		int status = read(f);
 
@@ -101,7 +99,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXEC:
     {
-      // printf("SYS_EXEC START\n");
   		enum intr_level old_level;
   		old_level = intr_disable();
 
@@ -128,9 +125,11 @@ syscall_handler (struct intr_frame *f)
       
   		struct child_info *info = malloc(sizeof(struct child_info));
   		set_child_info(info, child_pid, thread_current()->tid);
+     
+      struct thread *t = get_thread_from_tid(child_pid);
+      
 
   		intr_set_level(old_level);
-      // printf("SYS_EXEC end \n");
   		break;
   	}
 
@@ -139,8 +138,8 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_WAIT:
     {
-      // printf("SYS_WAIT start\n");
       tid_t child_pid = (tid_t) read(f);
+      // printf("SYS_WAIT start %d\n", child_pid);
 
   		tid_t parent_pid = thread_current()->tid;
 

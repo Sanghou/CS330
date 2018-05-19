@@ -15,7 +15,6 @@
 
 static struct list swap_table;
 static struct lock swap_lock;
-static struct semaphore sema;
 static struct bitmap *used_sector;
 
 
@@ -28,7 +27,6 @@ void
 swap_list_init (void){
 	list_init(&swap_table);
 	lock_init(&swap_lock);
-	sema_init(&sema, 1);
 
 	struct block * block = block_get_role(BLOCK_SWAP);
 	block_sector_t sector_size = block_size(block);

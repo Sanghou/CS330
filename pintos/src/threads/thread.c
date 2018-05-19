@@ -647,7 +647,6 @@ find_info(tid_t child_pid){
   struct list_elem *e;
 
   lock_acquire(&child_list_manage_lock);
-
   for(e= list_begin(&child_list); e!=list_end(&child_list); e = list_next(e)){
     struct child_info *info = list_entry(e, struct child_info, elem);
     if(info->child_pid == child_pid){

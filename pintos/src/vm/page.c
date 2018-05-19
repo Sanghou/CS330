@@ -11,8 +11,6 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 
-// struct lock hash_lock;
-
 bool 
 spage_less_func	(const struct hash_elem *a,
                  const struct hash_elem *b, void *aux)
