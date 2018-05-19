@@ -22,7 +22,6 @@
 #include "threads/synch.h"
 #ifdef VM
 #include "vm/frame.h"
-#include "vm/page.h"
 #endif
 
 static thread_func start_process NO_RETURN;
@@ -515,7 +514,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
-      uint8_t *kpage = allocate_frame_elem(upage)->frame_number;
+      uint8_t *kpage = allocate_frame_elem(upage, true)->frame_number;
       // uint8_t *kpage = palloc_get_page(PAL_USER);
 
       /* Load this page. */
@@ -554,7 +553,7 @@ setup_stack (void **esp)
 
 
   // kpage = palloc_get_page(PAL_USER | PAL_ZERO);
-  struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE);
+  struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE, true);
   kpage = fe->frame_number;
   memset(fe->frame_number, 0, PGSIZE);
   // if (kpage == NULL)
@@ -568,9 +567,10 @@ setup_stack (void **esp)
       if (success){
         *esp = PHYS_BASE;
       }
-      else
+      else {
         // palloc_free_page (kpage);
-        deallocate_frame_elem(fe->page_number);
+        deallocate_frame_elem(thread_current(), fe->page_number);
+      }
     } 
   return success;
 }

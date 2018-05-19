@@ -30,7 +30,7 @@ frame_init (void)
 }
 
 
-struct frame_entry * allocate_frame_elem(uint8_t *upage){
+struct frame_entry * allocate_frame_elem(uint8_t *upage, bool create_spage){
 	
 	uint8_t *kpage = palloc_get_page (PAL_USER);
 	
@@ -51,6 +51,11 @@ struct frame_entry * allocate_frame_elem(uint8_t *upage){
 	list_push_back(&page_table, &fe->elem);	
 	lock_release(&frame_lock);
 	pointer_set();
+
+	if (create_spage){
+		enum spage_type page_type = PHYS_MEMORY;
+		allocate_spage_elem(fe->page_number, page_type, fe);
+	}
 
 	return fe;
 }
@@ -78,37 +83,42 @@ struct frame_entry * allocate_frame_elem_both(uint8_t upage){
 	lock_release(&frame_lock);
 	pointer_set();
 
+	enum spage_type page_type = PHYS_MEMORY;
+	allocate_spage_elem(fe->page_number, page_type, fe);
+
 	return fe;
 }
 
-bool deallocate_frame_elem(unsigned pn){
+bool deallocate_frame_elem(struct thread *t, unsigned pn){
 	struct frame_entry *f;
-	struct list_elem *e;
+	enum spage_type type = PHYS_MEMORY;
+	
+	struct spage_entry *spage_entry = mapped_entry(t, pn);
+	if (spage_entry == NULL )
+		return false;
+	if (spage_entry->page_type != type)
+		return false;
+	f = (struct frame_entry *) spage_entry->pointer;
 
-	lock_acquire(&frame_lock);
-	for (e = list_begin(&page_table); e != list_end(&page_table); e = list_next(e))
-	  {
-    	f = list_entry(e, struct frame_entry, elem);
-    	if (f->page_number == pn)
-    	  {
+  
+  	if (pointer == &f->elem)
+  	{
+  		pointer = list_next(pointer);
+  		if (pointer == list_end(&page_table))
+  			pointer = list_begin(&page_table);
+  	}
 
-    	  	if (pointer == e)
-    	  	{
-    	  		pointer = list_next(e);
-    	  		if (pointer == list_end(&page_table))
-    	  			pointer = list_begin(&page_table);
-    	  	}
-
-    		list_remove(e);    		
-    		lock_release(&frame_lock);
-    		// pagedir_clear_page(f->thread->pagedir, f->page_number);
-    		palloc_free_page((void *)(f->frame_number));
-    		free(f);
-    		return true;
-    	  }
-	  }
+  	lock_acquire(&frame_lock);
+	list_remove(&f->elem);
 	lock_release(&frame_lock);
-	return false;
+
+	hash_delete(&t->supplement_page_table, &spage_entry->elem);
+	free(spage_entry);
+
+	pagedir_clear_page(t->pagedir, f->page_number);
+	palloc_free_page((void *)(f->frame_number));
+	free(f);
+	return true;
 }
 
 void
@@ -134,10 +144,7 @@ evict (void) // 2-chance
 	// struct list_elem *e = list_pop_front(&page_table);
 	// struct frame_entry *f = list_entry(e, struct frame_entry, elem);
 
-
-	//printf("start swap \n");
 	swap_out(f);
-	//printf("end swap \n");
 	pointer = list_next(pointer);
 	if (pointer == list_end(&page_table))
 	{
@@ -153,6 +160,31 @@ evict (void) // 2-chance
 		list_remove(list_prev(pointer));
 		lock_release(&frame_lock);
 	}
+
+	pagedir_clear_page(f->thread->pagedir, f->page_number);
+	palloc_free_page((void *)(f->frame_number));
+	free(f);
+}
+
+/*
+	function necessary to remove only frame_entry using spage_entry
+	used in thread_exit
+*/
+void
+frame_remove (struct spage_entry *spage_entry)
+{
+	struct frame_entry *f = (struct frame_entry *) spage_entry->pointer;
+  
+  	if (pointer == &f->elem)
+  	{
+  		pointer = list_next(pointer);
+  		if (pointer == list_end(&page_table))
+  			pointer = list_begin(&page_table);
+  	}
+
+  	lock_acquire(&frame_lock);
+	list_remove(&f->elem);
+	lock_release(&frame_lock);
 
 	pagedir_clear_page(f->thread->pagedir, f->page_number);
 	palloc_free_page((void *)(f->frame_number));

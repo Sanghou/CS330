@@ -11,10 +11,11 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
-#include "vm/frame.h"
-#include "vm/page.h"
 #ifdef USERPROG
 #include "userprog/process.h"
+#endif
+#ifdef VM
+#include "vm/frame.h"
 #endif
 
 /* Random value for struct thread's `magic' member.
@@ -191,6 +192,9 @@ thread_create (const char *name, int priority,
   /* Initialize thread. */
   init_thread (t, name, priority);
   tid = t->tid = allocate_tid ();
+  #ifdef VM
+    spage_init(&t->supplement_page_table);
+  #endif
 
   /* Prepare thread for first run by initializing its stack.
      Do this atomically so intermediate values for the 'stack' 
@@ -299,6 +303,10 @@ thread_exit (void)
   ASSERT (!intr_context ());
 
   struct thread* cur = thread_current();
+#ifdef VM
+  //clear supplementary page table
+    destroy_spage(&cur->supplement_page_table);
+#endif
 
 #ifdef USERPROG
   process_exit ();
@@ -315,11 +323,6 @@ thread_exit (void)
           free(file);
         }
     }
-#endif
-
-#ifdef VM
-  //clear supplementary page table
-    swap_remove(cur);
 #endif
 
   /* Remove thread from all threads list, set our status to dying,
@@ -504,10 +507,6 @@ init_thread (struct thread *t, const char *name, int priority)
     sema_init(&t->start,0);
     t->exit_status = 0;
     t->file = NULL;
-  #endif
-
-  #ifdef vm
-    // spage_init();
   #endif
 
 }

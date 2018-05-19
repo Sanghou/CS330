@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <lib/kernel/list.h>
+#include "vm/page.h"
 
 //frame table 
 struct frame_entry
@@ -14,6 +15,8 @@ struct frame_entry
  	};
 
 void frame_init (void);
-struct frame_entry * allocate_frame_elem (uint8_t *upage);
-bool deallocate_frame_elem (unsigned pn);
+// struct frame_entry * allocate_frame_elem (uint8_t *upage);
+struct frame_entry * allocate_frame_elem(uint8_t *upage, bool create_spage);
+bool deallocate_frame_elem (struct thread *t, unsigned pn);
+void frame_remove (struct spage_entry *spage_entry);
 void evict (void);

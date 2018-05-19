@@ -43,6 +43,8 @@ syscall_handler (struct intr_frame *f)
   //read system call number 
   int sys_num = read(f);
 
+  // printf("syscall_number : %d\n", sys_num);
+
   switch(sys_num)
   {
   	/* System call for pintos proj2 */
@@ -63,7 +65,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXIT:
     {
-      // printf("SYS_EXIT start\n");
       exec_sema_down();
   		int status = read(f);
 
@@ -93,7 +94,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXEC:
     {
-      printf("SYS_EXEC START\n");
+      // printf("SYS_EXEC START\n");
   		enum intr_level old_level;
   		old_level = intr_disable();
 
@@ -122,7 +123,7 @@ syscall_handler (struct intr_frame *f)
   		set_child_info(info, child_pid, thread_current()->tid);
 
   		intr_set_level(old_level);
-      printf("SYS_EXEC end \n");
+      // printf("SYS_EXEC end \n");
   		break;
   	}
 
@@ -131,7 +132,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_WAIT:
     {
-      printf("SYS_WAIT start\n");
+      // printf("SYS_WAIT start\n");
       tid_t child_pid = (tid_t) read(f);
 
   		tid_t parent_pid = thread_current()->tid;
@@ -151,7 +152,7 @@ syscall_handler (struct intr_frame *f)
   		f->eax = info->exit_status;
   		remove_child(&info->elem);
   		free(info);
-      printf("SYS_WAIT end\n");
+      // printf("SYS_WAIT end\n");
   		break;
   	}
 
@@ -419,7 +420,6 @@ syscall_handler (struct intr_frame *f)
   	case SYS_CLOSE:
     {
       int fd = read(f);
-      // printf("SYS_CLOSE\n");
 
       struct file_descript *descript = find_file_descript(fd);
 
@@ -432,8 +432,6 @@ syscall_handler (struct intr_frame *f)
       lock_release(&sys_lock);
       
       remove_file(&descript->fd_elem); 
-
-
   		break;
   	}
 
@@ -444,14 +442,13 @@ syscall_handler (struct intr_frame *f)
       int fd = read(f);
       void *addr =(void *)read(f);
 
-      if(fd <= 1 || !is_valid_addr(addr) ||addr==0){
+      if(fd <= 1 || !is_user_vaddr(addr) ||addr==0){
         f->eax = -1;
         terminate();
       }
 
-      acquire_sys_lock();
       struct file_descript *descript = find_file_descript(fd);
-      release_sys_lock();
+
 
       int file_len = file_length(descript->file);
 
@@ -459,6 +456,7 @@ syscall_handler (struct intr_frame *f)
         f->eax = -1;
         terminate_error();
       }
+      break;
 
     }
 
@@ -503,51 +501,7 @@ read (struct intr_frame *f)
   f->esp += 4;
   return result;
 }
-/*
-void*
-read (void **esp){
-  if(!is_valid_addr(esp)){
-    terminate_error();
-    return -1;
-  }
-  return *esp;
-}
-*/
 
-/*
-bool 
-is_valid_addr(void *addr)
-{
-  if (!is_user_vaddr(addr) || addr == NULL) return false;
-
-  //printf("%d \n", *(unsigned *)addr);
-
-  uint32_t *pd, *pde, *pt, *pte;
-  uintptr_t tmp;
-  asm volatile ("movl %%cr3, %0" : "=r" (tmp));
-  pd = ptov (tmp);
-
-  if (pd == NULL) return false;
-
-  pde = pd + pd_no(addr);
-
-  if (*pde == 0) return false;
-
-  pt = pde_get_pt(*pde);
-
-  if (pt == NULL) return false;
-
-  pte = &pt[pt_no(addr)];
-
-  if (pte == NULL) return false; //page table doesn't exist
-
-  if (!(*pte&PTE_P)) return false; //page table entry not present
-
-  //if (!(*pte&PTE_U)) return false;
-
-  return true;
-}
-*/
 
 bool 
 is_valid_addr(void *addr){

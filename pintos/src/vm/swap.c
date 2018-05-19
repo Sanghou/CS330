@@ -40,6 +40,51 @@ swap_list_init (void){
    Manage the swap_table list
 */
 
+void 
+swap_in (struct spage_entry *spage_entry){
+
+	struct block *swap_slot = block_get_role(BLOCK_SWAP);
+
+	struct swap_entry *se = (struct swap_entry *) spage_entry->pointer;
+
+	struct frame_entry* fe = allocate_frame_elem(se->page_number, false);
+	struct thread *t = thread_current();
+
+    bool success = pagedir_set_page(t->pagedir, (void *) fe->page_number, (void *) fe->frame_number, true);
+    if (!success) 
+    {
+    	palloc_free_page((void *)fe->frame_number);
+      	return;
+    }
+
+    list_remove(&se->list_elem);	
+
+    int i;
+    int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
+    int sector = se->sector;
+
+    for (i = 0 ; i < sector_per_page; i++)
+	{
+		void * tmp = malloc(BLOCK_SECTOR_SIZE);
+		// acquire_sys_lock();
+		block_read (swap_slot, sector, tmp);
+		// release_sys_lock();
+		memcpy(((void *) fe->frame_number+BLOCK_SECTOR_SIZE*i), tmp, BLOCK_SECTOR_SIZE);
+  		free(tmp);
+		sector++;
+	}
+
+	lock_acquire(&swap_lock);
+	bitmap_set_multiple (used_sector, se->sector, sector_per_page, false);
+	lock_release(&swap_lock);
+
+	enum spage_type type = PHYS_MEMORY;
+	spage_entry->pointer = fe;
+	spage_entry->page_type = type;
+   
+    free(se);
+}
+/*
 bool 
 swap_in (struct thread *t, unsigned page_num){
 	//find the proper swap slot in the swap_table
@@ -53,7 +98,7 @@ swap_in (struct thread *t, unsigned page_num){
 
 	    if (t == se->thread && pg_no(se->page_number) == pg_no(page_num))
 	      {
-	      	struct frame_entry* fe = allocate_frame_elem(se->page_number);
+	      	struct frame_entry* fe = allocate_frame_elem(se->page_number, false);
 
 	      	// allocate_spage_elem(t->page_number, t->frame_number);
 	      	bool success = pagedir_set_page(t->pagedir, (void *) fe->page_number, (void *) fe->frame_number, true);
@@ -90,7 +135,7 @@ swap_in (struct thread *t, unsigned page_num){
 	  }
 	  //printf("cannot find swap \n");
 	return false;
-}
+}*/
 
 /*
    Writes frame information in swap disk.
@@ -105,7 +150,6 @@ swap_out (struct frame_entry *frame)
 
 	struct block *swap_slot = block_get_role(BLOCK_SWAP);
 
-	int sector_number;
 	int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
 
 	int i;
@@ -121,8 +165,13 @@ swap_out (struct frame_entry *frame)
 	se->page_number = frame->page_number; 		
 	se->thread = frame->thread;
 
+	enum spage_type type = SWAP_DISK;
+	struct spage_entry * spage_entry= mapped_entry (frame->thread, frame->page_number);
+	spage_entry->page_type = type;
+	spage_entry->pointer = se;
+
 	//여기 block
-	void * paddr = (frame->frame_number);
+	void * paddr = (void *) frame->frame_number;
 
 	lock_acquire(&swap_lock);
 	size_t sector = bitmap_scan_and_flip(used_sector, 0, sector_per_page, false);
@@ -147,36 +196,23 @@ swap_out (struct frame_entry *frame)
 	// how to manage the supplementary page table?
 }
 
-void 
-swap_remove (struct thread *t)
+/*
+	function necessary to remove only swap_entry using spage_entry
+	used in thread_exit
+*/
+void
+swap_remove (struct spage_entry *spage_entry)
 {
-	struct list_elem *e;
-	bool success = false;
-
-	for (e = list_begin(&swap_table); e != list_end(&swap_table); e = list_next(e))
-	  {
-	    struct swap_entry *se = list_entry(e, struct swap_entry, list_elem);
-
-	    if (success){
-	    	struct swap_entry *se = list_entry(list_prev(e), struct swap_entry, list_elem);
-	    	list_remove(list_prev(e));
-	    	free(se);
-	    }
-	    success = false;
-
-	    if (t == se->thread)
-	      {
-	      	success = true;
-
-			int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
-			int sector = se->sector;
-
-			lock_acquire(&swap_lock);
-			bitmap_set_multiple (used_sector, se->sector, sector_per_page, false);
-			lock_release(&swap_lock);
-
-	      	// free(se);
-	      }
-	  }
+	struct swap_entry *se = (struct swap_entry *) spage_entry->pointer;
 	
+    int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
+
+	list_remove(&se->list_elem);
+
+	lock_acquire(&swap_lock);
+	bitmap_set_multiple (used_sector, se->sector, sector_per_page, false);
+	lock_release(&swap_lock);
+
+	free(se);
+
 }

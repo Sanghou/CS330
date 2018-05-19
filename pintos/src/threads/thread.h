@@ -5,6 +5,7 @@
 #include <list.h>
 #include <stdint.h>
 #include "threads/synch.h"
+#include "lib/kernel/hash.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -112,7 +113,7 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
 
 #ifdef VM
-    struct hash *supplement_page_table;
+    struct hash supplement_page_table;
 #endif
 
   };

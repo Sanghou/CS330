@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <lib/kernel/list.h>
 #include <lib/kernel/hash.h>
+#include "threads/thread.h"
 
 enum spage_type
 	{
@@ -20,8 +21,8 @@ struct spage_entry
 		void * pointer;
 	};
 
-
-void spage_init (void);
+void spage_init (struct hash *page_table);
 bool allocate_spage_elem(unsigned va, enum spage_type flag, void * entry);
 bool deallocate_spage_elem(unsigned va);
-struct spage_entry * mapped_entry (unsigned va);
+struct spage_entry * mapped_entry (struct thread *t, unsigned va);
+void destroy_spage (struct hash *page_table);
