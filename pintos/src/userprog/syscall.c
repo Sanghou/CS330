@@ -10,6 +10,9 @@
 #include "threads/vaddr.h"
 #include "threads/pte.h"
 #include "userprog/pagedir.h"
+#ifdef VM
+#include "vm/file_map.h"
+#endif
 
 static void syscall_handler (struct intr_frame *);
 
@@ -26,6 +29,8 @@ void terminate (void);
 struct lock sys_lock;
 struct semaphore load_exec_sync;
 struct semaphore exec_sema;
+
+int global_mmap_id = 0;
 
 void
 syscall_init (void) 
@@ -439,34 +444,87 @@ syscall_handler (struct intr_frame *f)
     case SYS_MMAP:
     {
 
-      int fd = read(f);
-      void *addr =(void *) read(f);
+      unsigned int fd = read(f);
+      void *addr =(void *)read(f);
 
+      if(fd <= 1 || !is_user_vaddr(addr) || addr==0 ){
+        f->eax = -1;
+        break;
+      }
 
       struct file_descript *descript = find_file_descript(fd);
 
-      if( fd <= 1 || descript == NULL || !is_valid_addr(addr))
-      {
-        terminate_error();
+      if(descript == NULL) {
+        f->eax = -1;
         break;
       }
 
-      int file_len = file_length(descript->file);
+      struct file *file = file_reopen(descript->file);
 
-      if ( file_len == 0)
-      {
-        terminate_error();
+      int file_len = file_length(file);
+
+      if(file_len==0 ){
+        f->eax = -1;
         break;
       }
+
+      struct file_map* mapped_file = load_file(file, (uint8_t*)addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
+      if(mapped_file == NULL){
+        f->eax = -1;
+        break;
+      }
+      mapped_file->t = thread_current();
+      mapped_file->file = file;
+      mapped_file->mmap_id = global_mmap_id;
+      global_mmap_id++;
+
+      list_push_back(&thread_current()->mapping_table,&mapped_file->elem);
+
+      f->eax = mapped_file->mmap_id;
       break;
 
     }
 
     case SYS_MUNMAP:
     {
-      int mapping = read(f);
-      terminate();
+      //list_init(&thread_current()->mapping_table);
+
+      int mmap_id = read(f);
+
+      struct list* mapping_table = &thread_current()->mapping_table;
+      struct list_elem* e;
+      for(e=list_begin(mapping_table); e!= list_end(mapping_table); e=list_next(e)){
+
+        struct file_map * mapped_file = list_entry(e,struct file_map,elem);
+
+        if(mapped_file->mmap_id == mmap_id){
+          while(!list_empty(&mapped_file->addr)){
+            struct list_elem* e2;
+            e2 = list_pop_front(&mapped_file->addr);
+            struct addr_elem *pointer = list_entry(e2,struct addr_elem, elem);
+            
+            //if((unsigned)pointer->physical_address&PTE_D){ //check dirty bit
+            if(pagedir_is_dirty(thread_current()->pagedir, pointer->virtual_address)){ //check dirty bit
+              acquire_sys_lock();
+              file_write_at(mapped_file->file, pointer->physical_address, PGSIZE, pointer->ofs);
+              release_sys_lock();
+            }
+
+            deallocate_spage_elem(pointer->virtual_address);
+            deallocate_frame_elem(pointer->virtual_address);
+            free(pointer);}
+          }
+
+        list_remove(&mapped_file->elem); 
+        free(mapped_file);
+
+        break;
     }
+    break;
+  }
+
+
+
   	default:
   		terminate();
   		break;

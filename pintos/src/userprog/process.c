@@ -22,6 +22,7 @@
 #include "threads/synch.h"
 #ifdef VM
 #include "vm/frame.h"
+#include "vm/file_map.h"
 #endif
 
 static thread_func start_process NO_RETURN;
@@ -593,4 +594,67 @@ install_page (void *upage, void *kpage, bool writable)
      address, then map our page there. */
   return (pagedir_get_page (t->pagedir, upage) == NULL
           && pagedir_set_page (t->pagedir, upage, kpage, writable));
+}
+
+struct file_map *
+load_file (struct file *file, uint8_t *upage,
+              uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
+{
+  ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
+  ASSERT (pg_ofs (upage) == 0);
+
+  struct file_map *map = malloc(sizeof(struct file_map));
+  list_init(&map->addr);
+
+  file_seek (file, 0);
+
+  off_t ofs = 0;
+
+  while (read_bytes > 0 || zero_bytes > 0) 
+    {
+      /* Calculate how to fill this page.
+         We will read PAGE_READ_BYTES bytes from FILE
+         and zero the final PAGE_ZERO_BYTES bytes. */
+      size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE; 
+      size_t page_zero_bytes = PGSIZE - page_read_bytes;
+
+      /* Get a page of memory. */
+      uint8_t *kpage = allocate_frame_elem(upage, writable)->frame_number;
+      // uint8_t *kpage = palloc_get_page(PAL_USER);
+
+      /* Load this page. */
+      acquire_sys_lock();
+      if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
+        {
+          release_sys_lock();
+          palloc_free_page (kpage);
+          free(map);
+          return NULL; 
+        }
+      release_sys_lock();
+      memset (kpage + page_read_bytes, 0, page_zero_bytes);
+      /* Add the page to the process's address space. */
+      if (!install_page (upage, kpage, writable)) 
+        {
+          palloc_free_page (kpage);
+          free(map);
+          return NULL; 
+        }
+
+      /* Advance. */
+      struct addr_elem *address = malloc(sizeof(struct addr_elem));
+      
+      address->ofs = ofs;
+      address->virtual_address = upage;
+      address->physical_address = kpage;
+
+      list_push_back(&map->addr,&address->elem);
+      
+      read_bytes -= page_read_bytes;
+      zero_bytes -= page_zero_bytes;
+      ofs += PGSIZE;
+      upage += PGSIZE;
+    }
+  //printf("asdfwqfefwe\n");
+  return map;
 }
