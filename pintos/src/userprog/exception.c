@@ -203,11 +203,7 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
 
         int need_page =  (0xC0000000-(unsigned)fault_addr)/PGSIZE;
         if(need_page <2){
-<<<<<<< HEAD
-          struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr), true);
-=======
           struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr), true, true);
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
           pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
           allocate_spage_elem(pg_round_down(fault_addr), PHYS_MEMORY);
         }
@@ -216,11 +212,7 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
           int i;
           int stack_position = pg_round_down(fault_addr);
           for(i=0;i<need_page;i++){
-<<<<<<< HEAD
-            struct frame_entry * fe = allocate_frame_elem(stack_position, true);
-=======
             struct frame_entry * fe = allocate_frame_elem(stack_position, true, true);
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
             pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
             allocate_spage_elem(stack_position, PHYS_MEMORY);
             stack_position += PGSIZE;
@@ -233,14 +225,6 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
 
    else if (not_present && mapped_entry(t, pg_round_down(fault_addr)))
      {
-<<<<<<< HEAD
-      success = swap_in(t, (unsigned) fault_addr); 
-       // if (!success)
-       // {
-       //  struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr));
-       //  pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
-       // }
-=======
       struct spage_entry *spage_entry = mapped_entry(t, pg_round_down(fault_addr));
       if (spage_entry != NULL && spage_entry->page_type != PHYS_MEMORY){
         swap_in(spage_entry);
@@ -249,7 +233,6 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
       {
         burst();
       }
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
      }
    else{
       burst();

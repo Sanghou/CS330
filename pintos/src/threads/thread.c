@@ -508,11 +508,6 @@ init_thread (struct thread *t, const char *name, int priority)
     t->exit_status = 0;
     t->file = NULL;
   #endif
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
   #ifdef VM
     list_init(&t->mapping_table);
   #endif

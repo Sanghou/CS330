@@ -33,11 +33,6 @@ hash_map (const struct hash_elem *e, void *aux)
 }
 
 void 
-<<<<<<< HEAD
-spage_init(struct thread *t)
-{
-	struct hash *page_table = &t->supplement_page_table;
-=======
 destory_hash_action(struct hash_elem *e, void *aux)
 {
 	struct spage_entry *spage_entry = hash_entry(e, struct spage_entry, elem);
@@ -74,7 +69,6 @@ destory_hash_action(struct hash_elem *e, void *aux)
 void 
 spage_init(struct hash *page_table)
 {
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 	hash_init(page_table,hash_map,spage_less_func, NULL);
 	// lock_init(&hash_lock);
 }
@@ -106,11 +100,7 @@ spage_destroy(struct hash *spt)
 
 
 bool 
-<<<<<<< HEAD
-allocate_spage_elem (unsigned va, enum spage_type flag)
-=======
 allocate_spage_elem (unsigned va, enum spage_type flag, void * entry, bool writable)
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 {
 	struct hash *page_table = &thread_current()->supplement_page_table;
 	struct spage_entry *fe = malloc(sizeof(struct spage_entry));
@@ -134,11 +124,8 @@ deallocate_spage_elem (unsigned va)
 		{
 			// lock_acquire(&hash_lock);
 			hash_delete(page_table, &e);
-<<<<<<< HEAD
-=======
 			// lock_release(&hash_lock);
 			free(&f);
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 			return true;
 		}
 	return false;

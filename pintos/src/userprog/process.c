@@ -22,10 +22,6 @@
 #include "threads/synch.h"
 #ifdef VM
 #include "vm/frame.h"
-<<<<<<< HEAD
-#include "vm/page.h"
-=======
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 #include "vm/file_map.h"
 #endif
 
@@ -524,12 +520,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
-<<<<<<< HEAD
-      uint8_t *kpage = allocate_frame_elem(upage, writable)->frame_number;
-      allocate_spage_elem(upage, PHYS_MEMORY);
-=======
       uint8_t *kpage = allocate_frame_elem(upage, writable, true)->frame_number;
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
       // uint8_t *kpage = palloc_get_page(PAL_USER);
 
       /* Load this page. */
@@ -567,12 +558,7 @@ setup_stack (void **esp)
 
 
   // kpage = palloc_get_page(PAL_USER | PAL_ZERO);
-<<<<<<< HEAD
-  struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE, true);
-  allocate_spage_elem(((uint8_t *) PHYS_BASE) - PGSIZE, PHYS_MEMORY);
-=======
   struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE, true, true);
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
   kpage = fe->frame_number;
   memset(fe->frame_number, 0, PGSIZE);
   // if (kpage == NULL)
@@ -637,15 +623,9 @@ load_file (struct file *file, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
-<<<<<<< HEAD
-      uint8_t *kpage = allocate_frame_elem(upage, writable)->frame_number;
-      allocate_spage_elem(upage, PHYS_MEMORY);
-      // uint8_t *kpage = palloc_get_page(PAL_USER);
-=======
       
       struct frame_entry *fe = allocate_frame_elem(upage, writable, false);
       uint8_t *kpage = fe->frame_number;
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 
       /* Load this page. */
       acquire_sys_lock();
@@ -668,12 +648,6 @@ load_file (struct file *file, uint8_t *upage,
 
       /* Advance. */
       struct addr_elem *address = malloc(sizeof(struct addr_elem));
-<<<<<<< HEAD
-      
-      address->ofs = ofs;
-      address->virtual_address = upage;
-      address->physical_address = kpage;
-=======
 
       enum spage_type type = MMAP;
       allocate_spage_elem(fe->page_number, type, fe, writable);
@@ -682,7 +656,6 @@ load_file (struct file *file, uint8_t *upage,
       
       address->ofs = ofs;
       address->spage_elem = spage_entry;
->>>>>>> cd1db56622332dcf7ea7e371d8300c4515869ed4
 
       list_push_back(&map->addr,&address->elem);
       
