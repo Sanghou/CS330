@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <lib/kernel/list.h>
 #include <lib/kernel/hash.h>
-
+#include "filesys/off_t.h"
 
 struct file_map{
 	struct thread *t;
@@ -16,6 +16,5 @@ struct file_map{
 struct addr_elem{
 	struct list_elem elem;
 	off_t ofs;
-	void * virtual_address;
-	void * physical_address;
+	void * spage_elem;
 };

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <syscall-nr.h>
 #include <list.h>
+#include <round.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/synch.h"
@@ -11,7 +12,8 @@
 #include "threads/pte.h"
 #include "userprog/pagedir.h"
 #ifdef VM
-#include "vm/file_map.h"
+#include "vm/file_map.h"    
+#include "vm/frame.h"
 #endif
 
 static void syscall_handler (struct intr_frame *);
@@ -443,7 +445,6 @@ syscall_handler (struct intr_frame *f)
 
     case SYS_MMAP:
     {
-
       unsigned int fd = read(f);
       void *addr =(void *)read(f);
 
@@ -463,12 +464,12 @@ syscall_handler (struct intr_frame *f)
 
       int file_len = file_length(file);
 
-      if(file_len==0 ){
+      if(file_len == 0 || pg_ofs (addr) != 0){
         f->eax = -1;
         break;
       }
 
-      struct file_map* mapped_file = load_file(file, (uint8_t*)addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
+      struct file_map* mapped_file = load_file(file, (uint8_t*) addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
       if(mapped_file == NULL){
         f->eax = -1;
         break;
@@ -487,7 +488,7 @@ syscall_handler (struct intr_frame *f)
 
     case SYS_MUNMAP:
     {
-      //list_init(&thread_current()->mapping_table);
+      // printf("SYS_MUNMAP\n");
 
       int mmap_id = read(f);
 
@@ -495,30 +496,54 @@ syscall_handler (struct intr_frame *f)
       struct list_elem* e;
       for(e=list_begin(mapping_table); e!= list_end(mapping_table); e=list_next(e)){
 
-        struct file_map * mapped_file = list_entry(e,struct file_map,elem);
+        struct file_map * mapped_file = list_entry(e, struct file_map,elem);
 
         if(mapped_file->mmap_id == mmap_id){
           while(!list_empty(&mapped_file->addr)){
+
             struct list_elem* e2;
             e2 = list_pop_front(&mapped_file->addr);
+
             struct addr_elem *pointer = list_entry(e2,struct addr_elem, elem);
-            
-            //if((unsigned)pointer->physical_address&PTE_D){ //check dirty bit
-            if(pagedir_is_dirty(thread_current()->pagedir, pointer->virtual_address)){ //check dirty bit
-              acquire_sys_lock();
-              file_write_at(mapped_file->file, pointer->physical_address, PGSIZE, pointer->ofs);
-              release_sys_lock();
+            struct spage_entry *spage_entry = pointer->spage_elem;
+
+            enum spage_type mmap_type = MMAP;
+            switch (spage_entry->page_type){
+              case MMAP:
+              {
+                struct frame_entry *fe = (struct frame_entry *) spage_entry->pointer;
+
+                if(pagedir_is_dirty(thread_current()->pagedir, spage_entry->va)){ //check dirty bit
+                  acquire_sys_lock();
+                  file_write_at(mapped_file->file, fe->frame_number, PGSIZE, pointer->ofs);
+                  release_sys_lock();
+                }
+                deallocate_frame_elem(fe->thread, fe->page_number);
+                break;
+              }
+              case PHYS_MEMORY:
+              {
+                struct frame_entry *fe = (struct frame_entry *) spage_entry->pointer;
+
+                if(pagedir_is_dirty(thread_current()->pagedir, spage_entry->va)){ //check dirty bit
+                  acquire_sys_lock();
+                  file_write_at(mapped_file->file, fe->frame_number, PGSIZE, pointer->ofs);
+                  release_sys_lock();
+                }
+                deallocate_frame_elem(fe->thread, fe->page_number);
+                break;
+              } 
+              default:
+                break;
             }
 
-            deallocate_spage_elem(pointer->virtual_address);
-            deallocate_frame_elem(pointer->virtual_address);
-            free(pointer);}
+            free(pointer);
+            // deallocate_spage_elem(spage_entry);
           }
-
-        list_remove(&mapped_file->elem); 
-        free(mapped_file);
-
-        break;
+            list_remove(&mapped_file->elem); 
+            free(mapped_file);
+            break;
+          }
     }
     break;
   }

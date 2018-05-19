@@ -515,7 +515,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
-      uint8_t *kpage = allocate_frame_elem(upage, true)->frame_number;
+      uint8_t *kpage = allocate_frame_elem(upage, writable, true)->frame_number;
       // uint8_t *kpage = palloc_get_page(PAL_USER);
 
       /* Load this page. */
@@ -554,7 +554,7 @@ setup_stack (void **esp)
 
 
   // kpage = palloc_get_page(PAL_USER | PAL_ZERO);
-  struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE, true);
+  struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE, true, true);
   kpage = fe->frame_number;
   memset(fe->frame_number, 0, PGSIZE);
   // if (kpage == NULL)
@@ -619,8 +619,9 @@ load_file (struct file *file, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
-      uint8_t *kpage = allocate_frame_elem(upage, writable)->frame_number;
-      // uint8_t *kpage = palloc_get_page(PAL_USER);
+      
+      struct frame_entry *fe = allocate_frame_elem(upage, writable, false);
+      uint8_t *kpage = fe->frame_number;
 
       /* Load this page. */
       acquire_sys_lock();
@@ -643,10 +644,14 @@ load_file (struct file *file, uint8_t *upage,
 
       /* Advance. */
       struct addr_elem *address = malloc(sizeof(struct addr_elem));
+
+      enum spage_type type = MMAP;
+      allocate_spage_elem(fe->page_number, type, fe, writable);
+      struct spage_entry *spage_entry = mapped_entry(thread_current(), fe->page_number);
+      spage_entry->file_map = map;
       
       address->ofs = ofs;
-      address->virtual_address = upage;
-      address->physical_address = kpage;
+      address->spage_elem = spage_entry;
 
       list_push_back(&map->addr,&address->elem);
       

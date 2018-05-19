@@ -191,6 +191,7 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
  {
    struct thread *t = thread_current();
    enum spage_type SWAP = SWAP_DISK;
+   enum spage_type MMAP = MMAP;
 
    if(is_stack(fault_addr,f)){
 
@@ -202,7 +203,7 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
 
         int need_page =  (0xC0000000-(unsigned)fault_addr)/PGSIZE;
         if(need_page <2){
-          struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr), true);
+          struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr), true, true);
           pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
         }
         
@@ -210,7 +211,7 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
           int i;
           int stack_position = pg_round_down(fault_addr);
           for(i=0;i<need_page;i++){
-            struct frame_entry * fe = allocate_frame_elem(stack_position, true);
+            struct frame_entry * fe = allocate_frame_elem(stack_position, true, true);
             pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
             stack_position += PGSIZE;
 
@@ -220,16 +221,15 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
         }
       }
 
-   else if (fault_addr != NULL && not_present && is_user_vaddr(fault_addr))
+   else if (not_present && mapped_entry(t, pg_round_down(fault_addr)))
      {
       struct spage_entry *spage_entry = mapped_entry(t, pg_round_down(fault_addr));
-      if (spage_entry != NULL && spage_entry->page_type == SWAP){
+      if (spage_entry != NULL && spage_entry->page_type != PHYS_MEMORY){
         swap_in(spage_entry);
       } 
       else
       {
-        struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr), true);
-        pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
+        burst();
       }
      }
    else{

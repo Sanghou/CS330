@@ -30,7 +30,7 @@ frame_init (void)
 }
 
 
-struct frame_entry * allocate_frame_elem(uint8_t *upage, bool create_spage){
+struct frame_entry * allocate_frame_elem(uint8_t *upage, bool writable, bool phys){
 	
 	uint8_t *kpage = palloc_get_page (PAL_USER);
 	
@@ -52,16 +52,16 @@ struct frame_entry * allocate_frame_elem(uint8_t *upage, bool create_spage){
 	lock_release(&frame_lock);
 	pointer_set();
 
-	if (create_spage){
+	if (phys){
 		enum spage_type page_type = PHYS_MEMORY;
-		allocate_spage_elem(fe->page_number, page_type, fe);
-	}
+		allocate_spage_elem(fe->page_number, page_type, fe, writable);
+	}	
 
 	return fe;
 }
 
 
-struct frame_entry * allocate_frame_elem_both(uint8_t upage){
+struct frame_entry * allocate_frame_elem_both(uint8_t upage, bool writable){
 	
 	uint8_t *kpage = palloc_get_page (PAL_USER | PAL_ZERO);
 	
@@ -84,19 +84,19 @@ struct frame_entry * allocate_frame_elem_both(uint8_t upage){
 	pointer_set();
 
 	enum spage_type page_type = PHYS_MEMORY;
-	allocate_spage_elem(fe->page_number, page_type, fe);
+	allocate_spage_elem(fe->page_number, page_type, fe, writable);
 
 	return fe;
 }
 
 bool deallocate_frame_elem(struct thread *t, unsigned pn){
 	struct frame_entry *f;
-	enum spage_type type = PHYS_MEMORY;
+	enum spage_type type = SWAP_DISK;
 	
 	struct spage_entry *spage_entry = mapped_entry(t, pn);
 	if (spage_entry == NULL )
 		return false;
-	if (spage_entry->page_type != type)
+	if (spage_entry->page_type == type)
 		return false;
 	f = (struct frame_entry *) spage_entry->pointer;
 
@@ -124,7 +124,6 @@ bool deallocate_frame_elem(struct thread *t, unsigned pn){
 void
 evict (void) // 2-chance
 {
-
 	struct frame_entry *f;
 	while (!list_empty(&page_table))
 	{
@@ -140,10 +139,8 @@ evict (void) // 2-chance
 		
 		pointer = list_next(pointer);
 	}
-
 	// struct list_elem *e = list_pop_front(&page_table);
 	// struct frame_entry *f = list_entry(e, struct frame_entry, elem);
-
 	swap_out(f);
 	pointer = list_next(pointer);
 	if (pointer == list_end(&page_table))

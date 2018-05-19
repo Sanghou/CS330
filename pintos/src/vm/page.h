@@ -5,6 +5,7 @@
 #include <lib/kernel/hash.h>
 #include "threads/thread.h"
 
+
 enum spage_type
 	{
     /* Block device types that play a role in Pintos. */
@@ -17,12 +18,14 @@ struct spage_entry
 	{
 		struct hash_elem elem;
 		unsigned va; //virtual address
+		bool writable;
 		enum spage_type page_type;
-		void * pointer;
+		void * pointer; //points to whether swap or frame
+		void * file_map;
 	};
 
 void spage_init (struct hash *page_table);
-bool allocate_spage_elem(unsigned va, enum spage_type flag, void * entry);
+bool allocate_spage_elem(unsigned va, enum spage_type flag, void * entry, bool writable);
 bool deallocate_spage_elem(unsigned va);
 struct spage_entry * mapped_entry (struct thread *t, unsigned va);
 void destroy_spage (struct hash *page_table);

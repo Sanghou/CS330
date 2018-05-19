@@ -4,10 +4,12 @@
 #include <debug.h>
 #include <inttypes.h>
 #include "vm/page.h"
+#include "vm/file_map.h"
 #include "lib/kernel/hash.h"
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/synch.h"
+#include "threads/vaddr.h"
 
 // struct lock hash_lock;
 
@@ -50,9 +52,33 @@ destory_hash_action(struct hash_elem *e, void *aux)
 		}
 		case MMAP:
 		{
-			break;
-		}
+			struct file_map * mapped_file = spage_entry->file_map;
+			hash_insert(&thread_current()->supplement_page_table, &spage_entry->elem);
 
+          	while(!list_empty(&mapped_file->addr)){
+
+            	struct list_elem* e = list_pop_front(&mapped_file->addr);
+
+           		struct addr_elem *addr_elem = list_entry(e,struct addr_elem, elem);
+            	struct spage_entry *se = addr_elem->spage_elem;
+           
+                struct frame_entry *fe = (struct frame_entry *) se->pointer;
+
+                if(pagedir_is_dirty(thread_current()->pagedir, se->va)){ //check dirty bit
+                  acquire_sys_lock();
+                  file_write_at(mapped_file->file, fe->frame_number, PGSIZE, addr_elem->ofs);
+                  release_sys_lock();
+                }
+                deallocate_frame_elem(fe->thread, fe->page_number);
+
+                free(addr_elem);
+              }
+            list_remove(&mapped_file->elem); 
+            free(mapped_file);
+            break; 
+        }
+        default:
+			break;
 	}
 }
 
@@ -64,13 +90,14 @@ spage_init(struct hash *page_table)
 }
 
 bool 
-allocate_spage_elem (unsigned va, enum spage_type flag, void * entry)
+allocate_spage_elem (unsigned va, enum spage_type flag, void * entry, bool writable)
 {
 	struct hash *page_table = &thread_current()->supplement_page_table;
 	struct spage_entry *fe = malloc(sizeof(struct spage_entry));
 	fe->va = va;
 	fe->pointer = entry;
 	fe->page_type = flag;
+	fe->writable = writable;
 	// lock_acquire(&hash_lock);
 	ASSERT(hash_insert(page_table, &fe->elem) == NULL);
 	// lock_release(&hash_lock);

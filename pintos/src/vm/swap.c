@@ -47,7 +47,7 @@ swap_in (struct spage_entry *spage_entry){
 
 	struct swap_entry *se = (struct swap_entry *) spage_entry->pointer;
 
-	struct frame_entry* fe = allocate_frame_elem(se->page_number, false);
+	struct frame_entry* fe = allocate_frame_elem(se->page_number, spage_entry->writable, false);
 	struct thread *t = thread_current();
 
     bool success = pagedir_set_page(t->pagedir, (void *) fe->page_number, (void *) fe->frame_number, true);
@@ -204,7 +204,7 @@ void
 swap_remove (struct spage_entry *spage_entry)
 {
 	struct swap_entry *se = (struct swap_entry *) spage_entry->pointer;
-	
+
     int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
 
 	list_remove(&se->list_elem);
