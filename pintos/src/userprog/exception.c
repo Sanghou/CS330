@@ -175,11 +175,12 @@ bool is_stack(void *fault_addr, struct intr_frame *f){
   // printf("need page 1 : %d \n" ,(fault_addr - f->esp)/PGSIZE);
   // printf("0xC0000000-(unsigned)fault_addr : %d \n", 0xC0000000-(unsigned)fault_addr);
 
-  if(!is_user_vaddr(fault_addr) || fault_addr - f->esp < -32 || fault_addr < 0x08048000){
+  if(!is_user_vaddr(fault_addr) || fault_addr < 0x08048000){
     burst();
   }
-
-  else if ( 0xC0000000-(unsigned)fault_addr  < 8 *1024 * 1024){
+  else if (0xC0000000-(unsigned)fault_addr  < 8 *1024 * 1024){
+    if (fault_addr - f->esp < -32)
+      burst();
     return true;
   }
 
@@ -193,7 +194,8 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
    enum spage_type SWAP = SWAP_DISK;
    enum spage_type MMAP = MMAP;
 
-   if(is_stack(fault_addr,f)){
+   if(is_stack(fault_addr,f))
+   {
 
         struct spage_entry *spage_entry = mapped_entry(t, pg_round_down(fault_addr));
         if (spage_entry != NULL && spage_entry->page_type == SWAP){
@@ -219,7 +221,7 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
             //printf("check time : %d \n", i);
           }
         }
-      }
+    }
 
    else if (not_present && mapped_entry(t, pg_round_down(fault_addr)))
      {
@@ -232,9 +234,10 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
         burst();
       }
      }
-   else{
+   else
+    {
       burst();
-     }
+    }
   }
 
 void burst(){
