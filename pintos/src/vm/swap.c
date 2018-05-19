@@ -48,7 +48,7 @@ swap_in (struct spage_entry *spage_entry){
 	struct frame_entry* fe = allocate_frame_elem(se->page_number, spage_entry->writable, false);
 	struct thread *t = thread_current();
 
-    bool success = pagedir_set_page(t->pagedir, (void *) fe->page_number, (void *) fe->frame_number, true);
+    bool success = pagedir_set_page(t->pagedir, (void *) fe->page_number, (void *) fe->frame_number, spage_entry->writable);
     if (!success) 
     {
     	palloc_free_page((void *)fe->frame_number);
@@ -64,9 +64,7 @@ swap_in (struct spage_entry *spage_entry){
     for (i = 0 ; i < sector_per_page; i++)
 	{
 		void * tmp = malloc(BLOCK_SECTOR_SIZE);
-		// acquire_sys_lock();
 		block_read (swap_slot, sector, tmp);
-		// release_sys_lock();
 		memcpy(((void *) fe->frame_number+BLOCK_SECTOR_SIZE*i), tmp, BLOCK_SECTOR_SIZE);
   		free(tmp);
 		sector++;
@@ -76,9 +74,14 @@ swap_in (struct spage_entry *spage_entry){
 	bitmap_set_multiple (used_sector, se->sector, sector_per_page, false);
 	lock_release(&swap_lock);
 
+
 	enum spage_type type = PHYS_MEMORY;
+	if (spage_entry->mmap){
+		type = MMAP;
+	}
 	spage_entry->pointer = fe;
 	spage_entry->page_type = type;
+	spage_entry->pa = fe->frame_number;
    
     free(se);
 }
@@ -165,7 +168,13 @@ swap_out (struct frame_entry *frame)
 
 	enum spage_type type = SWAP_DISK;
 	struct spage_entry * spage_entry= mapped_entry (frame->thread, frame->page_number);
+	if (spage_entry->mmap)
+	{
+		struct thread *t = frame->thread;
+		spage_entry->dirty = pagedir_is_dirty(t->pagedir, spage_entry->va);
+	}
 	spage_entry->page_type = type;
+	spage_entry->pa = se->sector;
 	spage_entry->pointer = se;
 
 	//여기 block
@@ -182,10 +191,8 @@ swap_out (struct frame_entry *frame)
 	//write to a swap block.
 	for (i = 0 ; i < sector_per_page; i++)
 	{
-		// acquire_sys_lock();
 		paddr = ((void *) frame->frame_number) + BLOCK_SECTOR_SIZE * i;
 		block_write(swap_slot, sector, paddr);
-		// release_sys_lock();
 		sector++;
 	}
 	

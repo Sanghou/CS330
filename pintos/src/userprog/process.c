@@ -647,9 +647,10 @@ load_file (struct file *file, uint8_t *upage,
       struct addr_elem *address = malloc(sizeof(struct addr_elem));
 
       enum spage_type type = MMAP;
-      allocate_spage_elem(fe->page_number, type, fe, writable);
+      allocate_spage_elem(fe->page_number, fe->frame_number, type, fe, writable);
       struct spage_entry *spage_entry = mapped_entry(thread_current(), fe->page_number);
       spage_entry->file_map = map;
+      spage_entry->mmap = true;
       
       address->ofs = ofs;
       address->spage_elem = spage_entry;
@@ -663,28 +664,4 @@ load_file (struct file *file, uint8_t *upage,
     }
   //printf("asdfwqfefwe\n");
   return map;
-}
-
-void
-unmap (struct file_map *mapped_file)
-{
-
-  while(!list_empty(&mapped_file->addr)){
-
-    struct list_elem* e = list_pop_front(&mapped_file->addr);
-
-    struct addr_elem *addr_elem = list_entry(e,struct addr_elem, elem);
-    struct spage_entry *se = addr_elem->spage_elem;
-
-    struct frame_entry *fe = (struct frame_entry *) se->pointer;
-
-    if(pagedir_is_dirty(thread_current()->pagedir, se->va)){ //check dirty bit
-      acquire_sys_lock();
-      file_write_at(mapped_file->file, fe->frame_number, PGSIZE, addr_elem->ofs);
-      release_sys_lock();
-    }
-    deallocate_frame_elem(fe->thread, fe->page_number);
-
-    free(addr_elem);
-  }
 }

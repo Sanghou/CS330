@@ -118,17 +118,15 @@ syscall_handler (struct intr_frame *f)
         f->eax = -1;
         break;
       }
-
+      exec_sema_up();
 
   		f->eax = child_pid;
-      exec_sema_up();
       
   		struct child_info *info = malloc(sizeof(struct child_info));
   		set_child_info(info, child_pid, thread_current()->tid);
      
       struct thread *t = get_thread_from_tid(child_pid);
       
-
   		intr_set_level(old_level);
   		break;
   	}
@@ -514,19 +512,7 @@ syscall_handler (struct intr_frame *f)
 
                 if(pagedir_is_dirty(thread_current()->pagedir, spage_entry->va)){ //check dirty bit
                   acquire_sys_lock();
-                  file_write_at(mapped_file->file, fe->frame_number, PGSIZE, pointer->ofs);
-                  release_sys_lock();
-                }
-                deallocate_frame_elem(fe->thread, fe->page_number);
-                break;
-              }
-              case PHYS_MEMORY:
-              {
-                struct frame_entry *fe = (struct frame_entry *) spage_entry->pointer;
-
-                if(pagedir_is_dirty(thread_current()->pagedir, spage_entry->va)){ //check dirty bit
-                  acquire_sys_lock();
-                  file_write_at(mapped_file->file, fe->frame_number, PGSIZE, pointer->ofs);
+                  file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, pointer->ofs);
                   release_sys_lock();
                 }
                 deallocate_frame_elem(fe->thread, fe->page_number);

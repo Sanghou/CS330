@@ -155,12 +155,12 @@ page_fault (struct intr_frame *f)
 
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
-     which fault_addr refers. */
-      // printf ("Page fault at %p: %s error %s page in %s context.\n",
-      //         fault_addr,
-      //         not_present ? "not present" : "rights violation",
-      //         write ? "writing" : "reading",
-      //         user ? "user" : "kernel"); 
+     // which fault_addr refers. */
+     //  printf ("Page fault at %p: %s error %s page in %s context.\n",
+     //          fault_addr,
+     //          not_present ? "not present" : "rights violation",
+     //          write ? "writing" : "reading",
+     //          user ? "user" : "kernel"); 
 
    page_fault_handling(not_present, write, user, fault_addr,f);
   // burst();
@@ -243,7 +243,9 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
   }
 
 void burst(){
+  // printf("burst\n");
   thread_current()->exit_status = -1;
+  exec_sema_down();
   printf("%s: exit(%d)\n", thread_current()->name, -1);
   struct child_info *info = find_info(thread_current()->tid);
   if (info != NULL){

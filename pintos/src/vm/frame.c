@@ -54,7 +54,7 @@ struct frame_entry * allocate_frame_elem(uint8_t *upage, bool writable, bool phy
 
 	if (phys){
 		enum spage_type page_type = PHYS_MEMORY;
-		allocate_spage_elem(fe->page_number, page_type, fe, writable);
+		allocate_spage_elem(fe->page_number, fe->frame_number, page_type, fe, writable);
 	}	
 
 	return fe;
@@ -84,7 +84,7 @@ struct frame_entry * allocate_frame_elem_both(uint8_t upage, bool writable){
 	pointer_set();
 
 	enum spage_type page_type = PHYS_MEMORY;
-	allocate_spage_elem(fe->page_number, page_type, fe, writable);
+	allocate_spage_elem(fe->page_number, fe->frame_number, page_type, fe, writable);
 
 	return fe;
 }
