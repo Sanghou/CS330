@@ -37,7 +37,6 @@ void
 destory_hash_action(struct hash_elem *e, void *aux)
 {
 	struct spage_entry *spage_entry = hash_entry(e, struct spage_entry, elem);
-
 	switch (spage_entry->page_type){
 		case PHYS_MEMORY:
 		{	
@@ -186,5 +185,9 @@ mapped_entry (struct thread *t, unsigned va){
 void 
 destroy_spage (struct hash *page_table)
 {
+  acquire_frame_lock();
+  acquire_swap_lock();
   hash_destroy(page_table, destory_hash_action);
+  release_frame_lock();
+  release_swap_lock();
 }

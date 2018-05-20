@@ -51,7 +51,6 @@ struct frame_entry * allocate_frame_elem(uint8_t *upage, bool writable, bool phy
 	list_push_back(&page_table, &fe->elem);	
 	lock_release(&frame_lock);
 	pointer_set();
-
 	if (phys){
 		enum spage_type page_type = PHYS_MEMORY;
 		allocate_spage_elem(fe->page_number, fe->frame_number, page_type, fe, writable);
@@ -179,9 +178,9 @@ frame_remove (struct spage_entry *spage_entry)
   			pointer = list_begin(&page_table);
   	}
 
-  	lock_acquire(&frame_lock);
+  	// lock_acquire(&frame_lock);
 	list_remove(&f->elem);
-	lock_release(&frame_lock);
+	// lock_release(&frame_lock);
 
 	pagedir_clear_page(f->thread->pagedir, f->page_number);
 	palloc_free_page((void *)(f->frame_number));
@@ -193,4 +192,13 @@ pointer_set (void)
 {
 	if (pointer == NULL)
 		pointer = list_begin(&page_table);
+}
+void
+acquire_frame_lock (void){
+	lock_acquire(&frame_lock);
+}
+void
+release_frame_lock (void)
+{
+	lock_release(&frame_lock);
 }

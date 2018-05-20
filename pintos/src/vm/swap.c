@@ -54,8 +54,9 @@ swap_in (struct spage_entry *spage_entry){
     	palloc_free_page((void *)fe->frame_number);
       	return;
     }
-
-    list_remove(&se->list_elem);	
+    lock_acquire(&swap_lock);
+    list_remove(&se->list_elem);
+    lock_release(&swap_lock);	
 
     int i;
     int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
@@ -168,11 +169,8 @@ swap_out (struct frame_entry *frame)
 
 	enum spage_type type = SWAP_DISK;
 	struct spage_entry * spage_entry= mapped_entry (frame->thread, frame->page_number);
-	if (spage_entry->mmap)
-	{
-		struct thread *t = frame->thread;
-		spage_entry->dirty = pagedir_is_dirty(t->pagedir, spage_entry->va);
-	}
+	struct thread *t = frame->thread;
+	spage_entry->dirty = pagedir_is_dirty(t->pagedir, spage_entry->va);	
 	spage_entry->page_type = type;
 	spage_entry->pa = se->sector;
 	spage_entry->pointer = se;
@@ -196,8 +194,10 @@ swap_out (struct frame_entry *frame)
 		sector++;
 	}
 	
+	lock_acquire(&swap_lock);
 	list_push_back(&swap_table, &se->list_elem);
-	
+	lock_release(&swap_lock);
+
 	// how to manage the supplementary page table?
 }
 
@@ -212,12 +212,22 @@ swap_remove (struct spage_entry *spage_entry)
 
     int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
 
+    // lock_acquire(&swap_lock);
 	list_remove(&se->list_elem);
 
-	lock_acquire(&swap_lock);
+	
 	bitmap_set_multiple (used_sector, se->sector, sector_per_page, false);
-	lock_release(&swap_lock);
+	// lock_release(&swap_lock);
 
 	free(se);
 
+}
+void
+acquire_swap_lock (void){
+	lock_acquire(&swap_lock);
+}
+void
+release_swap_lock (void)
+{
+	lock_release(&swap_lock);
 }
