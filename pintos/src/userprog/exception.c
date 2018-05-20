@@ -233,7 +233,7 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
    else if (not_present && mapped_entry(t, pg_round_down(fault_addr)))
      {
       struct spage_entry *spage_entry = mapped_entry(t, pg_round_down(fault_addr));
-      if (spage_entry != NULL && spage_entry->page_type != PHYS_MEMORY){
+      if (spage_entry != NULL && spage_entry->page_type == SWAP){
         swap_in(spage_entry);
       } 
      }
