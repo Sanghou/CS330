@@ -17,10 +17,11 @@ enum spage_type
 struct spage_entry
 	{
 		struct hash_elem elem;
+		struct list_elem list_elem;
 		unsigned va; //virtual address
 		unsigned pa;
+		int ofs;
 		bool writable;
-		// bool dirty;
 		enum spage_type page_type;
 		void * pointer; //points to whether swap or frame
 		void * file_map;

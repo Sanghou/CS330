@@ -12,10 +12,3 @@ struct file_map{
 	struct list addr;
 	struct list_elem elem;
 };
-
-struct addr_elem{
-	struct list_elem elem;
-	unsigned va;
-	off_t ofs;
-	void * spage_elem;
-};

@@ -531,11 +531,10 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
       /* Add the page to the process's address space. */
       if (!install_page (upage, kpage, writable)) 
-        {
+        { 
           palloc_free_page (kpage);
           return false; 
         }
-
       /* Advance. */
       read_bytes -= page_read_bytes;
       zero_bytes -= page_zero_bytes;
@@ -575,6 +574,7 @@ setup_stack (void **esp)
         #endif
       }
     } 
+
   return success;
 }
 
@@ -600,9 +600,9 @@ install_page (void *upage, void *kpage, bool writable)
 #ifdef VM
 struct file_map *
 load_file (struct file *file, uint8_t *upage,
-              uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
+              uint32_t read_bytes, bool writable) 
 {
-  ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
+  // ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
   ASSERT (pg_ofs (upage) == 0);
 
   struct file_map *map = malloc(sizeof(struct file_map));
@@ -610,13 +610,12 @@ load_file (struct file *file, uint8_t *upage,
 
   off_t ofs = 0;
 
-  while (read_bytes > 0 || zero_bytes > 0) 
+  while (read_bytes > 0 ) 
     {
       /* Calculate how to fill this page.
          We will read PAGE_READ_BYTES bytes from FILE
          and zero the final PAGE_ZERO_BYTES bytes. */
       size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE; 
-      size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
       
@@ -633,8 +632,7 @@ load_file (struct file *file, uint8_t *upage,
           return NULL; 
         }
       release_sys_lock();
-      memset (kpage + page_read_bytes, 0, page_zero_bytes);
-      /* Add the page to the process's address space. */
+
       if (!install_page (upage, kpage, writable)) {
           palloc_free_page (kpage);
           free(map);
@@ -642,22 +640,18 @@ load_file (struct file *file, uint8_t *upage,
         }
 
       /* Advance. */
-      struct addr_elem *address = malloc(sizeof(struct addr_elem));
+      // struct addr_elem *address = malloc(sizeof(struct addr_elem));
 
       enum spage_type type = MMAP;
       allocate_spage_elem(fe->page_number, fe->frame_number, type, fe, writable);
       struct spage_entry *spage_entry = mapped_entry(thread_current(), fe->page_number);
       spage_entry->file_map = map;
       spage_entry->mmap = true;
-      
-      address->ofs = ofs;
-      address->va = fe->page_number;
-      address->spage_elem = spage_entry;
+      spage_entry->ofs = ofs;
 
-      list_push_back(&map->addr,&address->elem);
+      list_push_back(&map->addr,&spage_entry->list_elem);
       
       read_bytes -= page_read_bytes;
-      zero_bytes -= page_zero_bytes;
       ofs += PGSIZE;
       upage += PGSIZE;
     }

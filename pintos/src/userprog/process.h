@@ -9,7 +9,7 @@ void process_exit (void);
 void process_activate (void);
 
 #ifdef VM
-struct file_map *load_file (struct file *file, uint8_t *upage, uint32_t read_bytes, uint32_t zero_bytes, bool writable);
+struct file_map *load_file (struct file *file, uint8_t *upage, uint32_t read_bytes, bool writable);
 #endif
 
 #endif /* userprog/process.h */

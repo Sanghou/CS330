@@ -237,26 +237,17 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
       else if (spage_entry != NULL && spage_entry->page_type ==MMAP)
       {
         struct file_map * mapped_file = spage_entry->file_map;
-        struct list_elem *e;
 
-        for (e = list_begin(&mapped_file->addr); e != list_end(&mapped_file->addr); e = list_next(e))
-        {
-            struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
-            if (addr_elem->va == spage_entry->va){
-              break;
-            }
-        }
-        struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
-
-        struct frame_entry *fe = allocate_frame_elem(addr_elem->va, spage_entry->writable, false);
+        struct frame_entry *fe = allocate_frame_elem(spage_entry->va, spage_entry->writable, false);
 
         acquire_sys_lock();
-        file_read_at (mapped_file->file, fe->frame_number, PGSIZE, addr_elem->ofs);
+        file_read_at (mapped_file->file, fe->frame_number, PGSIZE, spage_entry->ofs);
         release_sys_lock();
 
-        if (!pagedir_set_page(&thread_current()->pagedir,addr_elem->va, fe->frame_number, spage_entry->writable)) {
+        if (!pagedir_set_page(&thread_current()->pagedir,spage_entry->va, fe->frame_number, spage_entry->writable)) {
             burst();
         }
+
         spage_entry->pa = fe->frame_number;
 
       } 

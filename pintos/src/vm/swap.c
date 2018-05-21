@@ -56,8 +56,7 @@ swap_in (struct spage_entry *spage_entry){
       	return;
     }
     lock_acquire(&swap_lock);
-    list_remove(&se->list_elem);
-    lock_release(&swap_lock);	
+    list_remove(&se->list_elem);	
 
     int i;
     int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
@@ -72,15 +71,14 @@ swap_in (struct spage_entry *spage_entry){
 		sector++;
 	}
 
-	lock_acquire(&swap_lock);
 	bitmap_set_multiple (used_sector, se->sector, sector_per_page, false);
-	lock_release(&swap_lock);
-
 
 	enum spage_type type = PHYS_MEMORY;
 	spage_entry->pointer = fe;
 	spage_entry->page_type = type;
 	spage_entry->pa = fe->frame_number;
+
+	lock_release(&swap_lock);
    
     free(se);
 }
@@ -102,6 +100,7 @@ swap_out (struct frame_entry *frame)
 
 	int i;
 
+	lock_acquire(&swap_lock);
 	se = malloc(sizeof(struct swap_entry));
 
 	if (swap_slot == NULL)
@@ -119,18 +118,10 @@ swap_out (struct frame_entry *frame)
 		case MMAP:
 		{
 			struct file_map * mapped_file = spage_entry->file_map;
-			struct list_elem *e;
-			for (e = list_begin(&mapped_file->addr); e != list_end(&mapped_file->addr); e = list_next(e)){
-			    struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
-			    if (addr_elem->va == spage_entry->va){
-			      break;
-			    }
-			}
-		  	struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
-
+			
 		  	if (pagedir_is_dirty(mapped_file->t->pagedir, spage_entry->va)){
 		    	acquire_sys_lock();
-		    	file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, addr_elem->ofs);
+		    	file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, spage_entry->ofs);
 		    	release_sys_lock();
 	    	}
 	    	spage_entry->pointer = NULL;
@@ -150,7 +141,6 @@ swap_out (struct frame_entry *frame)
 	//여기 block
 	void * paddr = (void *) frame->frame_number;
 
-	lock_acquire(&swap_lock);
 	size_t sector = bitmap_scan_and_flip(used_sector, 0, sector_per_page, false);
 	lock_release(&swap_lock);
 	se->sector = sector; 
@@ -158,6 +148,7 @@ swap_out (struct frame_entry *frame)
 	if (sector == BITMAP_ERROR)
 		PANIC("SWAP BLOCK IS FULL");
 
+	acquire_frame_lock();
 	//write to a swap block.
 	for (i = 0 ; i < sector_per_page; i++)
 	{
@@ -165,7 +156,8 @@ swap_out (struct frame_entry *frame)
 		block_write(swap_slot, sector, paddr);
 		sector++;
 	}
-	
+	release_frame_lock();
+
 	lock_acquire(&swap_lock);
 	list_push_back(&swap_table, &se->list_elem);
 	lock_release(&swap_lock);
@@ -184,12 +176,9 @@ swap_remove (struct spage_entry *spage_entry)
 
     int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
 
-    // lock_acquire(&swap_lock);
 	list_remove(&se->list_elem);
 
-	
 	bitmap_set_multiple (used_sector, se->sector, sector_per_page, false);
-	// lock_release(&swap_lock);
 
 	free(se);
 

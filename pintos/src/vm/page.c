@@ -12,6 +12,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 
+struct lock hash_lock;
 
 bool 
 spage_less_func	(const struct hash_elem *a,
@@ -52,24 +53,15 @@ destory_hash_action(struct hash_elem *e, void *aux)
 		case MMAP:
 		{	
 			struct file_map * mapped_file = spage_entry->file_map;
-			struct list_elem *e;
-			for (e = list_begin(&mapped_file->addr); e != list_end(&mapped_file->addr); e = list_next(e)){
-			    struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
-			    if (addr_elem->va == spage_entry->va){
-			      break;
-			    }
-			}
-		  	struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
 
-		  	list_remove(&addr_elem->elem);
+		  	list_remove(&spage_entry->list_elem);
+
 		  	if (pagedir_is_dirty(mapped_file->t->pagedir, spage_entry->va)){
 		    	acquire_sys_lock();
-		    	file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, addr_elem->ofs);
+		    	file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, spage_entry->ofs);
 		    	release_sys_lock();
 	    	}
 	    	frame_remove(spage_entry);
-
-	    	free(addr_elem);
 		  
 		 	if (list_empty(&mapped_file->addr)){
 		        list_remove(&mapped_file->elem);
@@ -87,6 +79,7 @@ void
 spage_init(struct hash *page_table)
 {
 	hash_init(page_table,hash_map,spage_less_func, NULL);
+	lock_init(&hash_lock);
 }
 
 bool 
@@ -101,7 +94,9 @@ allocate_spage_elem (unsigned va, unsigned pa, enum spage_type flag, void * entr
 	fe->writable = writable;
 	fe->mmap = false;
 	fe->file_map = NULL;
+	lock_acquire(&hash_lock);
 	ASSERT(hash_insert(page_table, &fe->elem) == NULL);
+	lock_release(&hash_lock);
 }
 
 bool 
@@ -113,9 +108,11 @@ deallocate_spage_elem (unsigned va)
 	f.va = va; 
 	e = hash_find(page_table, &f.elem);
 	if (e != NULL)
-		{
+		{	
+			lock_acquire(&hash_lock);
 			hash_delete(page_table, &e);
 			free(&f);
+			lock_release(&hash_lock);
 			return true;
 		}
 	return false;

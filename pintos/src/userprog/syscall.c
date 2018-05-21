@@ -469,7 +469,7 @@ syscall_handler (struct intr_frame *f)
         break;
       } 
 
-      struct file_map* mapped_file = load_file(file, (uint8_t*) addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
+      struct file_map* mapped_file = load_file(file, (uint8_t*) addr, (uint32_t) file_len, true);
       
       if(mapped_file == NULL)
       {
@@ -506,8 +506,7 @@ syscall_handler (struct intr_frame *f)
 
             struct list_elem* e2 = list_pop_front(&mapped_file->addr);
 
-            struct addr_elem *pointer = list_entry(e2,struct addr_elem, elem);
-            struct spage_entry *spage_entry = (struct spage_entry *) pointer->spage_elem;
+            struct spage_entry *spage_entry = list_entry(e2, struct spage_entry, list_elem);
 
             switch (spage_entry->page_type)
             {
@@ -521,7 +520,7 @@ syscall_handler (struct intr_frame *f)
                 { 
                   //check dirty bit
                   acquire_sys_lock();
-                  file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, pointer->ofs);
+                  file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, spage_entry->ofs);
                   release_sys_lock();
                 }
                 deallocate_frame_elem(fe->thread, fe->page_number);
@@ -530,7 +529,6 @@ syscall_handler (struct intr_frame *f)
               default:
                 break; 
             }
-            free(pointer);
 
           }
             list_remove(&mapped_file->elem); 

@@ -29,6 +29,17 @@ frame_init (void)
 	pointer = NULL;
 }
 
+void
+pointer_check (struct list_elem *list_elem)
+{
+	if (pointer == list_elem)
+  	{
+  		pointer = list_next(pointer);
+  		if (pointer == list_end(&page_table))
+  			pointer = list_begin(&page_table);
+  	}
+}
+
 
 struct frame_entry * allocate_frame_elem(uint8_t *upage, bool writable, bool phys){
 	
@@ -42,20 +53,20 @@ struct frame_entry * allocate_frame_elem(uint8_t *upage, bool writable, bool phy
 	
 	struct frame_entry *fe;
 	
+	lock_acquire(&frame_lock);
 	fe = malloc(sizeof(struct frame_entry));
 	fe->thread = thread_current();
 	fe->page_number = upage;
 	fe->frame_number = kpage;
 	fe->evict = 1;
-	lock_acquire(&frame_lock);
 	list_push_back(&page_table, &fe->elem);	
-	lock_release(&frame_lock);
 	pointer_set();
 	if (phys){
 		enum spage_type page_type = PHYS_MEMORY;
 		allocate_spage_elem(fe->page_number, fe->frame_number, page_type, fe, writable);
-	}	
-
+	}
+    
+    lock_release(&frame_lock);
 	return fe;
 }
 
@@ -71,20 +82,20 @@ struct frame_entry * allocate_frame_elem_both(uint8_t upage, bool writable){
 	}
 	
 	struct frame_entry *fe;
-	
+
+	lock_acquire(&frame_lock);
 	fe = malloc(sizeof(struct frame_entry));
 	fe->thread = thread_current();
 	fe->page_number = upage;
 	fe->frame_number = kpage;
 	fe->evict = 1;
-	lock_acquire(&frame_lock);
 	list_push_back(&page_table, &fe->elem);	
-	lock_release(&frame_lock);
 	pointer_set();
 
 	enum spage_type page_type = PHYS_MEMORY;
 	allocate_spage_elem(fe->page_number, fe->frame_number, page_type, fe, writable);
 
+	lock_release(&frame_lock);
 	return fe;
 }
 
@@ -98,18 +109,12 @@ bool deallocate_frame_elem(struct thread *t, unsigned pn){
 	if (spage_entry->page_type == type)
 		return false;
 	f = (struct frame_entry *) spage_entry->pointer;
-
-  
-  	if (pointer == &f->elem)
-  	{
-  		pointer = list_next(pointer);
-  		if (pointer == list_end(&page_table))
-  			pointer = list_begin(&page_table);
-  	}
-
+ 	
+ 	
   	lock_acquire(&frame_lock);
+  	pointer_check (&f->elem);
+  	
 	list_remove(&f->elem);
-	lock_release(&frame_lock);
 
 	hash_delete(&t->supplement_page_table, &spage_entry->elem);
 	free(spage_entry);
@@ -117,6 +122,9 @@ bool deallocate_frame_elem(struct thread *t, unsigned pn){
 	pagedir_clear_page(t->pagedir, f->page_number);
 	palloc_free_page((void *)(f->frame_number));
 	free(f);
+
+	lock_release(&frame_lock);
+	
 	return true;
 }
 
@@ -124,6 +132,7 @@ void
 evict (void) // 2-chance
 {
 	struct frame_entry *f;
+
 	while (!list_empty(&page_table))
 	{
 		if (pointer == list_end(&page_table)){
@@ -138,29 +147,24 @@ evict (void) // 2-chance
 		
 		pointer = list_next(pointer);
 	}
-	// struct list_elem *e = list_pop_front(&page_table);
-	// struct frame_entry *f = list_entry(e, struct frame_entry, elem);
-	// list_remove(e);
-	swap_out(f);
-	pointer = list_next(pointer);
-	if (pointer == list_end(&page_table))
-	{
-		pointer = list_begin(&page_table);
-		lock_acquire(&frame_lock);
-		list_pop_back(&page_table);
-		lock_release(&frame_lock);
 
-	}
-	else 
-	{
-		lock_acquire(&frame_lock);
-		list_remove(list_prev(pointer));
-		lock_release(&frame_lock);
-	}
+	
+	swap_out(f);
+	
+	lock_acquire(&frame_lock);
+
+	struct list_elem *e = pointer;
+	pointer_check (pointer);
+	list_remove(e);
 
 	pagedir_clear_page(f->thread->pagedir, f->page_number);
 	palloc_free_page((void *)(f->frame_number));
 	free(f);
+
+	lock_release(&frame_lock);
+	
+	// struct spage_entry *entry = mapped_entry(f->thread, f->page_number);
+	// frame_remove(entry);
 }
 
 /*
@@ -172,20 +176,16 @@ frame_remove (struct spage_entry *spage_entry)
 {
 	struct frame_entry *f = (struct frame_entry *) spage_entry->pointer;
   
-  	if (pointer == &f->elem)
-  	{
-  		pointer = list_next(pointer);
-  		if (pointer == list_end(&page_table))
-  			pointer = list_begin(&page_table);
-  	}
-
   	lock_acquire(&frame_lock);
+  	pointer_check (&f->elem);
+  	
 	list_remove(&f->elem);
-	lock_release(&frame_lock);
 
 	pagedir_clear_page(f->thread->pagedir, f->page_number);
 	palloc_free_page((void *)(f->frame_number));
 	free(f);
+
+	lock_release(&frame_lock);
 }
 
 void
