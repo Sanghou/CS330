@@ -468,8 +468,11 @@ syscall_handler (struct intr_frame *f)
         f->eax = -1;
         break;
       } 
+
       struct file_map* mapped_file = load_file(file, (uint8_t*) addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
-      if(mapped_file == NULL){
+      
+      if(mapped_file == NULL)
+      {
         f->eax = -1;
         break;
       }
@@ -491,28 +494,32 @@ syscall_handler (struct intr_frame *f)
 
       struct list* mapping_table = &thread_current()->mapping_table;
       struct list_elem* e;
+
       for(e=list_begin(mapping_table); e!= list_end(mapping_table); e=list_next(e)){
 
         struct file_map * mapped_file = list_entry(e, struct file_map,elem);
 
-        if(mapped_file->mmap_id == mmap_id){
-          while(!list_empty(&mapped_file->addr)){
+        if(mapped_file->mmap_id == mmap_id)
+        {
+          while(!list_empty(&mapped_file->addr))
+          {
 
-            struct list_elem* e2;
-            e2 = list_pop_front(&mapped_file->addr);
+            struct list_elem* e2 = list_pop_front(&mapped_file->addr);
 
             struct addr_elem *pointer = list_entry(e2,struct addr_elem, elem);
-            struct spage_entry *spage_entry = pointer->spage_elem;
+            struct spage_entry *spage_entry = (struct spage_entry *) pointer->spage_elem;
 
-            enum spage_type mmap_type = MMAP;
-            switch (spage_entry->page_type){
+            switch (spage_entry->page_type)
+            {
               case MMAP:
               {
                 struct frame_entry *fe = (struct frame_entry *) spage_entry->pointer;
                 if (fe == NULL)
                   break;
 
-                if(pagedir_is_dirty(thread_current()->pagedir, spage_entry->va)){ //check dirty bit
+                if(pagedir_is_dirty(thread_current()->pagedir, spage_entry->va))
+                { 
+                  //check dirty bit
                   acquire_sys_lock();
                   file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, pointer->ofs);
                   release_sys_lock();
@@ -521,17 +528,16 @@ syscall_handler (struct intr_frame *f)
                 break;
               } 
               default:
-                break;
+                break; 
             }
-
             free(pointer);
-            // deallocate_spage_elem(spage_entry);
+
           }
             list_remove(&mapped_file->elem); 
             free(mapped_file);
             break;
-          }
-    }
+        }
+      }
     break;
   }
   #endif

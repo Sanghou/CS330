@@ -417,8 +417,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
   *esp -= sizeof(void *);
   memcpy(*esp, &tmp, sizeof(void *));
 
-  //hex_dump((uint8_t) *esp, *esp, 200, 1);
-
   success = true;
 
  done:
@@ -516,9 +514,9 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 
       /* Get a page of memory. */
       #ifdef VM
-      uint8_t *kpage = allocate_frame_elem(upage, writable, true)->frame_number;
+        uint8_t *kpage = allocate_frame_elem(upage, writable, true)->frame_number;
       #else
-      uint8_t *kpage = palloc_get_page(PAL_USER);
+        uint8_t *kpage = palloc_get_page(PAL_USER);
       #endif
 
       /* Load this page. */
@@ -543,8 +541,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       zero_bytes -= page_zero_bytes;
       upage += PGSIZE;
     }
-
-  //printf("asdfwqfefwe\n");
   return true;
 }
 /* Create a minimal stack by mapping a zeroed page at the top of
@@ -558,17 +554,13 @@ setup_stack (void **esp)
 
 
   #ifdef VM
-  struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE, true, true);
-  kpage = fe->frame_number;
-  memset(fe->frame_number, 0, PGSIZE);
+    struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE, true, true);
+    kpage = fe->frame_number;
+    memset(fe->frame_number, 0, PGSIZE);
   #else
-  kpage = palloc_get_page(PAL_USER | PAL_ZERO);
+    kpage = palloc_get_page(PAL_USER | PAL_ZERO);
   #endif
-  // if (kpage == NULL)
-  //   {
-  //     evict();
-  //     kpage = palloc_get_page(PAL_USER | PAL_ZERO);
-  //   }
+  
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
@@ -616,8 +608,6 @@ load_file (struct file *file, uint8_t *upage,
   struct file_map *map = malloc(sizeof(struct file_map));
   list_init(&map->addr);
 
-  file_seek (file, 0);
-
   off_t ofs = 0;
 
   while (read_bytes > 0 || zero_bytes > 0) 
@@ -635,7 +625,7 @@ load_file (struct file *file, uint8_t *upage,
 
       /* Load this page. */
       acquire_sys_lock();
-      if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
+      if (file_read_at (file, kpage, page_read_bytes, ofs) != (int) page_read_bytes)
         {
           release_sys_lock();
           palloc_free_page (kpage);

@@ -8,8 +8,10 @@
 #include "threads/vaddr.h"
 #include "threads/palloc.h"
 #include "threads/pte.h"
+#ifdef VM
 #include "vm/frame.h"
 #include "vm/file_map.h"
+#endif
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -189,18 +191,6 @@ bool is_stack(void *fault_addr, struct intr_frame *f){
    }
    return false;
 
-  // if(!is_user_vaddr(fault_addr) || fault_addr - f->esp < -32 || fault_addr < 0x08048000){
-  //   printf("is stack0 \n\n");
-    
-  //   burst();
-  // }
-
-  // else if ( 0xC0000000-(unsigned)fault_addr  < 8 *1024 * 1024){
-  //   return true;
-  // }
-
-  // return false;
-
 }
 
 void page_fault_handling (bool not_present, bool write, bool user, void *fault_addr, struct intr_frame *f)
@@ -210,25 +200,28 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
    enum spage_type MMAP = MMAP;
    if(is_stack(fault_addr,f)){
         struct spage_entry *spage_entry = mapped_entry(t, pg_round_down(fault_addr));
-        if (spage_entry != NULL && spage_entry->page_type == SWAP){
+        if (spage_entry != NULL && spage_entry->page_type == SWAP)
+        {
            swap_in(spage_entry);
            return;
         }
 
         int need_page =  (0xC0000000-(unsigned)fault_addr)/PGSIZE;
-        if(need_page <2){
+        if(need_page <2)
+        {
           struct frame_entry * fe = allocate_frame_elem(pg_round_down(fault_addr), true, true);
           pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
         }
         
-        else{
+        else
+        {
           int i;
           int stack_position = pg_round_down(fault_addr);
-          for(i=0;i<need_page;i++){
+          for(i=0;i<need_page;i++)
+          {
             struct frame_entry * fe = allocate_frame_elem(stack_position, true, true);
             pagedir_set_page(t->pagedir, fe->page_number, fe->frame_number, true);
             stack_position += PGSIZE;
-
           }
         }
       }
@@ -236,13 +229,18 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
    else if (not_present && mapped_entry(t, pg_round_down(fault_addr)))
      {
       struct spage_entry *spage_entry = mapped_entry(t, pg_round_down(fault_addr));
-      if (spage_entry != NULL && spage_entry->page_type == SWAP){
+
+      if (spage_entry != NULL && spage_entry->page_type == SWAP)
+      {
         swap_in(spage_entry);
-      }else if (spage_entry != NULL && spage_entry->page_type ==MMAP){
+      }
+      else if (spage_entry != NULL && spage_entry->page_type ==MMAP)
+      {
         struct file_map * mapped_file = spage_entry->file_map;
         struct list_elem *e;
 
-        for (e = list_begin(&mapped_file->addr); e != list_end(&mapped_file->addr); e = list_next(e)){
+        for (e = list_begin(&mapped_file->addr); e != list_end(&mapped_file->addr); e = list_next(e))
+        {
             struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
             if (addr_elem->va == spage_entry->va){
               break;
@@ -269,7 +267,6 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
   }
 #endif
 void burst(){
-  // printf("burst\n");
   thread_current()->exit_status = -1;
   exec_sema_down();
   printf("%s: exit(%d)\n", thread_current()->name, -1);
