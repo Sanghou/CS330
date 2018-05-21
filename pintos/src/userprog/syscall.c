@@ -99,6 +99,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXEC:
     {
+      // printf("SYS_EXEC\n");
   		enum intr_level old_level;
   		old_level = intr_disable();
 
@@ -439,7 +440,7 @@ syscall_handler (struct intr_frame *f)
   		break;
   	}
 
-
+#ifdef VM
     case SYS_MMAP:
     {
       unsigned int fd = read(f);
@@ -457,15 +458,16 @@ syscall_handler (struct intr_frame *f)
         break;
       }
 
+      acquire_sys_lock();
       struct file *file = file_reopen(descript->file);
 
       int file_len = file_length(file);
+      release_sys_lock();
 
       if(file_len == 0 || pg_ofs (addr) != 0){
         f->eax = -1;
         break;
-      }
-
+      } 
       struct file_map* mapped_file = load_file(file, (uint8_t*) addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
       if(mapped_file == NULL){
         f->eax = -1;
@@ -484,9 +486,7 @@ syscall_handler (struct intr_frame *f)
     }
 
     case SYS_MUNMAP:
-    {
-      // printf("SYS_MUNMAP\n");
-
+    { 
       int mmap_id = read(f);
 
       struct list* mapping_table = &thread_current()->mapping_table;
@@ -509,6 +509,8 @@ syscall_handler (struct intr_frame *f)
               case MMAP:
               {
                 struct frame_entry *fe = (struct frame_entry *) spage_entry->pointer;
+                if (fe == NULL)
+                  break;
 
                 if(pagedir_is_dirty(thread_current()->pagedir, spage_entry->va)){ //check dirty bit
                   acquire_sys_lock();
@@ -532,8 +534,7 @@ syscall_handler (struct intr_frame *f)
     }
     break;
   }
-
-
+  #endif
 
   	default:
   		terminate();

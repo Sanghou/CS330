@@ -140,6 +140,7 @@ evict (void) // 2-chance
 	}
 	// struct list_elem *e = list_pop_front(&page_table);
 	// struct frame_entry *f = list_entry(e, struct frame_entry, elem);
+	// list_remove(e);
 	swap_out(f);
 	pointer = list_next(pointer);
 	if (pointer == list_end(&page_table))
@@ -178,9 +179,9 @@ frame_remove (struct spage_entry *spage_entry)
   			pointer = list_begin(&page_table);
   	}
 
-  	// lock_acquire(&frame_lock);
+  	lock_acquire(&frame_lock);
 	list_remove(&f->elem);
-	// lock_release(&frame_lock);
+	lock_release(&frame_lock);
 
 	pagedir_clear_page(f->thread->pagedir, f->page_number);
 	palloc_free_page((void *)(f->frame_number));

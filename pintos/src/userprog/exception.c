@@ -9,6 +9,7 @@
 #include "threads/palloc.h"
 #include "threads/pte.h"
 #include "vm/frame.h"
+#include "vm/file_map.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -161,12 +162,14 @@ page_fault (struct intr_frame *f)
      //          not_present ? "not present" : "rights violation",
      //          write ? "writing" : "reading",
      //          user ? "user" : "kernel"); 
-
+  #ifdef VM
    page_fault_handling(not_present, write, user, fault_addr,f);
-  // burst();
+  #else
+   burst();
+  #endif
   
 }
-
+#ifdef VM
 bool is_stack(void *fault_addr, struct intr_frame *f){
 
 
@@ -235,13 +238,36 @@ void page_fault_handling (bool not_present, bool write, bool user, void *fault_a
       struct spage_entry *spage_entry = mapped_entry(t, pg_round_down(fault_addr));
       if (spage_entry != NULL && spage_entry->page_type == SWAP){
         swap_in(spage_entry);
+      }else if (spage_entry != NULL && spage_entry->page_type ==MMAP){
+        struct file_map * mapped_file = spage_entry->file_map;
+        struct list_elem *e;
+
+        for (e = list_begin(&mapped_file->addr); e != list_end(&mapped_file->addr); e = list_next(e)){
+            struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
+            if (addr_elem->va == spage_entry->va){
+              break;
+            }
+        }
+        struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
+
+        struct frame_entry *fe = allocate_frame_elem(addr_elem->va, spage_entry->writable, false);
+
+        acquire_sys_lock();
+        file_read_at (mapped_file->file, fe->frame_number, PGSIZE, addr_elem->ofs);
+        release_sys_lock();
+
+        if (!pagedir_set_page(&thread_current()->pagedir,addr_elem->va, fe->frame_number, spage_entry->writable)) {
+            burst();
+        }
+        spage_entry->pa = fe->frame_number;
+
       } 
      }
    else{
       burst();
      }
   }
-
+#endif
 void burst(){
   // printf("burst\n");
   thread_current()->exit_status = -1;

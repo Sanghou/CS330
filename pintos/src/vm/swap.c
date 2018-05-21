@@ -12,6 +12,7 @@
 #include "threads/vaddr.h"
 #include "threads/pte.h"
 #include "userprog/pagedir.h"
+#include "vm/file_map.h"
 
 static struct list swap_table;
 static struct lock swap_lock;
@@ -77,67 +78,12 @@ swap_in (struct spage_entry *spage_entry){
 
 
 	enum spage_type type = PHYS_MEMORY;
-	if (spage_entry->mmap){
-		type = MMAP;
-	}
 	spage_entry->pointer = fe;
 	spage_entry->page_type = type;
 	spage_entry->pa = fe->frame_number;
    
     free(se);
 }
-/*
-bool 
-swap_in (struct thread *t, unsigned page_num){
-	//find the proper swap slot in the swap_table
-	struct list_elem *e;
-	struct block *swap_slot = block_get_role(BLOCK_SWAP);
-
-	// struct block *swap_slot = block_get_role(BLOCK_SWAP);
-	for (e = list_begin(&swap_table); e != list_end(&swap_table); e = list_next(e))
-	  {
-	    struct swap_entry *se = list_entry(e, struct swap_entry, list_elem);
-
-	    if (t == se->thread && pg_no(se->page_number) == pg_no(page_num))
-	      {
-	      	struct frame_entry* fe = allocate_frame_elem(se->page_number, false);
-
-	      	// allocate_spage_elem(t->page_number, t->frame_number);
-	      	bool success = pagedir_set_page(t->pagedir, (void *) fe->page_number, (void *) fe->frame_number, true);
-	      	if (!success) 
-	      	{
-	      		palloc_free_page((void *)fe->frame_number);
-	      		return false;
-	      	}
-
-	      	list_remove(e);	
-
-	      	int i;
-			int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
-			int sector = se->sector;
-
-	      	for (i = 0 ; i < sector_per_page; i++)
-			{
-				void * tmp = malloc(BLOCK_SECTOR_SIZE);
-				// acquire_sys_lock();
-				block_read (swap_slot, sector, tmp);
-				// release_sys_lock();
-				memcpy(((void *) fe->frame_number+BLOCK_SECTOR_SIZE*i), tmp, BLOCK_SECTOR_SIZE);
-	      		free(tmp);
-				sector++;
-			}
-
-			lock_acquire(&swap_lock);
-			bitmap_set_multiple (used_sector, se->sector, sector_per_page, false);
-			lock_release(&swap_lock);
-	   
-	      	free(se);
-	        return true;
-	      }
-	  }
-	  //printf("cannot find swap \n");
-	return false;
-}*/
 
 /*
    Writes frame information in swap disk.
@@ -169,11 +115,37 @@ swap_out (struct frame_entry *frame)
 
 	enum spage_type type = SWAP_DISK;
 	struct spage_entry * spage_entry= mapped_entry (frame->thread, frame->page_number);
-	struct thread *t = frame->thread;
-	spage_entry->dirty = pagedir_is_dirty(t->pagedir, spage_entry->va);	
-	spage_entry->page_type = type;
-	spage_entry->pa = se->sector;
-	spage_entry->pointer = se;
+	switch (spage_entry->page_type){
+		case MMAP:
+		{
+			struct file_map * mapped_file = spage_entry->file_map;
+			struct list_elem *e;
+			for (e = list_begin(&mapped_file->addr); e != list_end(&mapped_file->addr); e = list_next(e)){
+			    struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
+			    if (addr_elem->va == spage_entry->va){
+			      break;
+			    }
+			}
+		  	struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
+
+		  	if (pagedir_is_dirty(mapped_file->t->pagedir, spage_entry->va)){
+		    	acquire_sys_lock();
+		    	file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, addr_elem->ofs);
+		    	release_sys_lock();
+	    	}
+	    	spage_entry->pointer = NULL;
+	    	free(se);
+	    	return;
+		}	
+		case PHYS_MEMORY:
+		{
+			struct thread *t = frame->thread;
+			spage_entry->page_type = type;
+			spage_entry->pa = se->sector;
+			spage_entry->pointer = se;
+		}
+	}
+	
 
 	//여기 block
 	void * paddr = (void *) frame->frame_number;

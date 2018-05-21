@@ -515,8 +515,11 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
+      #ifdef VM
       uint8_t *kpage = allocate_frame_elem(upage, writable, true)->frame_number;
-      // uint8_t *kpage = palloc_get_page(PAL_USER);
+      #else
+      uint8_t *kpage = palloc_get_page(PAL_USER);
+      #endif
 
       /* Load this page. */
       acquire_sys_lock();
@@ -554,10 +557,13 @@ setup_stack (void **esp)
   bool success = false;
 
 
-  // kpage = palloc_get_page(PAL_USER | PAL_ZERO);
+  #ifdef VM
   struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE, true, true);
   kpage = fe->frame_number;
   memset(fe->frame_number, 0, PGSIZE);
+  #else
+  kpage = palloc_get_page(PAL_USER | PAL_ZERO);
+  #endif
   // if (kpage == NULL)
   //   {
   //     evict();
@@ -570,8 +576,11 @@ setup_stack (void **esp)
         *esp = PHYS_BASE;
       }
       else {
-        // palloc_free_page (kpage);
-        deallocate_frame_elem(thread_current(), fe->page_number);
+        #ifdef VM
+          deallocate_frame_elem(thread_current(), fe->page_number);
+        #else
+          palloc_free_page (kpage); 
+        #endif
       }
     } 
   return success;
@@ -596,7 +605,7 @@ install_page (void *upage, void *kpage, bool writable)
   return (pagedir_get_page (t->pagedir, upage) == NULL
           && pagedir_set_page (t->pagedir, upage, kpage, writable));
 }
-
+#ifdef VM
 struct file_map *
 load_file (struct file *file, uint8_t *upage,
               uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
@@ -636,8 +645,7 @@ load_file (struct file *file, uint8_t *upage,
       release_sys_lock();
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
       /* Add the page to the process's address space. */
-      if (!install_page (upage, kpage, writable)) 
-        {
+      if (!install_page (upage, kpage, writable)) {
           palloc_free_page (kpage);
           free(map);
           return NULL; 
@@ -653,6 +661,7 @@ load_file (struct file *file, uint8_t *upage,
       spage_entry->mmap = true;
       
       address->ofs = ofs;
+      address->va = fe->page_number;
       address->spage_elem = spage_entry;
 
       list_push_back(&map->addr,&address->elem);
@@ -662,6 +671,6 @@ load_file (struct file *file, uint8_t *upage,
       ofs += PGSIZE;
       upage += PGSIZE;
     }
-  //printf("asdfwqfefwe\n");
   return map;
 }
+#endif

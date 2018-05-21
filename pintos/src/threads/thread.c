@@ -298,7 +298,6 @@ void
 thread_exit (void) 
 {
   ASSERT (!intr_context ());
-
   struct thread* cur = thread_current();
 #ifdef VM
   //clear supplementary page table

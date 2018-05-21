@@ -20,7 +20,7 @@ struct spage_entry
 		unsigned va; //virtual address
 		unsigned pa;
 		bool writable;
-		bool dirty;
+		// bool dirty;
 		enum spage_type page_type;
 		void * pointer; //points to whether swap or frame
 		void * file_map;
