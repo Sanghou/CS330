@@ -148,7 +148,6 @@ swap_out (struct frame_entry *frame)
 	if (sector == BITMAP_ERROR)
 		PANIC("SWAP BLOCK IS FULL");
 
-	acquire_frame_lock();
 	//write to a swap block.
 	for (i = 0 ; i < sector_per_page; i++)
 	{
@@ -156,7 +155,6 @@ swap_out (struct frame_entry *frame)
 		block_write(swap_slot, sector, paddr);
 		sector++;
 	}
-	release_frame_lock();
 
 	lock_acquire(&swap_lock);
 	list_push_back(&swap_table, &se->list_elem);
