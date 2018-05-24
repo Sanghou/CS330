@@ -525,7 +525,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
           release_sys_lock();
           palloc_free_page (kpage);
           return false; 
-        }
+        } 
       release_sys_lock();
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
       /* Add the page to the process's address space. */
@@ -544,6 +544,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   //printf("asdfwqfefwe\n");
   return true;
 }
+
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
@@ -553,16 +554,11 @@ setup_stack (void **esp)
   uint8_t *kpage;
   bool success = false;
 
-
-  // kpage = palloc_get_page(PAL_USER | PAL_ZERO);
   struct frame_entry *fe = allocate_frame_elem(((uint8_t *) PHYS_BASE) - PGSIZE, true, true);
   kpage = fe->frame_number;
   memset(fe->frame_number, 0, PGSIZE);
-  // if (kpage == NULL)
-  //   {
-  //     evict();
-  //     kpage = palloc_get_page(PAL_USER | PAL_ZERO);
-  //   }
+
+
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
@@ -619,29 +615,30 @@ load_file (struct file *file, uint8_t *upage,
       size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE; 
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
-      /* Get a page of memory. */
+      /* Get a page of memory.   */
       
       struct frame_entry *fe = allocate_frame_elem(upage, writable, false);
       uint8_t *kpage = fe->frame_number;
 
       /* Load this page. */
-      acquire_sys_lock();
-      if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
+      if (file_read_at (file, kpage, page_read_bytes,ofs) != (int) page_read_bytes)
         {
-          release_sys_lock();
+          deallocate_frame_elem(thread_current(),kpage);
+          //release_sys_lock();
           palloc_free_page (kpage);
           free(map);
           return NULL; 
-        }
-      release_sys_lock();
+        } 
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
       /* Add the page to the process's address space. */
       if (!install_page (upage, kpage, writable)) 
         {
+          deallocate_frame_elem(thread_current(),kpage);
           palloc_free_page (kpage);
           free(map);
           return NULL; 
         }
+
 
       /* Advance. */
       struct addr_elem *address = malloc(sizeof(struct addr_elem));
@@ -654,14 +651,13 @@ load_file (struct file *file, uint8_t *upage,
       
       address->ofs = ofs;
       address->spage_elem = spage_entry;
-
       list_push_back(&map->addr,&address->elem);
-      
       read_bytes -= page_read_bytes;
       zero_bytes -= page_zero_bytes;
       ofs += PGSIZE;
       upage += PGSIZE;
     }
   //printf("asdfwqfefwe\n");
+  //hex_dump(kpage,kpage,33*PGSIZE,true);
   return map;
 }

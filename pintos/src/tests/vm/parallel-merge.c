@@ -75,7 +75,7 @@ sort_chunks (const char *subprocess, int exit_status)
       snprintf (fn, sizeof fn, "buf%zu", i);
       CHECK ((handle = open (fn)) > 1, "open \"%s\"", fn);
       read (handle, buf1 + CHUNK_SIZE * i, CHUNK_SIZE);
-      close (handle);
+      close (handle); 
       quiet = false;
     }
 }

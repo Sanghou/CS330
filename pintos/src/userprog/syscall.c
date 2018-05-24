@@ -418,9 +418,6 @@ syscall_handler (struct intr_frame *f)
   	}
 
 
-
-
-
   	case SYS_CLOSE:
     {
       int fd = read(f);
@@ -457,6 +454,7 @@ syscall_handler (struct intr_frame *f)
         break;
       }
 
+      
       struct file *file = file_reopen(descript->file);
 
       int file_len = file_length(file);
@@ -466,11 +464,15 @@ syscall_handler (struct intr_frame *f)
         break;
       }
 
+      acquire_sys_lock();
       struct file_map* mapped_file = load_file(file, (uint8_t*) addr, (uint32_t) file_len, (ROUND_UP(file_len,PGSIZE) - file_len), true);
+      release_sys_lock();
+
       if(mapped_file == NULL){
         f->eax = -1;
         break;
       }
+
       mapped_file->t = thread_current();
       mapped_file->file = file;
       mapped_file->mmap_id = global_mmap_id;
@@ -485,7 +487,6 @@ syscall_handler (struct intr_frame *f)
 
     case SYS_MUNMAP:
     {
-      // printf("SYS_MUNMAP\n");
 
       int mmap_id = read(f);
 

@@ -21,10 +21,10 @@ struct spage_entry
 		unsigned pa;
 		bool writable;
 		bool dirty;
+		bool mmap;
 		enum spage_type page_type;
 		void * pointer; //points to whether swap or frame
 		void * file_map;
-		bool mmap;
 	};
 
 void spage_init (struct hash *page_table);

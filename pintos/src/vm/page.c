@@ -12,7 +12,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 
-// struct lock hash_lock;
+//struct lock hash_lock;
 
 bool 
 spage_less_func	(const struct hash_elem *a,
@@ -36,6 +36,8 @@ hash_map (const struct hash_elem *e, void *aux)
 void 
 destory_hash_action(struct hash_elem *e, void *aux)
 {
+
+	//acquire_sys_lock();
 	struct spage_entry *spage_entry = hash_entry(e, struct spage_entry, elem);
 
 	switch (spage_entry->page_type){
@@ -47,56 +49,61 @@ destory_hash_action(struct hash_elem *e, void *aux)
 		}
 		case SWAP_DISK:
 		{
-			if (spage_entry->mmap)
-			{	
-				struct file_map * mapped_file = spage_entry->file_map;
-				struct list_elem *e;
-				for (e = list_begin(&mapped_file->addr); e != list_end(&mapped_file->addr); e = list_next(e))
-				{
-				    struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
-				    if (addr_elem->spage_elem == spage_entry)
-				      break;
-				}
-		  		struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
+			// if (spage_entry->mmap)
+			// {	
+			// 	printf("destroy mmap!! \n");
+			// 	//acquire_sys_lock();
+			// 	struct file_map * mapped_file = spage_entry->file_map;
+			// 	struct list_elem *e;
+			// 	for (e = list_begin(&mapped_file->addr); e != list_end(&mapped_file->addr); e = list_next(e))
+			// 	{
+			// 	    struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
+			// 	    if (addr_elem->spage_elem == spage_entry)
+			// 	      break;
+			// 	}
+		 //  		struct addr_elem *addr_elem = list_entry (e, struct addr_elem, elem);
 
-		  		list_remove(&addr_elem->elem);
+		 //  		list_remove(&addr_elem->elem);
 
 
-			    if (spage_entry->dirty)
-			    {
-			    	struct block *swap_slot = block_get_role(BLOCK_SWAP);
+			//     if (spage_entry->dirty)
+			//     {
+			//     	//printf("dirty clean \n");
+			//     	struct block *swap_slot = block_get_role(BLOCK_SWAP);
 
-			    	int i=0;
-				    int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
+			//     	int i=0;
+			// 	    int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
 
-				    int sector = spage_entry->pa;
+			// 	    int sector = spage_entry->pa;
 
-				    void *tmp = malloc(PGSIZE);
+			// 	    void *tmp = malloc(PGSIZE);
 
-				    for (i = 0 ; i < sector_per_page; i++)
-					{
-						block_read (swap_slot, sector, ((void *) tmp+BLOCK_SECTOR_SIZE*i));
-						sector++;
-					}
-					acquire_sys_lock();
-					file_write_at(mapped_file->file, tmp, PGSIZE, addr_elem->ofs);
-			    	release_sys_lock();
-					free(tmp);
-			    }
-			    free(addr_elem);
+			// 	    for (i = 0 ; i < sector_per_page; i++)
+			// 		{
+			// 			block_read (swap_slot, sector, ((void *) tmp+BLOCK_SECTOR_SIZE*i));
+			// 			sector++;
+			// 		}
+			// 		acquire_sys_lock();
+			// 		file_write_at(mapped_file->file, tmp, PGSIZE, addr_elem->ofs);
+			//     	release_sys_lock();
+			// 		free(tmp);
+			//     }
+			//     free(addr_elem);
 
-			    if ( list_empty(&mapped_file->addr))
-			    {
-			        list_remove(&mapped_file->elem); 
-			        free(mapped_file);
-		    	}
-			}
+			//     if ( list_empty(&mapped_file->addr))
+			//     {
+			//         list_remove(&mapped_file->elem); 
+			//         free(mapped_file);
+		 //    	}
+			// }
+			//release_sys_lock();
 			swap_remove(spage_entry);
 			free(spage_entry);
 			break;
 		}
 		case MMAP:
 		{	
+			//printf("destroy MMAP\n");
 			struct file_map * mapped_file = spage_entry->file_map;
 			struct list_elem *e;
 			for (e = list_begin(&mapped_file->addr); e != list_end(&mapped_file->addr); e = list_next(e)){
@@ -109,6 +116,7 @@ destory_hash_action(struct hash_elem *e, void *aux)
 		  	list_remove(&addr_elem->elem);
 		
 		    if (pagedir_is_dirty(mapped_file->t->pagedir, spage_entry->va)||spage_entry->dirty){
+		    	//printf("dirty mmap data \n");
 		    	acquire_sys_lock();
 		    	file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, addr_elem->ofs);
 		    	release_sys_lock();
@@ -127,13 +135,14 @@ destory_hash_action(struct hash_elem *e, void *aux)
         default:
 			break;
 	}
+	//release_sys_lock();
 }
 
 void 
 spage_init(struct hash *page_table)
 {
 	hash_init(page_table,hash_map,spage_less_func, NULL);
-	// lock_init(&hash_lock);
+	//lock_init(&hash_lock);
 }
 
 bool 
@@ -181,10 +190,14 @@ mapped_entry (struct thread *t, unsigned va){
 	}
 
 	return hash_entry(hash , struct spage_entry, elem);
+
 }
 
 void 
 destroy_spage (struct hash *page_table)
 {
-  hash_destroy(page_table, destory_hash_action);
+	acquire_swap_lock();
+	hash_destroy(page_table, destory_hash_action);
+  	release_swap_lock();
+  	
 }

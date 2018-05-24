@@ -20,3 +20,4 @@ struct frame_entry * allocate_frame_elem(uint8_t *upage, bool writable, bool phy
 bool deallocate_frame_elem (struct thread *t, unsigned pn);
 void frame_remove (struct spage_entry *spage_entry);
 void evict (void);
+

@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <lib/kernel/list.h>
 #include <lib/kernel/bitmap.h>
-#include "vm/swap.h"
 #include "devices/block.h"
 #include "threads/malloc.h"
 #include "threads/thread.h"
@@ -12,6 +11,7 @@
 #include "threads/vaddr.h"
 #include "threads/pte.h"
 #include "userprog/pagedir.h"
+#include "vm/swap.h"
 
 static struct list swap_table;
 static struct lock swap_lock;
@@ -49,6 +49,7 @@ swap_in (struct spage_entry *spage_entry){
 	struct thread *t = thread_current();
 
     bool success = pagedir_set_page(t->pagedir, (void *) fe->page_number, (void *) fe->frame_number, spage_entry->writable);
+    
     if (!success) 
     {
     	palloc_free_page((void *)fe->frame_number);
@@ -85,6 +86,7 @@ swap_in (struct spage_entry *spage_entry){
    
     free(se);
 }
+
 /*
 bool 
 swap_in (struct thread *t, unsigned page_num){
@@ -143,6 +145,8 @@ swap_in (struct thread *t, unsigned page_num){
    Manage the swap_table list
    returns false when swap table is full.
 */
+
+
 void 
 swap_out (struct frame_entry *frame)
 {
@@ -154,6 +158,9 @@ swap_out (struct frame_entry *frame)
 	int sector_per_page = PGSIZE / BLOCK_SECTOR_SIZE;
 
 	int i;
+
+	//lock_acquire(&swap_lock);
+	//lock_acquire(&swap_lock);
 
 	se = malloc(sizeof(struct swap_entry));
 
@@ -167,17 +174,23 @@ swap_out (struct frame_entry *frame)
 	se->thread = frame->thread;
 
 	enum spage_type type = SWAP_DISK;
+	
+
 	struct spage_entry * spage_entry= mapped_entry (frame->thread, frame->page_number);
-	if (spage_entry->mmap)
-	{
-		struct thread *t = frame->thread;
-		spage_entry->dirty = pagedir_is_dirty(t->pagedir, spage_entry->va);
-	}
+
+	// if (spage_entry->mmap)
+	// {
+	// 	//printf("spage_type is mmap : %d \n", spage_entry->mmap);
+	 	struct thread *t = frame->thread;
+	 	spage_entry->dirty = pagedir_is_dirty(t->pagedir, spage_entry->va);
+	//}
+	
 	spage_entry->page_type = type;
 	spage_entry->pa = se->sector;
 	spage_entry->pointer = se;
 
 	//여기 block
+
 	void * paddr = (void *) frame->frame_number;
 
 	lock_acquire(&swap_lock);
@@ -214,10 +227,16 @@ swap_remove (struct spage_entry *spage_entry)
 
 	list_remove(&se->list_elem);
 
-	lock_acquire(&swap_lock);
 	bitmap_set_multiple (used_sector, se->sector, sector_per_page, false);
-	lock_release(&swap_lock);
-
+	
 	free(se);
 
+}
+
+void acquire_swap_lock(){
+	lock_acquire(&swap_lock);
+}
+
+void release_swap_lock(){
+	lock_release(&swap_lock);
 }
