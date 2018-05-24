@@ -25,6 +25,7 @@ struct spage_entry
 		enum spage_type page_type;
 		void * pointer; //points to whether swap or frame
 		void * file_map;
+		bool mmap;
 	};
 
 void spage_init (struct hash *page_table);

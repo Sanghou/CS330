@@ -36,8 +36,6 @@ hash_map (const struct hash_elem *e, void *aux)
 void 
 destory_hash_action(struct hash_elem *e, void *aux)
 {
-
-	//acquire_sys_lock();
 	struct spage_entry *spage_entry = hash_entry(e, struct spage_entry, elem);
 	switch (spage_entry->page_type){
 		case PHYS_MEMORY:
@@ -54,7 +52,6 @@ destory_hash_action(struct hash_elem *e, void *aux)
 		}
 		case MMAP:
 		{	
-			//printf("destroy MMAP\n");
 			struct file_map * mapped_file = spage_entry->file_map;
 
 		  	list_remove(&spage_entry->list_elem);
@@ -76,7 +73,6 @@ destory_hash_action(struct hash_elem *e, void *aux)
         default:
 			break;
 	}
-	//release_sys_lock();
 }
 
 void 
@@ -134,7 +130,6 @@ mapped_entry (struct thread *t, unsigned va){
 	}
 
 	return hash_entry(hash , struct spage_entry, elem);
-
 }
 void 
 destroy_spage (struct hash *page_table)

@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <lib/kernel/list.h>
 #include <lib/kernel/bitmap.h>
+#include "vm/swap.h"
 #include "devices/block.h"
 #include "threads/malloc.h"
 #include "threads/thread.h"
@@ -49,7 +50,6 @@ swap_in (struct spage_entry *spage_entry){
 	struct thread *t = thread_current();
 
     bool success = pagedir_set_page(t->pagedir, (void *) fe->page_number, (void *) fe->frame_number, spage_entry->writable);
-    
     if (!success) 
     {
     	palloc_free_page((void *)fe->frame_number);
@@ -83,14 +83,11 @@ swap_in (struct spage_entry *spage_entry){
     free(se);
 }
 
-
 /*
    Writes frame information in swap disk.
    Manage the swap_table list
    returns false when swap table is full.
 */
-
-
 void 
 swap_out (struct frame_entry *frame)
 {
@@ -116,8 +113,6 @@ swap_out (struct frame_entry *frame)
 	se->thread = frame->thread;
 
 	enum spage_type type = SWAP_DISK;
-	
-
 	struct spage_entry * spage_entry= mapped_entry (frame->thread, frame->page_number);
 	switch (spage_entry->page_type){
 		case MMAP:
@@ -144,7 +139,6 @@ swap_out (struct frame_entry *frame)
 	
 
 	//여기 block
-
 	void * paddr = (void *) frame->frame_number;
 
 	size_t sector = bitmap_scan_and_flip(used_sector, 0, sector_per_page, false);

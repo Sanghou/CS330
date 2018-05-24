@@ -419,6 +419,9 @@ syscall_handler (struct intr_frame *f)
   	}
 
 
+
+
+
   	case SYS_CLOSE:
     {
       int fd = read(f);
@@ -473,7 +476,6 @@ syscall_handler (struct intr_frame *f)
         f->eax = -1;
         break;
       }
-
       mapped_file->t = thread_current();
       mapped_file->file = file;
       mapped_file->mmap_id = global_mmap_id;

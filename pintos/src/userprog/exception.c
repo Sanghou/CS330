@@ -175,13 +175,12 @@ page_fault (struct intr_frame *f)
 bool is_stack(void *fault_addr, struct intr_frame *f){
 
 
-   //printf("fault_addr : %p, esp : %p \n", fault_addr, f->esp);
+   // printf("fault_addr : %p, esp : %p \n", fault_addr, f->esp);
    // printf("fault_addr - esp : %d \n",fault_addr - f->esp);
    // printf("need page 1 : %d \n" ,(fault_addr - f->esp)/PGSIZE);
    // printf("0xC0000000-(unsigned)fault_addr : %d \n", 0xC0000000-(unsigned)fault_addr);
 
    if(!is_user_vaddr(fault_addr) || fault_addr < 0x08048000){
-    //PANIC("QWEFASD");
     burst();
    }
    else if (0xC0000000-(unsigned)fault_addr  < 8 *1024 * 1024){
@@ -191,6 +190,7 @@ bool is_stack(void *fault_addr, struct intr_frame *f){
     return true;
    }
    return false;
+
 }
 
 void page_fault_handling (bool not_present, bool write, bool user, void *fault_addr, struct intr_frame *f)

@@ -1030,3 +1030,195 @@ git pull
 git pull origin file_descipt
 git checkout .
 git pull origin file_descipt
+ls
+git status
+git checkout .bash_history 
+git checkout .viminfo 
+git commit -am "try parallerel-merge"
+git status
+git push vm_hou
+git push hou_vm
+git push origin hou_vm
+git push origin vm_hou
+ls
+cd pintos/
+cd ~
+git status
+git checkout -b filesys_hou
+git status
+git pull orgin new_branch
+git pull origin new_branch
+git status
+git fetch origin new_branch
+ls
+git status
+ls
+rm -r pintos
+ls
+git status
+git fetch origin new_branch
+git pull origin new_branch
+git commit -am "delete all to do other thing"
+git status
+git pull origin new_branch
+git status
+git
+ls
+git pull -f origin new_branch
+ls
+git reset --hard HEAD
+git pull origin new_branch
+git
+ls
+ls -al
+ls
+git status
+git checkout new_branch
+git status
+clear
+git pull origin new_branch
+ls
+cd pintos/src/vm/
+ls
+vi frame.c
+vi swap.h
+vi swap.c
+vi page.h
+vi page.c
+vi frame.h
+vi frame.c
+vi ../userprog/syscall.c
+vi ../userprog/process.c
+vi ../userprog/exception.c
+git status
+cd ~
+git checkout .viminfo 
+git status
+git commit -am "merge file"
+git status
+git checkout filesys_hou
+git status
+git
+ls
+git checkout new_branch
+ls
+git status
+cd pintos/src/
+ls
+cd vm/
+ls
+vi frame.c
+ls
+vi file_map.c 
+cd ~
+git checkout -b filesys_hou
+ls
+git
+ls
+LS
+ls
+git checkout filesys_hou
+git
+ls
+git status
+git checkout .viminfo 
+clear
+ls
+git status
+cd pintos/
+ls
+cd src/
+ls
+cd ~
+GIT STA
+ls
+git sta
+git status
+git commit -am "Sync"
+git add --all
+git commit -am "Sync"
+git
+git status
+clear
+cd pintos/src/vm/
+make grade
+clear
+make grade
+pinsto
+pintos
+ls
+cd ~
+ls
+make
+cd pintos/src/vm/
+make
+make grade
+pintos
+cd ~
+env
+clear
+env
+cd pintos/src/
+ls
+cd vm/
+ls
+make grade
+pintos
+ls
+cd ..
+cd utils/
+echo 'export PATH=$PATH:~/pintos/src/utils/' >> ~/.bashrc
+source ~/.bashrc
+ls
+pintos –v -- -q run alarm-multiple
+pintos
+cd ~
+pintos
+git status
+git checkout .bashrc 
+git status
+pintos
+cd pintos/src/vm/
+make
+make grade
+cd ~
+sl
+clear
+pintos
+ls
+env
+ls -al
+vi .ssh
+ls
+clear
+ls
+cd ..
+ls
+cd team13a
+ls
+pintos
+ls
+cd pintos/src/vm/
+ls
+make grade
+ls
+cd ..
+cd ~
+ls
+rm -r pintos/
+ls
+cd ..
+cd team13b
+LS
+ls
+cp -r pintos/ ../team13a
+ls
+cd ..
+cd ../team13a
+ls
+cd team13a
+ls
+git status
+cd pintos/src/vm/
+make grade
+qls

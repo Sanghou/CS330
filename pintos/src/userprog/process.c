@@ -526,7 +526,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
           release_sys_lock();
           palloc_free_page (kpage);
           return false; 
-        } 
+        }
       release_sys_lock();
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
       /* Add the page to the process's address space. */
@@ -542,7 +542,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
     }
   return true;
 }
-
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
@@ -551,7 +550,6 @@ setup_stack (void **esp)
 
   uint8_t *kpage;
   bool success = false;
-
 
 
   #ifdef VM
@@ -619,7 +617,7 @@ load_file (struct file *file, uint8_t *upage,
          and zero the final PAGE_ZERO_BYTES bytes. */
       size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE; 
 
-      /* Get a page of memory.   */
+      /* Get a page of memory. */
       
       struct frame_entry *fe = allocate_frame_elem(upage, writable, false);
       uint8_t *kpage = fe->frame_number;
@@ -628,8 +626,7 @@ load_file (struct file *file, uint8_t *upage,
       acquire_sys_lock();
       if (file_read_at (file, kpage, page_read_bytes, ofs) != (int) page_read_bytes)
         {
-          deallocate_frame_elem(thread_current(),kpage);
-          //release_sys_lock();
+          release_sys_lock();
           palloc_free_page (kpage);
           free(map);
           return NULL; 
@@ -641,7 +638,6 @@ load_file (struct file *file, uint8_t *upage,
           free(map);
           return NULL; 
         }
-
 
       /* Advance. */
       // struct addr_elem *address = malloc(sizeof(struct addr_elem));
