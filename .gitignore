@@ -1,4 +1,8 @@
 .gitconfig
+.bash*
+.cache*
+.ssh
+.vim
 pintos/src/examples/*
 .viminfo
 pintos/filesys.disk
