@@ -95,6 +95,8 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
+    int tick_time;
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -184,3 +186,7 @@ int set_file_descript(struct file *file);
 struct file_descript * find_file_descript(int fd);
 
 #endif /* threads/thread.h */
+
+void timer_release(int64_t tick);
+void timer_set(int64_t tick);
+

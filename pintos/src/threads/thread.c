@@ -24,6 +24,8 @@
    that are ready to run but not actually running. */
 static struct list ready_list;
 
+static struct list wait_list;
+
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
@@ -98,6 +100,8 @@ thread_init (void)
   list_init (&ready_list);
   list_init (&all_list);
   list_init (&child_list);
+  list_init (&wait_list);
+  
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -743,5 +747,56 @@ find_file_descript(int fd)
 
   }
   return NULL;
+}
+
+/* Called in devices/timer.c. 
+   Transitions a running thread to the blocked state.*/
+void
+timer_set (int64_t tick){
+  enum intr_level old_level;
+ 
+  static struct thread *cur;
+  cur = thread_current();
+  cur->tick_time = tick;
+  list_push_back(&wait_list, &cur->elem);
+
+  old_level = intr_disable();
+
+  thread_block();
+  
+  intr_set_level(old_level);
+}
+
+
+/* When thread successfully holds block for given tick time, 
+   this function releases its block state.
+   Transitions a blocked thread T to the ready-to-run state.*/
+void
+timer_release (int64_t tick){
+  //parameter tick is current tick
+  struct list_elem *e;
+  struct thread *t;
+  bool check = false;
+
+  for (e = list_begin(&wait_list); e != list_end(&wait_list); e = list_next(e)){
+    t= list_entry(e, struct thread, elem);
+    
+    if (check){
+      struct thread *tmp = list_entry(list_prev(e),struct thread, elem);
+      list_remove(list_prev(e));
+      thread_unblock(tmp);
+    }
+
+    if (t->tick_time && t->tick_time <= tick){
+      check = true;
+    }else{
+      check = false;
+    }
+  }
+
+  if (check){
+    list_remove(list_prev(e));
+    thread_unblock(t);
+  }
 }
 

@@ -89,11 +89,9 @@ timer_elapsed (int64_t then)
 void
 timer_sleep (int64_t ticks) 
 {
+  ASSERT( intr_get_level() == INTR_ON);
   int64_t start = timer_ticks ();
-
-  ASSERT (intr_get_level () == INTR_ON);
-  while (timer_elapsed (start) < ticks) 
-    thread_yield ();
+  timer_set(start+ticks);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -171,6 +169,11 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
+  int64_t cur_tick = timer_ticks();
+  timer_release(cur_tick);
+  
+  // intr_set_level(old_level);
+
   thread_tick ();
 }
 
