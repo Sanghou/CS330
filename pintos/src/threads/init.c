@@ -109,6 +109,10 @@ main (void)
 
   frame_init();
 #endif
+
+#ifdef FILESYS
+  cache_init ();
+#endif
   /* Segmentation. */
 #ifdef USERPROG
   tss_init ();

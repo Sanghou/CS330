@@ -1,13 +1,13 @@
 #include "filesys/cache.h"
 #include <list.h>
 #include <string.h>
+#include "threads/synch.h"
 
 struct list cache;
 
 void 
 cache_init()
 {
-
 	list_init(&cache);
 }
 
@@ -25,7 +25,6 @@ cache_read(struct block *block, block_sector_t sector, void * buffer)
 			return;
 		}
 	}
-
 	cache_read_from_disk(block, sector, buffer);
 }
 
@@ -51,7 +50,6 @@ cache_write (struct block *block, block_sector_t sector, void * buffer)
 void 
 cache_destroy()
 {
-
 	int i;
 	unsigned size = list_size(&cache);
 	struct cache_elem * cache_unit;
@@ -67,7 +65,6 @@ cache_destroy()
 void 
 cache_read_from_disk (struct block *block, block_sector_t sector, void * buffer_)
 {
-	
 	uint8_t *buffer = buffer_;
   	struct cache_elem * cache_unit;
 
