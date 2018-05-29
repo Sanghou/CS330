@@ -9,7 +9,7 @@ struct cache_elem
  bool dirty; // dirty check
  uint8_t data[512];
  struct list_elem elem;
-}
+};
 
 void cache_init(void);
 struct cache_elem * cache_get(void);

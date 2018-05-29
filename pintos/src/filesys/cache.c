@@ -10,9 +10,6 @@ cache_init()
 	list_init(&cache);
 }
 
-/*
- 
-*/
 
 void 
 cache_read(struct block *block, block_sector_t sector, void * buffer)
@@ -81,8 +78,8 @@ cache_read_from_disk (struct block *block, block_secotr_t sector, void * buffer_
 	*/
 	block_read(block, sector, buffer);
 	memcpy(cache_unit->data, buffer, 512);
-	cache_unit->dirty = 0;
-	cache_unit->locate = sector;
+	cache_unit.dirty = 0;
+	cache_unit.locate = sector;
 	list_push_back(&cache, &cache_unit);
 }
 
