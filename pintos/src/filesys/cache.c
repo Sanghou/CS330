@@ -43,6 +43,7 @@ cache_write (struct block *block, block_sector_t sector, void * buffer)
 			return;
 		}
 	}
+
 	block_write (block, sector, buffer);
 }
 
@@ -81,7 +82,7 @@ cache_read_from_disk (struct block *block, block_sector_t sector, void * buffer_
 	memcpy(cache_unit->data, buffer, 512);
 	cache_unit->dirty = 0;
 	cache_unit->sector = sector;
-	list_push_back(&cache, &cache_unit);
+	list_push_back(&cache, cache_unit);
 }
 
 /*
@@ -100,11 +101,11 @@ cache_evict (void)
 {
 	//FIFO
 	struct list_elem *elem = list_pop_front(&cache);
-	struct cache_elem *cache = list_entry(elem, struct cache_elem, elem);
-	if (cache == NULL)
+	struct cache_elem *cache_unit = list_entry(elem, struct cache_elem, elem);
+	if (cache_unit == NULL)
 		PANIC("CACHE NOT EXIST\n");
 
-	if (cache->dirty)
-		cache_write_to_disk (cache);
-	free(cache);
+	if (cache_unit->dirty)
+		cache_write_to_disk (cache_unit);
+	free(cache_unit);
 }

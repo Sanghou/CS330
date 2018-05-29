@@ -228,6 +228,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
           /* Read full sector directly into caller's buffer. */
         #ifdef FILESYS
           cache_read (fs_device, sector_idx, buffer + bytes_read);
+          //block_read (fs_device, sector_idx, buffer + bytes_read);
         #else
           block_read (fs_device, sector_idx, buffer + bytes_read);
         #endif
@@ -243,7 +244,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
                 break;
             }
         #ifdef FILESYS
-          cache_read (fs_device, sector_idx, bounce);
+        cache_read (fs_device, sector_idx, bounce);
         #else
           block_read (fs_device, sector_idx, bounce);
         #endif
