@@ -16,8 +16,6 @@ enum spage_type
 
 struct spage_entry
 	{
-		struct hash_elem elem;
-		struct list_elem list_elem;
 		unsigned va; //virtual address
 		unsigned pa;
 		int ofs;
@@ -26,6 +24,8 @@ struct spage_entry
 		void * pointer; //points to whether swap or frame
 		void * file_map;
 		bool mmap;
+		struct hash_elem elem;
+		struct list_elem list_elem;
 	};
 
 void spage_init (struct hash *page_table);
