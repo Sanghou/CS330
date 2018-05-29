@@ -247,7 +247,6 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
         #else
           block_read (fs_device, sector_idx, bounce);
         #endif
-          // block_read (fs_device, sector_idx, bounce);
           memcpy (buffer + bytes_read, bounce + sector_ofs, chunk_size);
         }
       

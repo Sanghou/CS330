@@ -109,6 +109,10 @@ main (void)
 
   frame_init();
 #endif
+
+#ifdef FILESYS
+  cache_init ();
+#endif
   /* Segmentation. */
 #ifdef USERPROG
   tss_init ();
@@ -123,10 +127,6 @@ main (void)
 #ifdef USERPROG
   exception_init ();
   syscall_init ();
-#endif
-
-#ifdef FILESYS
-  cache_init ();
 #endif
 
   /* Start thread scheduler and enable interrupts. */
