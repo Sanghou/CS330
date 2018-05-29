@@ -40,7 +40,7 @@ filesys_init (bool format)
 void
 filesys_done (void) 
 {
-  cache_destroy();
+  cache_destroy(fs_device);
   free_map_close ();
 }
 
