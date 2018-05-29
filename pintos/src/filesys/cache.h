@@ -6,7 +6,6 @@
 struct cache_elem
 {
  block_sector_t locate; //disk location
- unsigned address; //page address
  bool dirty; // dirty check
  uint8_t data[512];
  struct list_elem elem;
