@@ -1,5 +1,6 @@
-#include "filesys_cache.h"
+#include "filesys/cache.h"
 #include <list.h>
+#include <string.h>
 
 struct list cache;
 
@@ -18,7 +19,7 @@ cache_read(struct block *block, block_sector_t sector, void * buffer)
 	for(e = list_begin(&cache); e!=list_end(&cache); e = list_next(e))
 	{	
 		struct cache_elem *cache = list_entry(e, struct cache_elem, elem);
-		if (sector == cache->locate)
+		if (sector == cache->sector)
 		{
 			memcpy(buffer, cache->data, 512);
 			return;
@@ -35,7 +36,7 @@ cache_write (struct block *block, block_sector_t sector, void * buffer)
 	for(e = list_begin(&cache); e!=list_end(&cache); e = list_next(e))
 	{	
 		struct cache_elem *cache = list_entry(e, struct cache_elem, elem);
-		if (sector == cache->locate)
+		if (sector == cache->sector)
 		{
 			memcpy(cache->data, buffer, 512);
 			cache->dirty = 1;
@@ -51,23 +52,23 @@ cache_destroy()
 {
 
 	int i;
-	unsigned list_size = list_size(&cache);
-	struct cache_elem cache_unit;
+	unsigned size = list_size(&cache);
+	struct cache_elem * cache_unit;
 
-	for(i=list_size; i>0; i--){
-		cache_unit = list_pop_front(&cache);
-		if(cache_unit.dirty ==1){
+	for(i=size; i>0; i--){
+		cache_unit = list_entry(list_pop_front(&cache),struct cache_elem, elem);
+		if(cache_unit->dirty ==1){
 			cache_write_to_disk(cache_unit);
 		}
 	}
 }
 
 void 
-cache_read_from_disk (struct block *block, block_secotr_t sector, void * buffer_)
+cache_read_from_disk (struct block *block, block_sector_t sector, void * buffer_)
 {
 	
 	uint8_t *buffer = buffer_;
-  	struct cache_elem cache_unit;
+  	struct cache_elem * cache_unit;
 
 	cache_unit = malloc(sizeof(struct cache_elem));
 	if(list_size(&cache) == 64){
@@ -78,8 +79,8 @@ cache_read_from_disk (struct block *block, block_secotr_t sector, void * buffer_
 	*/
 	block_read(block, sector, buffer);
 	memcpy(cache_unit->data, buffer, 512);
-	cache_unit.dirty = 0;
-	cache_unit.locate = sector;
+	cache_unit->dirty = 0;
+	cache_unit->sector = sector;
 	list_push_back(&cache, &cache_unit);
 }
 
