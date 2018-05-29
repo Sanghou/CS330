@@ -6,6 +6,9 @@
 #include "filesys/filesys.h"
 #include "filesys/free-map.h"
 #include "threads/malloc.h"
+#ifdef FILESYS
+#include "filesys/cache.h"
+#endif
 
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
@@ -223,7 +226,11 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
       if (sector_ofs == 0 && chunk_size == BLOCK_SECTOR_SIZE)
         {
           /* Read full sector directly into caller's buffer. */
+        #ifdef FILESYS
+          cache_read (fs_device, sector_idx, buffer + bytes_read);
+        #else
           block_read (fs_device, sector_idx, buffer + bytes_read);
+        #endif
         }
       else 
         {
@@ -235,7 +242,12 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
               if (bounce == NULL)
                 break;
             }
+        #ifdef FILESYS
+          cache_read (fs_device, sector_idx, bounce);
+        #else
           block_read (fs_device, sector_idx, bounce);
+        #endif
+          // block_read (fs_device, sector_idx, bounce);
           memcpy (buffer + bytes_read, bounce + sector_ofs, chunk_size);
         }
       
@@ -284,7 +296,11 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       if (sector_ofs == 0 && chunk_size == BLOCK_SECTOR_SIZE)
         {
           /* Write full sector directly to disk. */
+        #ifdef FILESYS
+          cache_write (fs_device, sector_idx, buffer + bytes_written);
+        #else
           block_write (fs_device, sector_idx, buffer + bytes_written);
+        #endif
         }
       else 
         {
@@ -300,11 +316,21 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
              we're writing, then we need to read in the sector
              first.  Otherwise we start with a sector of all zeros. */
           if (sector_ofs > 0 || chunk_size < sector_left) 
+          {
+          #ifdef FILESYS
+            cache_read (fs_device, sector_idx, bounce);
+          #else
             block_read (fs_device, sector_idx, bounce);
+          #endif
+          } 
           else
             memset (bounce, 0, BLOCK_SECTOR_SIZE);
           memcpy (bounce + sector_ofs, buffer + bytes_written, chunk_size);
+        #ifdef FILESYS
+          cache_write (fs_device, sector_idx, bounce);
+        #else
           block_write (fs_device, sector_idx, bounce);
+        #endif
         }
 
       /* Advance. */

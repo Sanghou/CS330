@@ -1,5 +1,6 @@
-#include "filesys_cache.h"
+#include "filesys/cache.h"
 #include <list.h>
+#include <string.h>
 
 struct list cache;
 
@@ -21,7 +22,7 @@ cache_read(struct block *block, block_sector_t sector, void * buffer)
 	for(e = list_begin(&cache); e!=list_end(&cache); e = list_next(e))
 	{	
 		struct cache_elem *cache = list_entry(e, struct cache_elem, elem);
-		if (sector == cache->locate)
+		if (sector == cache->sector)
 		{
 			memcpy(buffer, cache->data, 512);
 			return;
@@ -38,7 +39,7 @@ cache_write (struct block *block, block_sector_t sector, void * buffer)
 	for(e = list_begin(&cache); e!=list_end(&cache); e = list_next(e))
 	{	
 		struct cache_elem *cache = list_entry(e, struct cache_elem, elem);
-		if (sector == cache->locate)
+		if (sector == cache->sector)
 		{
 			memcpy(cache->data, buffer, 512);
 			cache->dirty = 1;
@@ -81,8 +82,8 @@ cache_read_from_disk (struct block *block, block_secotr_t sector, void * buffer_
 	*/
 	block_read(block, sector, buffer);
 	memcpy(cache_unit->data, buffer, 512);
-	cache_unit->dirty = 0;
-	cache_unit->locate = sector;
+	cache_unit.dirty = 0;
+	cache_unit.sector = sector;
 	list_push_back(&cache, &cache_unit);
 }
 
