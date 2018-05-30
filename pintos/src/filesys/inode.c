@@ -80,7 +80,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
       memset(buffer, 0, sizeof(buffer));
       block_read(fs_device, index, buffer);
       result = buffer[result];
-      
+
       free(buffer);
       return result;
     }
@@ -417,16 +417,18 @@ deallocate_sectors (const struct inode *inode)
 {
   int cnt = inode->data.length / BLOCK_SECTOR_SIZE;
   int i;
-  for (i = 0; i!= cnt; i++)
+  int limit = cnt < 123? cnt : 123;
+  for (i = 0; i!= limit; i++)
     free_map_release (inode->data.direct[i], 1);
 
-  if (cnt > 123)
+  cnt -= limit;
+  if (cnt > 0)
   {
-    cnt -= 123;
     ASSERT (inode->data.indirect != -1);
 
     i = cnt < 128 ? cnt : 128;
     cnt -= i;
+    
     int8_t *buffer = malloc (BLOCK_SECTOR_SIZE);
     block_read(fs_device, inode->data.indirect, buffer);
 
@@ -439,11 +441,12 @@ deallocate_sectors (const struct inode *inode)
     free(buffer);
     free_map_release (inode->data.indirect , 1);
   }
+
   if (cnt > 0)
   {
     ASSERT (inode->data.double_indirect != -1);
 
-    int32_t *buffer = malloc(BLOCK_SECTOR_SIZE);
+    int32_t *buffer = malloc (BLOCK_SECTOR_SIZE);
     block_read(fs_device, inode->data.double_indirect, buffer);
     i = cnt / 128 + 1;
 
@@ -452,22 +455,20 @@ deallocate_sectors (const struct inode *inode)
       int index = buffer[i-1];
       int j;
 
-      int32_t *buffer2 = malloc(512);
-      block_read(fs_device, inode->data.indirect, buffer2);
+      int32_t *buffer2 = malloc (BLOCK_SECTOR_SIZE);
+      block_read(fs_device, index, buffer2);
 
       for (j = 0; j < 128; j++)
       {
-        int index2 = buffer2[j];
-        if (index2 == -1)
+        if (buffer2[j] == -1)
           break;
-        free_map_release(index2, 1);
+        free_map_release(buffer2[j], 1);
       }
 
       free(buffer2);
       free_map_release(index, 1);
       i--;
     }
-
 
     free(buffer);
     free_map_release (inode->data.double_indirect , 1);
