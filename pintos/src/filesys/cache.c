@@ -44,7 +44,8 @@ cache_write (struct block *block, block_sector_t sector, void * buffer)
 		}
 	}
 
-	block_write (block, sector, buffer);
+
+	cache_write_from_disk (block, sector, buffer);
 }
 
 
@@ -95,6 +96,25 @@ cache_write_to_disk (struct cache_elem * cache_unit, struct block *block)
 	block_write(block, cache_unit->sector,cache_unit->data);
 }
 
+void
+cache_write_from_disk (struct block *block, block_sector_t sector, void * buffer_)
+{
+	uint8_t *buffer = buffer_;
+  	struct cache_elem * cache_unit;
+
+	cache_unit = malloc(sizeof(struct cache_elem));
+	if(list_size(&cache) == 64){
+		cache_evict(block);
+	}
+	/*
+	block read, and append data for cache_elem;
+	*/
+	memcpy(cache_unit->data, buffer, 512);
+	cache_unit->dirty = 1;
+	cache_unit->sector = sector;
+	list_push_back(&cache, cache_unit);
+}
+
 void 
 cache_evict (struct block *block)
 {
@@ -105,8 +125,6 @@ cache_evict (struct block *block)
 		PANIC("CACHE NOT EXIST\n");
 
 	if (cache_unit->dirty)
-		//PANIC("start \n");
-		cache_write_to_disk (cache_unit, block);
-		//PANIC("END \n");		
+		cache_write_to_disk (cache_unit, block);	
 	free(cache_unit);
 }
