@@ -53,30 +53,34 @@ byte_to_sector (const struct inode *inode, off_t pos)
 {
   ASSERT (inode != NULL);
   if (pos < inode->data.length){
-    int result = inode->data.direct[pos / BLOCK_SECTOR_SIZE];
+    int result = pos / BLOCK_SECTOR_SIZE;
     if (result < 123)
-      return result;
+      return inode->data.direct[result];
     else if (result < 251)  /* indirect */
     {
       ASSERT (inode->data.indirect != -1);
+
       int8_t *buffer = malloc (512);
       block_read(fs_device, inode->data.indirect, buffer);
       result -= 123;
       result = buffer[result];
+
       free(buffer);
       return result;
     }
     else  /* double_indirect */
     {
       ASSERT (inode->data.double_indirect != -1);
-      int8_t *buffer = malloc (512);
       result -= 251;
+
+      int8_t *buffer = malloc (512);
       block_read(fs_device, inode->data.double_indirect, buffer);
       int index = buffer[result / 128];
       result = result - (result/128)*128;
       memset(buffer, 0, sizeof(buffer));
       block_read(fs_device, index, buffer);
       result = buffer[result];
+      
       free(buffer);
       return result;
     }
@@ -454,7 +458,7 @@ deallocate_sectors (const struct inode *inode)
       for (j = 0; j < 128; j++)
       {
         int index2 = buffer2[j];
-        if (index2 == 0)
+        if (index2 == -1)
           break;
         free_map_release(index2, 1);
       }
