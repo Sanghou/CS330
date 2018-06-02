@@ -124,6 +124,8 @@ allocate_sectors(size_t sectors, struct inode_disk* disk_inode){
 
   static char zeros[BLOCK_SECTOR_SIZE];
 
+  if(sectors ==0) return true;
+
   for(i=0; i < sectors; i++){
     success = free_map_allocate(1, &location);
     next_append(location, disk_inode);
@@ -138,7 +140,6 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
   // check direct_number
   // if allocated sectors are less than 120, then allocate direct_sectors.
   if(disk_inode->direct_number < 120){
-    //printf("direct_number : %d \n",disk_inode->direct_number);
     disk_inode->direct[disk_inode->direct_number] = location;
     disk_inode->direct_number++;
 
@@ -156,16 +157,12 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
 
 
     if(disk_inode->indirect_number < 128){
-      printf("start checkt \n");
       block_read(fs_device, disk_inode->indirect, &b);
-      printf("disk_inode->indirect_sector first : %d \n\n",b[disk_inode->indirect_number -1 ]);
       b[disk_inode->indirect_number] = location;
-      printf("disk_inode->indirect_number : %d \n",disk_inode->indirect_number);
-      printf("disk_inode->indirect_sector second : %d \n",b[disk_inode->indirect_number]);
       block_write(fs_device, disk_inode->indirect,&b);
-      printf("end chec k \n\n");
       disk_inode->indirect_number++;
 
+      //printf("disk_inode->indirect_number : %d \n", disk_inode->indirect_number);
     }
 
     //indirect == 128, need to do double indirect
@@ -181,7 +178,7 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
     block_sector_t first[128];
     block_sector_t second[128];
 
-    printf("double_indirect_number allocate \n\n");
+    //printf("double_indirect_number allocate \n\n");
     //first allocate block.
     //need first_indirect_block.
 
@@ -419,7 +416,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
         #ifdef FILESYS
         cache_read (fs_device, sector_idx, bounce);
         #else
-          block_read (fs_device, sector_idx, bounce);
+        block_read (fs_device, sector_idx, bounce);
         #endif
           // block_read (fs_device, sector_idx, bounce);
           memcpy (buffer + bytes_read, bounce + sector_ofs, chunk_size);
