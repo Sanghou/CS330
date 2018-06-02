@@ -11,4 +11,5 @@ struct file_map{
 	int mmap_id;
 	struct list addr;
 	struct list_elem elem;
+	int file_size;
 };

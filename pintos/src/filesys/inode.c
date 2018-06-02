@@ -8,7 +8,10 @@
 #include "threads/malloc.h"
 #ifdef FILESYS
 #include "filesys/cache.h"
+#include "threads/synch.h"
 #endif
+
+struct lock inode_lock;
 
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
@@ -85,12 +88,12 @@ byte_to_sector (const struct inode *inode, off_t pos)
     ASSERT (inode->data.double_indirect != -1);
     result -= 248;
 
+    block_sector_t buffer2[128];
+
     block_read(fs_device, inode->data.double_indirect, buffer);
     int index = buffer[result / 128];
-    result = result - (result/128)*128;
-    memset(buffer, 0, sizeof(buffer));
-    block_read(fs_device, index, buffer);
-    result = buffer[result];
+    block_read(fs_device, index, buffer2);
+    result = buffer2[result % 128];
   }
 
   return result;
@@ -105,6 +108,7 @@ void
 inode_init (void) 
 {
   list_init (&open_inodes);
+  lock_init (&inode_lock);
 }
 
 /* Initializes an inode with LENGTH bytes of data and
@@ -182,18 +186,24 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
       if(disk_inode->double_indirect_number == 0){
         free_map_allocate(1, &disk_inode->double_indirect);
         block_write(fs_device, disk_inode->double_indirect, first);
-        //printf("allocate done \n");
       }
 
       //read first indirect_block.
+      ASSERT(disk_inode->double_indirect != -1);
+
+      //printf("disk_inode->double_indirect_number : %d \n", disk_inode->double_indirect_number);
 
       block_read(fs_device,disk_inode->double_indirect, first);
 
       uint32_t first_check = disk_inode->double_indirect_number / 128;
       uint32_t second_check = disk_inode->double_indirect_number % 128;
       block_read(fs_device, first[first_check],second);
+      
       second[second_check] = location;
+      
       block_write(fs_device, first[first_check] ,second);
+
+      //printf("second[second_check] : %d \n", second[second_check]);
 
       disk_inode->double_indirect_number++;
     }
@@ -227,7 +237,9 @@ inode_create (block_sector_t sector, off_t length)
       disk_inode->indirect_number = 0;
       disk_inode->double_indirect_number = 0;
 
+      lock_acquire(&inode_lock);
       success = allocate_sectors(sectors, disk_inode);
+      lock_release(&inode_lock);
 
       block_write (fs_device, sector, disk_inode);
 
@@ -415,13 +427,15 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
   if (inode->deny_write_cnt)
     return 0;
 
-  if (offset+size > ROUND_UP(inode_length(inode), BLOCK_SECTOR_SIZE))
+  if (offset + size > ROUND_UP(inode_length(inode), BLOCK_SECTOR_SIZE))
   {
     //grow file!
     int file = offset+size;
     file -= ROUND_UP(inode_length(inode), BLOCK_SECTOR_SIZE);
+    lock_acquire(&inode_lock);
     if (!allocate_sectors(DIV_ROUND_UP(file, BLOCK_SECTOR_SIZE), &inode->data)) 
       PANIC("did not allocate sectors\n");
+    lock_release(&inode_lock);
     inode->data.length = offset+size;
     inode->grow = true;
   }
@@ -441,8 +455,6 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       int chunk_size = size < min_left ? size : min_left;
       if (chunk_size <= 0)
         break;
-
-      // printf("chunk_size : %d\n, size : %d\n", chunk_size, size);
 
       if (sector_ofs == 0 && chunk_size == BLOCK_SECTOR_SIZE)
         {
@@ -490,9 +502,8 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       bytes_written += chunk_size;
     }
   free (bounce);
-  if (inode_length(inode) < offset){
+  if (inode_length(inode) < offset)
     inode->data.length = offset;
-  }
 
   return bytes_written;
 }
