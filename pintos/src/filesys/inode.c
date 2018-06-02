@@ -69,7 +69,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
   if (result < 120)
     return inode->data.direct[result];
 
-  int8_t *buffer = malloc (512);
+  block_sector_t buffer[128];
 
   if (result < 248)  /* indirect */
   {
@@ -78,7 +78,6 @@ byte_to_sector (const struct inode *inode, off_t pos)
     block_read(fs_device, inode->data.indirect, buffer);
     result -= 120;
     result = buffer[result];
-
   }
   else  /* double_indirect */
   {
@@ -93,7 +92,6 @@ byte_to_sector (const struct inode *inode, off_t pos)
     result = buffer[result];
   }
 
-  free(buffer);
   return result;
 }
 
@@ -151,7 +149,7 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
     block_sector_t b[128];
 
     if(disk_inode->indirect_number == 0){
-      free_map_allocate(1,disk_inode->indirect);
+      free_map_allocate(1, &disk_inode->indirect);
       block_write(fs_device, disk_inode->indirect , b);
     }
 
@@ -180,7 +178,7 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
     //need first_indirect_block.
 
       if(disk_inode->double_indirect_number == 0){
-        free_map_allocate(1,disk_inode->double_indirect_number);
+        free_map_allocate(1, &disk_inode->double_indirect_number);
         block_write(fs_device, disk_inode->double_indirect, first);
       }
 
@@ -216,7 +214,6 @@ inode_create (block_sector_t sector, off_t length)
   if (disk_inode != NULL)
     {
       size_t sectors = bytes_to_sectors (length); // return the needed sector number
-      
       //from here i change code.
 
       disk_inode->magic = INODE_MAGIC;
@@ -414,7 +411,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
   if (inode->deny_write_cnt)
     return 0;
 
-  if (size > inode_length(inode))
+  if (size > ROUND_UP(inode_length(inode), BLOCK_SECTOR_SIZE))
   {
     //grow file!
     bool success = false;
@@ -533,7 +530,7 @@ deallocate_sectors (const struct inode *inode)
     i = cnt < 128 ? cnt : 128;
     cnt -= i;
 
-    int8_t *buffer = malloc (BLOCK_SECTOR_SIZE);
+    block_sector_t buffer[128];
     block_read(fs_device, inode->data.indirect, buffer);
 
     while (i > 0)
@@ -550,7 +547,7 @@ deallocate_sectors (const struct inode *inode)
   {
     ASSERT (inode->data.double_indirect != -1);
 
-    int32_t *buffer = malloc (BLOCK_SECTOR_SIZE);
+    block_sector_t buffer[128];
     block_read(fs_device, inode->data.double_indirect, buffer);
     i = cnt / 128 + 1;
 
@@ -559,7 +556,7 @@ deallocate_sectors (const struct inode *inode)
       int index = buffer[i-1];
       int j;
 
-      int32_t *buffer2 = malloc (BLOCK_SECTOR_SIZE);
+      block_sector_t buffer2[128];
       block_read(fs_device, index, buffer2);
 
       for (j = 0; j < 128; j++)
