@@ -48,10 +48,36 @@ filesys_done (void)
    Returns true if successful, false otherwise.
    Fails if a file named NAME already exists,
    or if internal memory allocation fails. */
+
+char *
+dir_get_file(char *name){
+
+  char *token, *saved_ptr, *previous;
+
+
+  uint32_t len = strlen(name);
+  char full_state[len+1];
+  memcpy(full_state,name,len+1);
+
+    for (token = strtok_r (full_state, "/", &saved_ptr); token != NULL;
+      token = strtok_r (NULL, "/", &saved_ptr)){
+      previous = token;
+      printf("name : %s \n", previous);
+      
+    }
+
+  printf("name : %s \n\n", previous);
+
+  return token;
+
+}
+
+
 bool
 filesys_create (const char *name, off_t initial_size) 
 {
   block_sector_t inode_sector = 0;
+  dir_get_file(name);
   struct dir *dir = dir_open_root ();
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
