@@ -179,7 +179,7 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
     block_sector_t second[128];
 
     //printf("double_indirect_number allocate \n\n");
-    //first allocate block.
+    //first allocate block. 
     //need first_indirect_block.
 
       if(disk_inode->double_indirect_number == 0){
@@ -447,6 +447,8 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
 
   if (inode->deny_write_cnt)
     return 0;
+
+
 
   if (size > inode_length(inode))
   {
