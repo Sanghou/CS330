@@ -157,6 +157,14 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
 
       uint32_t first_check = disk_inode->double_indirect_number / 128;
       uint32_t second_check = disk_inode->double_indirect_number % 128;
+
+      //double_indirect_number is multiple of 128.
+      //so second block is full.
+      //Need to new second block.
+      if(second_check == 0){
+        free_map_allocate(fs_device, first[first_check]);
+      }
+
       block_read(fs_device, first[first_check],second);
       second[second_check] = location;
       block_write(fs_device, first[first_check] ,second);
