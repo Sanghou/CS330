@@ -183,8 +183,12 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
     //first allocate block.
     //need first_indirect_block.
 
-      if(disk_inode->double_indirect_number == 0){
+      if(disk_inode->double_indirect_number == 0)
+      {
+        block_sector_t first_double;
         free_map_allocate(1, &disk_inode->double_indirect);
+        free_map_allocate(1, &first_double);
+        first[0] = first_double;
         block_write(fs_device, disk_inode->double_indirect, first);
       }
 
@@ -195,6 +199,15 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
 
       uint32_t first_check = disk_inode->double_indirect_number / 128;
       uint32_t second_check = disk_inode->double_indirect_number % 128;
+
+      if (second_check == 0 && first_check != 0)
+      {
+        block_sector_t first_double;
+        free_map_allocate(1, &first_double);
+        first[first_check] = first_double;
+        block_write(fs_device, disk_inode->double_indirect, first); 
+      }
+
       block_read(fs_device, first[first_check],second);
       
       second[second_check] = location;
@@ -375,7 +388,6 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
           /* Read full sector directly into caller's buffer. */
         #ifdef FILESYS
           cache_read (fs_device, sector_idx, buffer + bytes_read);
-          //block_read (fs_device, sector_idx, buffer + bytes_read);
         #else
           block_read (fs_device, sector_idx, buffer + bytes_read);
         #endif
@@ -395,7 +407,6 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
         #else
           block_read (fs_device, sector_idx, bounce);
         #endif
-          // block_read (fs_device, sector_idx, bounce);
           memcpy (buffer + bytes_read, bounce + sector_ofs, chunk_size);
         }
       
