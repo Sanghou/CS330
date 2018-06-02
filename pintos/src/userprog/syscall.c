@@ -479,6 +479,7 @@ syscall_handler (struct intr_frame *f)
       mapped_file->t = thread_current();
       mapped_file->file = file;
       mapped_file->mmap_id = global_mmap_id;
+      mapped_file->file_size = file_len;
       global_mmap_id++;
 
       list_push_back(&thread_current()->mapping_table,&mapped_file->elem);

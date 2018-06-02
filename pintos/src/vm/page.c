@@ -58,8 +58,8 @@ destory_hash_action(struct hash_elem *e, void *aux)
 
 		  	if (pagedir_is_dirty(mapped_file->t->pagedir, spage_entry->va)){
 		    	acquire_sys_lock();
-		    	file_write_at(mapped_file->file, spage_entry->pa, PGSIZE, spage_entry->ofs);
-		    	release_sys_lock();
+		    	file_write_at(mapped_file->file, spage_entry->pa, mapped_file->file_size, spage_entry->ofs);
+		    	release_sys_lock();	
 	    	}
 	    	frame_remove(spage_entry);
 		  

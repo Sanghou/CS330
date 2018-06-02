@@ -85,12 +85,12 @@ byte_to_sector (const struct inode *inode, off_t pos)
     ASSERT (inode->data.double_indirect != -1);
     result -= 248;
 
+    block_sector_t buffer2[128];
+
     block_read(fs_device, inode->data.double_indirect, buffer);
     int index = buffer[result / 128];
-    result = result - (result/128)*128;
-    memset(buffer, 0, sizeof(buffer));
-    block_read(fs_device, index, buffer);
-    result = buffer[result];
+    block_read(fs_device, index, buffer2);
+    result = buffer2[result % 128];
   }
 
   return result;
@@ -185,6 +185,7 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
       }
 
       //read first indirect_block.
+      ASSERT(disk_inode->double_indirect != -1);
 
       block_read(fs_device,disk_inode->double_indirect, first);
 
@@ -380,7 +381,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
                   break;
             }
         #ifdef FILESYS
-        cache_read (fs_device, sector_idx, bounce);
+          cache_read (fs_device, sector_idx, bounce);
         #else
           block_read (fs_device, sector_idx, bounce);
         #endif
@@ -414,7 +415,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
   if (inode->deny_write_cnt)
     return 0;
 
-  if (offset+size > ROUND_UP(inode_length(inode), BLOCK_SECTOR_SIZE))
+  if (offset + size > ROUND_UP(inode_length(inode), BLOCK_SECTOR_SIZE))
   {
     //grow file!
     int file = offset+size;
@@ -435,13 +436,10 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       int sector_left = BLOCK_SECTOR_SIZE - sector_ofs;
       int min_left = inode_left < sector_left ? inode_left : sector_left;
 
-
       /* Number of bytes to actually write into this sector. */
       int chunk_size = size < min_left ? size : min_left;
       if (chunk_size <= 0)
         break;
-
-      // printf("chunk_size : %d\n, size : %d\n", chunk_size, size);
 
       if (sector_ofs == 0 && chunk_size == BLOCK_SECTOR_SIZE)
         {
@@ -489,9 +487,8 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       bytes_written += chunk_size;
     }
   free (bounce);
-  if (inode_length(inode) < offset){
+  if (inode_length(inode) < offset)
     inode->data.length = offset;
-  }
 
   return bytes_written;
 }
@@ -526,62 +523,58 @@ inode_length (const struct inode *inode)
 void 
 deallocate_sectors (const struct inode *inode)
 {
-  int cnt = inode->data.length / BLOCK_SECTOR_SIZE;
   int i;
-  int limit = cnt < 120? cnt : 120;
-  for (i = 0; i!= limit; i++)
+  for (i = 0; i < inode->data.direct_number; i++)
     free_map_release (inode->data.direct[i], 1);
 
-  cnt -= limit;
-  if (cnt > 0)
+  if (inode->data.indirect_number > 0)
   {
     ASSERT (inode->data.indirect != -1);
-
-    i = cnt < 128 ? cnt : 128;
-    cnt -= i;
 
     block_sector_t buffer[128];
     block_read(fs_device, inode->data.indirect, buffer);
 
-    while (i > 0)
+    int cnt = inode->data.indirect_number;
+
+    while (cnt > 0)
     {
-      free_map_release (buffer[i-1], 1);
-      i--;
+      cnt--;
+      free_map_release (buffer[cnt], 1);   
     }
 
-    free(buffer);
     free_map_release (inode->data.indirect , 1);
   }
 
-  if (cnt > 0)
+  if (inode->data.double_indirect_number > 0)
   {
     ASSERT (inode->data.double_indirect != -1);
 
     block_sector_t buffer[128];
     block_read(fs_device, inode->data.double_indirect, buffer);
-    i = cnt / 128 + 1;
+    i = inode->data.double_indirect_number;
+    i = i / BLOCK_SECTOR_SIZE + 1;
+    int cnt = inode->data.double_indirect_number;
 
     while (i > 0)
     {
-      int index = buffer[i-1];
+      i--;
+      int index = buffer[i];
       int j;
-
       block_sector_t buffer2[128];
+      
       block_read(fs_device, index, buffer2);
 
       for (j = 0; j < 128; j++)
       {
-        if (buffer2[j] == -1)
+        if (cnt <= 0)
           break;
         free_map_release(buffer2[j], 1);
+        cnt--;
       }
 
-      free(buffer2);
       free_map_release(index, 1);
-      i--;
     }
 
-    free(buffer);
     free_map_release (inode->data.double_indirect , 1);
   }
 
