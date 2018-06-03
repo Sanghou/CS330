@@ -541,6 +541,31 @@ syscall_handler (struct intr_frame *f)
   }
   #endif
 
+  #ifdef FILESYS
+
+    case SYS_CHDIR: /* Change the current directory. */
+    {
+
+    }                 
+
+    case SYS_MKDIR: /* Create a directory. */
+    {
+
+    }                  
+    case SYS_READDIR: /* Reads a directory entry. */
+    {
+
+    }                
+    case SYS_ISDIR:  /* Tests if a fd represents a directory. */
+    {
+
+    }               
+    case SYS_INUMBER:
+    {
+
+    }
+  #endif
+
   	default:
   		terminate();
   		break;

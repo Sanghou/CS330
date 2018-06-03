@@ -125,7 +125,8 @@ allocate_sectors(size_t sectors, struct inode_disk* disk_inode){
 
   if (sectors == 0) return true;
 
-  for(i=0; i < sectors; i++){
+  for(i=0; i < sectors; i++)
+  {
     success = free_map_allocate(1, &location);
     next_append(location, disk_inode);
     block_write(fs_device, location, zeros);
@@ -139,24 +140,27 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
   // check direct_number
   // if allocated sectors are less than 120, then allocate direct_sectors.
 
-  if(disk_inode->direct_number < 120){
+  if(disk_inode->direct_number < 120)
+  {
     disk_inode->direct[disk_inode->direct_number] = location;
     disk_inode->direct_number++;
   }
 
-  else{
-
+  else
+  {
     //direct == 120
     //Allocate indirect block.
 
     block_sector_t b[128];
 
-    if(disk_inode->indirect_number == 0){
+    if(disk_inode->indirect_number == 0)
+    {
       free_map_allocate(1, &disk_inode->indirect);
       block_write(fs_device, disk_inode->indirect , b);
     }
 
-    if(disk_inode->indirect_number < 128){
+    if(disk_inode->indirect_number < 128)
+    {
       block_read(fs_device, disk_inode->indirect, b);
       b[disk_inode->indirect_number] = location;
       block_write(fs_device, disk_inode->indirect,b);
@@ -171,7 +175,8 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
     // |         | |      | |              |
     // ----------- -------- -----------------
 
-    else{
+    else
+    {
 
     block_sector_t first[128];
     block_sector_t second[128];
