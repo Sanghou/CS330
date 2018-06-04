@@ -513,6 +513,10 @@ init_thread (struct thread *t, const char *name, int priority)
     list_init(&t->mapping_table);
   #endif
 
+  #ifdef FILESYS
+    t->DIR_SECTOR = 1;
+  #endif
+
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and

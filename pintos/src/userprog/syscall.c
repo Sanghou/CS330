@@ -15,6 +15,9 @@
 #include "vm/file_map.h"    
 #include "vm/frame.h"
 #endif
+#ifdef FILESYS
+#include "filesys/directory.h"
+#endif
 
 static void syscall_handler (struct intr_frame *);
 
@@ -541,39 +544,60 @@ syscall_handler (struct intr_frame *f)
   }
   #endif
 
-  case SYS_CHDIR:
-  {
-    char *dir =(char *)read(f);
+  #ifdef FILESYS
 
-    //chdir(dir);
+    case SYS_CHDIR: /* Change the current directory. */
+    {
+      const char *dir = read (f);
 
-    break;
+      if (!is_user_vaddr(dir)){
+        f->eax = 0;
+        break;
+      }
+      bool success = chdir (dir);
 
-  }
+      f->eax = success;
+      break;
+    }                 
 
-  case SYS_MKDIR:
-  {
-    char *dir =(char *)read(f);
-  
-    break;
-  }
-  case SYS_READDIR:
-  {
-    int fd = read(f);
-  }
-  case SYS_ISDIR:
-  {
-    int fd = read(f);
-    
-    //char name[READDIR_MAX_LEN +1 ] = read(f);
-    
-    break;
-  }
-  case SYS_INUMBER:
-  {
-    int fd = read(f);
-    break;
-  }
+    case SYS_MKDIR: /* Create a directory. */
+    {
+      const char *dir = read (f);
+
+      if (!is_user_vaddr (dir)){
+        f->eax = 0;
+        break;
+      }
+      bool success = mkdir (dir);
+
+      f->eax = success;
+      break;
+    }                  
+    case SYS_READDIR: /* Reads a directory entry. */
+    {
+      int fd = read (f);
+      char *name = read (f);
+
+      if (fd <= 1 || !is_user_vaddr (name)){
+        f->eax = 0;
+        break;
+      }
+
+      break;
+    }                
+    case SYS_ISDIR:  /* Tests if a fd represents a directory. */
+    {
+      int fd = read(f);
+
+      break;
+    }               
+    case SYS_INUMBER:
+    {
+      int fd = read(f);
+
+      break;
+    }
+  #endif
 
   	default:
   		terminate();
