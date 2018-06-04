@@ -541,6 +541,40 @@ syscall_handler (struct intr_frame *f)
   }
   #endif
 
+  case SYS_CHDIR:
+  {
+    char *dir =(char *)read(f);
+
+    //chdir(dir);
+
+    break;
+
+  }
+
+  case SYS_MKDIR:
+  {
+    char *dir =(char *)read(f);
+  
+    break;
+  }
+  case SYS_READDIR:
+  {
+    int fd = read(f);
+  }
+  case SYS_ISDIR:
+  {
+    int fd = read(f);
+    
+    //char name[READDIR_MAX_LEN +1 ] = read(f);
+    
+    break;
+  }
+  case SYS_INUMBER:
+  {
+    int fd = read(f);
+    break;
+  }
+
   	default:
   		terminate();
   		break;

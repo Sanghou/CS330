@@ -52,21 +52,24 @@ filesys_done (void)
 char *
 dir_get_file(char *name){
 
-  char *token, *saved_ptr, *previous;
-
+  char *token, *saved_ptr, *previous = "";
 
   uint32_t len = strlen(name);
   char full_state[len+1];
   memcpy(full_state,name,len+1);
 
+  printf("full_state : %s \n", full_state);
+    
     for (token = strtok_r (full_state, "/", &saved_ptr); token != NULL;
-      token = strtok_r (NULL, "/", &saved_ptr)){
-      previous = token;
-      printf("name : %s \n", previous);
+        token = strtok_r (NULL, "/", &saved_ptr)){
       
+      printf("full_state : %s \n", full_state);    
+      printf("ptr : %s \n", saved_ptr);
+      printf("token : %s \n",token);      
+    
     }
 
-  printf("name : %s \n\n", previous);
+  printf("%s\n",token);
 
   return token;
 
