@@ -52,11 +52,34 @@ bool
 filesys_create (const char *name, off_t initial_size) 
 {
   block_sector_t inode_sector = 0;
+#ifdef FILESYS
+  struct dir *dir = dir_open_current ();
+#else
   struct dir *dir = dir_open_root ();
+#endif
+  // if (strrchr (name, '/') != NULL)
+  // {
+  //   char *token, *save_ptr;
+  //   char *tmp;
+  //   int i = 0;
+  //   for (token = strtok_r (name, "/", &save_ptr); token != NULL;
+  //         token = strtok_r (NULL, "/", &save_ptr))
+  //   {
+  //     i++;
+  //     tmp = token;
+  //   }
+  //   name = tmp;
+  // }
+  if (strrchr (name, '/') != NULL)
+  {
+    struct inode *dir_inode = (struct inode *) find_dir (name);
+    dir = dir_open(dir_inode);
+  }
+
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
                   && inode_create (inode_sector, initial_size)
-                  && dir_add (dir, name, inode_sector));
+                  && dir_add (dir, name, inode_sector, false));
   if (!success && inode_sector != 0) 
     free_map_release (inode_sector, 1);
   dir_close (dir);
@@ -72,7 +95,11 @@ filesys_create (const char *name, off_t initial_size)
 struct file *
 filesys_open (const char *name)
 {
+#ifdef FILESYS
+  struct dir *dir = dir_open_current ();
+#else
   struct dir *dir = dir_open_root ();
+#endif
   struct inode *inode = NULL;
 
   if (dir != NULL)
@@ -89,7 +116,11 @@ filesys_open (const char *name)
 bool
 filesys_remove (const char *name) 
 {
+#ifdef FILESYS
+  struct dir *dir = dir_open_current ();
+#else
   struct dir *dir = dir_open_root ();
+#endif
   bool success = dir != NULL && dir_remove (dir, name);
   dir_close (dir); 
 

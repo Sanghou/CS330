@@ -119,6 +119,11 @@ struct thread
     struct list mapping_table;
 #endif
 
+
+#ifdef FILESYS
+    uint32_t DIR_SECTOR;
+#endif 
+    
   };
 
   struct child_info

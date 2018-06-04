@@ -5,6 +5,7 @@
 #include "filesys/filesys.h"
 #include "filesys/inode.h"
 #include "threads/malloc.h"
+#include "threads/thread.h"
 
 /* A directory. */
 struct dir 
@@ -19,6 +20,7 @@ struct dir_entry
     block_sector_t inode_sector;        /* Sector number of header. */
     char name[NAME_MAX + 1];            /* Null terminated file name. */
     bool in_use;                        /* In use or free? */
+    bool is_file;                       /* Is this entry is file or not? */
   };
 
 /* Creates a directory with space for ENTRY_CNT entries in the
@@ -55,6 +57,12 @@ struct dir *
 dir_open_root (void)
 {
   return dir_open (inode_open (ROOT_DIR_SECTOR));
+}
+
+struct dir *
+dir_open_current (void)
+{
+  return dir_open (inode_open (thread_current()->DIR_SECTOR));
 }
 
 /* Opens and returns a new directory for the same inode as DIR.
@@ -139,7 +147,7 @@ dir_lookup (const struct dir *dir, const char *name,
    Fails if NAME is invalid (i.e. too long) or a disk or memory
    error occurs. */
 bool
-dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
+dir_add (struct dir *dir, const char *name, block_sector_t inode_sector, bool file)
 {
   struct dir_entry e;
   off_t ofs;
@@ -155,6 +163,10 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
   /* Check that NAME is not in use. */
   if (lookup (dir, name, NULL, NULL))
     goto done;
+
+  if (BLOCK_SECTOR_SIZE - dir->pos < sizeof e)
+    printf("DIRECTORY ADD\n");
+    // allocate_sectors(1, &dir->inode->inode_disk);
 
   /* Set OFS to offset of free slot.
      If there are no free slots, then it will be set to the
@@ -172,6 +184,7 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
   e.in_use = true;
   strlcpy (e.name, name, sizeof e.name);
   e.inode_sector = inode_sector;
+  e.is_file = file;
   success = inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
 
  done:
@@ -233,4 +246,82 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
         } 
     }
   return false;
+}
+
+#ifdef FILESYS
+bool
+chdir (const char *dir)
+{
+  struct inode * dir_inode = (struct inode *) find_dir (dir);
+  if (dir_inode == -1)
+    return false;
+  thread_current()->DIR_SECTOR = inode_get_inumber (dir_inode);
+  return true;
+}
+
+bool
+mkdir (const char *dir)
+{
+  struct inode * dir_inode = (struct inode *) find_dir (dir);
+  struct dir *open_dir = dir_open(dir_inode);
+
+  block_sector_t inode_sector;
+  off_t ofs;
+  struct dir_entry e;
+  bool success = false;
+
+  ASSERT (open_dir != NULL);
+
+  if (*dir == '\0' || strlen (dir) > NAME_MAX)
+    return false;
+
+  /* Check that NAME is not in use. */
+  if (lookup (open_dir, dir, NULL, NULL))
+    return false;
+
+  if (BLOCK_SECTOR_SIZE - open_dir->pos < sizeof e)
+    printf("DIRECTORY ADD\n");
+
+  success = free_map_allocate (1, &inode_sector) & 
+            inode_create (inode_sector, BLOCK_SECTOR_SIZE);
+    // allocate_sectors(1, &dir->inode->inode_disk);
+
+  /* Set OFS to offset of free slot.
+     If there are no free slots, then it will be set to the
+     current end-of-file.
+     
+     inode_read_at() will only return a short read at end of file.
+     Otherwise, we'd need to verify that we didn't get a short
+     read due to something intermittent such as low memory. */
+  for (ofs = 0; inode_read_at (open_dir->inode, &e, sizeof e, ofs) == sizeof e;
+       ofs += sizeof e) 
+    if (!e.in_use)
+      break;
+
+  /* Write slot. */
+  e.in_use = true;
+  strlcpy (e.name, dir, sizeof e.name);
+  e.inode_sector = inode_sector;
+  e.is_file = true;
+  success = (inode_write_at (open_dir->inode, &e, sizeof e, ofs) == sizeof e) & success;
+
+  //그럴려면 여기에 inode 하나 더 열어야함
+  // dir_add(); //. 추가하고 싶었음
+  // dir_add(); // .. 추가하고싶었음
+  inode_close(dir_inode);
+
+  return success;
+
+}
+#endif
+/*
+  returns inode pointer of the last directory should be opened.
+  name is truncated into only file name.
+  void * 리턴하는 거 struct inode * 이고 싶었음.
+  하려다ㅏㄱ 말았음
+*/
+void *
+find_dir (const char *dir)
+{
+
 }
