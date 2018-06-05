@@ -135,6 +135,12 @@ allocate_sectors(size_t sectors, struct inode_disk* disk_inode){
   return success;
 }
 
+bool
+inode_allocate_sectors (size_t sectors, struct inode *inode)
+{
+  return allocate_sectors (sectors, &inode->data);
+}
+
 void
 next_append(block_sector_t location, struct inode_disk* disk_inode){
   // check direct_number

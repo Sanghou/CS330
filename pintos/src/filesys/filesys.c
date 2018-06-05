@@ -64,38 +64,17 @@ filesys_create (const char *name, off_t initial_size)
 #endif
 
   struct inode *inode = NULL;
-  char * file_name = name;
+  const char * file_name;
 
   if (strrchr (name, '/') != NULL)
   {
-    // inode = (struct inode *) find_dir (name);
-    // if (inode == NULL)
-    //   return false;
-    // dir_close(dir);
-    // dir = dir_open(inode);
-    // char *tmp;
-    // tmp = find_name (name);
-    dir_close (dir);
-    struct inode *inode = NULL;
-    char pointer[sizeof(name)];
-    char tmp[sizeof(name)];
-    memcpy(pointer, name, sizeof(name));
-    dir = dir_open_root();
-  
-    char *token, *saved_ptr;
-
-    for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
-      token = strtok_r (NULL, "/", &saved_ptr))
-    {
-      memcpy(tmp, token, sizeof(token));
-      if (dir_lookup(dir, token, &inode) && inode != NULL && !inode_is_file (inode))
-      {
-        dir_close(dir);
-        dir_open(inode);
-      }
-    }
-    file_name = tmp;
+    file_name = find_name(name);
+    inode = find_dir (name);
+    dir_close(dir);
+    dir = dir_open(inode);
   }
+  else 
+    file_name = name;
 
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
@@ -104,6 +83,11 @@ filesys_create (const char *name, off_t initial_size)
   if (!success && inode_sector != 0) 
     free_map_release (inode_sector, 1);
   dir_close (dir);
+
+  printf("success : %d\n", success);
+
+  if (file_name != name)
+    free(file_name);
 
   return success;
 }

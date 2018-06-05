@@ -161,10 +161,12 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
   /* Check that NAME is not in use. */
   if (lookup (dir, name, NULL, NULL))
     goto done;
+  
 
-  if (BLOCK_SECTOR_SIZE - dir->pos < sizeof e)
-    printf("DIRECTORY ADD\n");
-    // allocate_sectors(1, &dir->inode->inode_disk);
+  if (BLOCK_SECTOR_SIZE - dir->pos < sizeof e){
+    bool access = inode_allocate_sectors(1, dir->inode);
+    if (!access) return false;
+  }
 
   /* Set OFS to offset of free slot.
      If there are no free slots, then it will be set to the
@@ -259,13 +261,14 @@ chdir (const char *name)
       dir_close(dir);
       return false;
     }
-    dir_close(dir); 
+    dir_close(dir);
   }
 
-  if (dir_inode == -1)
+  if (dir_inode == NULL)
     return false;
 
   thread_current()->DIR_SECTOR = inode_get_inumber (dir_inode);
+  printf("number ; %d\n", thread_current()->DIR_SECTOR);
   return true; 
 }
 
@@ -279,8 +282,7 @@ mkdir (const char *name)
     char pointer[sizeof(name)];
     char tmp[sizeof(name)];
     memcpy(pointer, name, sizeof(name));
-    dir = dir_open_root();
-    
+    dir = dir_open_root();    
     char *token, *saved_ptr;
 
     for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
@@ -293,59 +295,27 @@ mkdir (const char *name)
         dir->inode = dir_inode;
       }
     }
-    dir_inode = dir->inode;
     name = tmp;
   } 
   else 
     dir = dir_open_root();
-  
+    
   block_sector_t inode_sector;
-  off_t ofs;
-  struct dir_entry e;
-  bool success = false;
 
-  ASSERT (dir != NULL);
+  bool success = free_map_allocate (1, &inode_sector) & 
+            inode_create (inode_sector, BLOCK_SECTOR_SIZE, false) &
+            dir_add (dir, name, inode_sector);
 
-  if (*name == '\0' || strlen (name) > NAME_MAX)
-    return false;
-
-  /* Check that NAME is not in use. */
-  if (lookup (dir, name, NULL, NULL))
-    return false;
-
-  if (BLOCK_SECTOR_SIZE - dir->pos < sizeof e)
-    printf("DIRECTORY ADD\n");
-
-  success = free_map_allocate (1, &inode_sector) & 
-            inode_create (inode_sector, BLOCK_SECTOR_SIZE, false);
-
-  /* Set OFS to offset of free slot.
-     If there are no free slots, then it will be set to the
-     current end-of-file.
-     
-     inode_read_at() will only return a short read at end of file.
-     Otherwise, we'd need to verify that we didn't get a short
-     read due to something intermittent such as low memory. */
-  for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
-       ofs += sizeof e) 
-    if (!e.in_use)
-      break;
-
-  /* Write slot. */
-  e.in_use = true;
-  strlcpy (e.name, name, sizeof e.name);
-  e.inode_sector = inode_sector;
-  success = (inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e) & success;
-
-  dir->inode = inode_open(inode_sector);
-  dir_add(dir, ".", inode_sector); //. 추가하고 싶었음
+  struct dir *new_dir = dir_open (inode_open (inode_sector));
+  dir_add(new_dir, ".", inode_sector); //. 추가하고 싶었음
   if (dir_inode == NULL)
-    dir_add(dir, "..", 1); // .. 추가하고싶었음
+    dir_add(new_dir, "..", 1); // .. 추가하고싶었음
   else{
-    dir_add(dir, "..", inode_get_inumber(dir_inode));
-    inode_close(dir_inode);
+    dir_add(new_dir, "..", inode_get_inumber(dir_inode));
   }
+
   dir_close (dir);
+  dir_close (new_dir);
 
   return success;
 
@@ -369,15 +339,34 @@ find_dir (const char *name)
   for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
     token = strtok_r (NULL, "/", &saved_ptr))
   {
-
-    if (dir_lookup(dir, token, &inode) && inode != NULL && !inode_is_file (inode))
+    if (token = "")
+      continue;
+    bool success = dir_lookup(dir, token, &inode);
+    if (success && inode != NULL && !inode_is_file (inode))
     {
       dir->inode = inode;
     }
-    else 
-      return -1;
   }
-  dir_close(dir);
   inode = dir->inode;
+  dir_close(dir);
   return inode;
+}
+
+char *
+find_name (const char *name)
+{
+  struct inode *inode = NULL;
+  char pointer[sizeof(name)];
+  memcpy(pointer, name, sizeof(name));
+  
+  char *token, *saved_ptr, *tmp;
+
+  for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
+    token = strtok_r (NULL, "/", &saved_ptr))
+  {
+    tmp = token;
+  }
+  char * file_name = malloc(strlen(tmp)+1);
+  memcpy(file_name, tmp, strlen(file_name));
+  return file_name; 
 }
