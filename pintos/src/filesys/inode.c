@@ -30,7 +30,7 @@ struct inode_disk
     uint32_t double_indirect_number;
     off_t length;                             /* File size in bytes. */
     unsigned magic;                           /* Magic number. */
-    uint32_t unused[1];                       /* Not used. */
+    uint32_t is_file;                         /* Not used. */
   };
 
 /* Returns the number of sectors to allocate for an inode SIZE
@@ -220,7 +220,7 @@ next_append(block_sector_t location, struct inode_disk* disk_inode){
 }
 
 bool
-inode_create (block_sector_t sector, off_t length)
+inode_create (block_sector_t sector, off_t length, bool is_file)
 {
   struct inode_disk *disk_inode = NULL;
   bool success = false;
@@ -244,6 +244,7 @@ inode_create (block_sector_t sector, off_t length)
       disk_inode->direct_number = 0;
       disk_inode->indirect_number = 0;
       disk_inode->double_indirect_number = 0;
+      disk_inode->is_file = is_file;
 
       success = allocate_sectors(sectors, disk_inode);
 
@@ -310,6 +311,12 @@ block_sector_t
 inode_get_inumber (const struct inode *inode)
 {
   return inode->sector;
+}
+
+bool
+inode_is_file (const struct inode *inode)
+{
+  return (bool) inode->data.is_file;
 }
 
 /* Closes INODE and writes it to disk.

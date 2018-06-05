@@ -264,9 +264,11 @@ strtok_r (char *s, const char *delimiters, char **save_ptr)
   token = s;
   while (strchr (delimiters, *s) == NULL)
     s++;
+
   if (*s != '\0') 
     {
       *s = '\0';
+      // printf("%s \n\n" , save_ptr);
       *save_ptr = s + 1;
     }
   else 

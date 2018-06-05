@@ -583,6 +583,8 @@ syscall_handler (struct intr_frame *f)
         break;
       }
 
+      
+
       break;
     }                
     case SYS_ISDIR:  /* Tests if a fd represents a directory. */

@@ -20,7 +20,6 @@ struct dir_entry
     block_sector_t inode_sector;        /* Sector number of header. */
     char name[NAME_MAX + 1];            /* Null terminated file name. */
     bool in_use;                        /* In use or free? */
-    bool is_file;                       /* Is this entry is file or not? */
   };
 
 /* Creates a directory with space for ENTRY_CNT entries in the
@@ -28,7 +27,7 @@ struct dir_entry
 bool
 dir_create (block_sector_t sector, size_t entry_cnt)
 {
-  return inode_create (sector, entry_cnt * sizeof (struct dir_entry));
+  return inode_create (sector, entry_cnt * sizeof (struct dir_entry), false);
 }
 
 /* Opens and returns the directory for the given INODE, of which
@@ -147,7 +146,7 @@ dir_lookup (const struct dir *dir, const char *name,
    Fails if NAME is invalid (i.e. too long) or a disk or memory
    error occurs. */
 bool
-dir_add (struct dir *dir, const char *name, block_sector_t inode_sector, bool file)
+dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
 {
   struct dir_entry e;
   off_t ofs;
@@ -155,7 +154,6 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector, bool fi
 
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
-
   /* Check NAME for validity. */
   if (*name == '\0' || strlen (name) > NAME_MAX)
     return false;
@@ -184,7 +182,6 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector, bool fi
   e.in_use = true;
   strlcpy (e.name, name, sizeof e.name);
   e.inode_sector = inode_sector;
-  e.is_file = file;
   success = inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
 
  done:
@@ -250,41 +247,77 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
 
 #ifdef FILESYS
 bool
-chdir (const char *dir)
+chdir (const char *name)
 {
-  struct inode * dir_inode = (struct inode *) find_dir (dir);
+  struct inode *dir_inode;
+  if (strrchr (name, '/') != NULL)
+    dir_inode = (struct inode *) find_dir (name);
+  else 
+  {
+    struct dir *dir = dir_open_root();
+    if (!dir_lookup(dir, name, &dir_inode) || dir_inode == NULL || inode_is_file (dir_inode)){
+      dir_close(dir);
+      return false;
+    }
+    dir_close(dir); 
+  }
+
   if (dir_inode == -1)
     return false;
+
   thread_current()->DIR_SECTOR = inode_get_inumber (dir_inode);
-  return true;
+  return true; 
 }
 
 bool
-mkdir (const char *dir)
+mkdir (const char *name)
 {
-  struct inode * dir_inode = (struct inode *) find_dir (dir);
-  struct dir *open_dir = dir_open(dir_inode);
+  struct dir *dir;
+  struct inode * dir_inode = NULL;
+  if (strrchr (name, '/') != NULL)
+  {
+    char pointer[sizeof(name)];
+    char tmp[sizeof(name)];
+    memcpy(pointer, name, sizeof(name));
+    dir = dir_open_root();
+    
+    char *token, *saved_ptr;
 
+    for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
+      token = strtok_r (NULL, "/", &saved_ptr))
+    {
+      memcpy(tmp, token, sizeof(token));
+
+      if (dir_lookup(dir, token, &dir_inode) && dir_inode != NULL && !inode_is_file (dir_inode))
+      {
+        dir->inode = dir_inode;
+      }
+    }
+    dir_inode = dir->inode;
+    name = tmp;
+  } 
+  else 
+    dir = dir_open_root();
+  
   block_sector_t inode_sector;
   off_t ofs;
   struct dir_entry e;
   bool success = false;
 
-  ASSERT (open_dir != NULL);
+  ASSERT (dir != NULL);
 
-  if (*dir == '\0' || strlen (dir) > NAME_MAX)
+  if (*name == '\0' || strlen (name) > NAME_MAX)
     return false;
 
   /* Check that NAME is not in use. */
-  if (lookup (open_dir, dir, NULL, NULL))
+  if (lookup (dir, name, NULL, NULL))
     return false;
 
-  if (BLOCK_SECTOR_SIZE - open_dir->pos < sizeof e)
+  if (BLOCK_SECTOR_SIZE - dir->pos < sizeof e)
     printf("DIRECTORY ADD\n");
 
   success = free_map_allocate (1, &inode_sector) & 
-            inode_create (inode_sector, BLOCK_SECTOR_SIZE);
-    // allocate_sectors(1, &dir->inode->inode_disk);
+            inode_create (inode_sector, BLOCK_SECTOR_SIZE, false);
 
   /* Set OFS to offset of free slot.
      If there are no free slots, then it will be set to the
@@ -293,22 +326,26 @@ mkdir (const char *dir)
      inode_read_at() will only return a short read at end of file.
      Otherwise, we'd need to verify that we didn't get a short
      read due to something intermittent such as low memory. */
-  for (ofs = 0; inode_read_at (open_dir->inode, &e, sizeof e, ofs) == sizeof e;
+  for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e) 
     if (!e.in_use)
       break;
 
   /* Write slot. */
   e.in_use = true;
-  strlcpy (e.name, dir, sizeof e.name);
+  strlcpy (e.name, name, sizeof e.name);
   e.inode_sector = inode_sector;
-  e.is_file = true;
-  success = (inode_write_at (open_dir->inode, &e, sizeof e, ofs) == sizeof e) & success;
+  success = (inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e) & success;
 
-  //그럴려면 여기에 inode 하나 더 열어야함
-  // dir_add(); //. 추가하고 싶었음
-  // dir_add(); // .. 추가하고싶었음
-  inode_close(dir_inode);
+  dir->inode = inode_open(inode_sector);
+  dir_add(dir, ".", inode_sector); //. 추가하고 싶었음
+  if (dir_inode == NULL)
+    dir_add(dir, "..", 1); // .. 추가하고싶었음
+  else{
+    dir_add(dir, "..", inode_get_inumber(dir_inode));
+    inode_close(dir_inode);
+  }
+  dir_close (dir);
 
   return success;
 
@@ -316,12 +353,31 @@ mkdir (const char *dir)
 #endif
 /*
   returns inode pointer of the last directory should be opened.
-  name is truncated into only file name.
   void * 리턴하는 거 struct inode * 이고 싶었음.
-  하려다ㅏㄱ 말았음
 */
 void *
-find_dir (const char *dir)
+find_dir (const char *name)
 {
+  struct inode *inode = NULL;
+  char pointer[sizeof(name)];
+  // char tmp[sizeof(name)];
+  memcpy(pointer, name, sizeof(name));
+  struct dir *dir = dir_open_root();
+  
+  char *token, *saved_ptr;
 
+  for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
+    token = strtok_r (NULL, "/", &saved_ptr))
+  {
+
+    if (dir_lookup(dir, token, &inode) && inode != NULL && !inode_is_file (inode))
+    {
+      dir->inode = inode;
+    }
+    else 
+      return -1;
+  }
+  dir_close(dir);
+  inode = dir->inode;
+  return inode;
 }
