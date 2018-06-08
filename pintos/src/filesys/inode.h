@@ -22,4 +22,5 @@ void inode_allow_write (struct inode *);
 off_t inode_length (const struct inode *);
 
 bool inode_allocate_sectors (size_t, struct inode *);
+void deallocate_sectors (const struct inode *inode);
 #endif /* filesys/inode.h */

@@ -163,7 +163,8 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
     goto done;
   
 
-  if (BLOCK_SECTOR_SIZE - dir->pos < sizeof e){
+  if (BLOCK_SECTOR_SIZE - dir->pos < sizeof e)
+  {
     bool access = inode_allocate_sectors(1, dir->inode);
     if (!access) return false;
   }
@@ -213,6 +214,11 @@ dir_remove (struct dir *dir, const char *name)
   if (inode == NULL)
     goto done;
 
+  // if (!inode_is_file(inode))
+  // {
+  //   deallocate_sectors(inode);
+  // }
+
   /* Erase directory entry. */
   e.in_use = false;
   if (inode_write_at (dir->inode, &e, sizeof e, ofs) != sizeof e) 
@@ -251,122 +257,105 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
 bool
 chdir (const char *name)
 {
+  struct dir *dir = dir_open_root();
   struct inode *dir_inode;
-  if (strrchr (name, '/') != NULL)
-    dir_inode = (struct inode *) find_dir (name);
+  bool success;
+  if (strrchr (name, '/') != NULL){
+    success = find_dir (dir, name);
+    dir_inode = dir->inode;
+  }
   else 
   {
-    struct dir *dir = dir_open_root();
     if (!dir_lookup(dir, name, &dir_inode) || dir_inode == NULL || inode_is_file (dir_inode)){
       dir_close(dir);
       return false;
     }
-    dir_close(dir);
   }
+  dir_close(dir);
 
-  if (dir_inode == NULL)
+  if (!success)
     return false;
 
   thread_current()->DIR_SECTOR = inode_get_inumber (dir_inode);
-  printf("number ; %d\n", thread_current()->DIR_SECTOR);
   return true; 
 }
 
 bool
 mkdir (const char *name)
 {
-  struct dir *dir;
+  struct dir *dir = dir_open_root();
   struct inode * dir_inode = NULL;
+  char *tmp = NULL;
+
   if (strrchr (name, '/') != NULL)
   {
-    char pointer[sizeof(name)];
-    char tmp[sizeof(name)];
-    memcpy(pointer, name, sizeof(name));
-    dir = dir_open_root();    
-    char *token, *saved_ptr;
+    bool find = find_dir (dir, name);
+    if (!find){
+      dir_close (dir);
+      return false;
+    }
 
+    int name_size = strlen(name)+1;
+
+    char pointer[name_size];
+    tmp = malloc(name_size);
+    memcpy(pointer, name, name_size);
+  
+    char *token, *saved_ptr;
+ 
     for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
       token = strtok_r (NULL, "/", &saved_ptr))
     {
-      memcpy(tmp, token, sizeof(token));
-
-      if (dir_lookup(dir, token, &dir_inode) && dir_inode != NULL && !inode_is_file (dir_inode))
-      {
-        dir->inode = dir_inode;
-      }
+      memcpy(tmp, token, sizeof(token)+1);
     }
     name = tmp;
   } 
-  else 
-    dir = dir_open_root();
-    
   block_sector_t inode_sector;
+  dir_inode = dir->inode;
 
   bool success = free_map_allocate (1, &inode_sector) & 
             inode_create (inode_sector, BLOCK_SECTOR_SIZE, false) &
             dir_add (dir, name, inode_sector);
 
   struct dir *new_dir = dir_open (inode_open (inode_sector));
-  dir_add(new_dir, ".", inode_sector); //. 추가하고 싶었음
-  if (dir_inode == NULL)
-    dir_add(new_dir, "..", 1); // .. 추가하고싶었음
-  else{
-    dir_add(new_dir, "..", inode_get_inumber(dir_inode));
-  }
+
+  dir_add(new_dir, ".", inode_sector); 
+  dir_add(new_dir, "..", inode_get_inumber(dir_inode));
 
   dir_close (dir);
   dir_close (new_dir);
 
+  if (tmp != NULL)
+    free(tmp);
   return success;
-
 }
 #endif
 /*
   returns inode pointer of the last directory should be opened.
   void * 리턴하는 거 struct inode * 이고 싶었음.
 */
-void *
-find_dir (const char *name)
+bool
+find_dir (struct dir *dir, const char *name)
 {
   struct inode *inode = NULL;
-  char pointer[sizeof(name)];
-  // char tmp[sizeof(name)];
-  memcpy(pointer, name, sizeof(name));
-  struct dir *dir = dir_open_root();
+  char pointer[strlen(name)+1];
+  memcpy(pointer, name, strlen(name)+1);
   
   char *token, *saved_ptr;
 
   for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
     token = strtok_r (NULL, "/", &saved_ptr))
-  {
-    if (token = "")
-      continue;
-    bool success = dir_lookup(dir, token, &inode);
-    if (success && inode != NULL && !inode_is_file (inode))
-    {
+  { 
+    if (strlen(saved_ptr)== 0){
+      break;
+    }
+    
+    if (dir_lookup (dir, token, &inode) && inode != NULL && !inode_is_file (inode)) {   
       dir->inode = inode;
     }
-  }
-  inode = dir->inode;
-  dir_close(dir);
-  return inode;
-}
-
-char *
-find_name (const char *name)
-{
-  struct inode *inode = NULL;
-  char pointer[sizeof(name)];
-  memcpy(pointer, name, sizeof(name));
-  
-  char *token, *saved_ptr, *tmp;
-
-  for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
-    token = strtok_r (NULL, "/", &saved_ptr))
-  {
-    tmp = token;
-  }
-  char * file_name = malloc(strlen(tmp)+1);
-  memcpy(file_name, tmp, strlen(file_name));
-  return file_name; 
+    else{
+      return false;
+    }
+  } 
+  return true;
 }

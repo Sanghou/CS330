@@ -711,6 +711,7 @@ set_file_descript(struct file *file){
   memset (file_descript, 0, sizeof *file_descript);
 
   file_descript->file = file;
+  file_descript->is_file = inode_is_file(file_get_inode(file));
 
   struct list_elem *e;
 

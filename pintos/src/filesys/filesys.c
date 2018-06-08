@@ -64,17 +64,33 @@ filesys_create (const char *name, off_t initial_size)
 #endif
 
   struct inode *inode = NULL;
-  const char * file_name;
+  char * file_name = name;
+  char *tmp = NULL;
 
   if (strrchr (name, '/') != NULL)
   {
-    file_name = find_name(name);
-    inode = find_dir (name);
-    dir_close(dir);
-    dir = dir_open(inode);
+    bool find = find_dir (dir, name);
+    if (!find){
+      dir_close (dir);
+      return false;
+    }
+
+    int name_size = strlen(name)+1;
+
+    char pointer[name_size];
+    tmp = malloc (name_size);
+    memset(tmp, 0, name_size);
+    memcpy(pointer, name, name_size);
+  
+    char *token, *saved_ptr;
+ 
+    for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
+      token = strtok_r (NULL, "/", &saved_ptr))
+    {
+      memcpy(tmp, token, sizeof(token)+1);
+    }
+    file_name = tmp;
   }
-  else 
-    file_name = name;
 
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
@@ -84,10 +100,9 @@ filesys_create (const char *name, off_t initial_size)
     free_map_release (inode_sector, 1);
   dir_close (dir);
 
-  printf("success : %d\n", success);
+  if (tmp != NULL)
+    free(tmp);
 
-  if (file_name != name)
-    free(file_name);
 
   return success;
 }
@@ -105,11 +120,45 @@ filesys_open (const char *name)
 #else
   struct dir *dir = dir_open_root ();
 #endif
+
   struct inode *inode = NULL;
+  char * file_name = name;
+  char *tmp = NULL;
+
+  if (strrchr (name, '/') != NULL)
+  {
+    bool find = find_dir (dir, name);
+    if (!find){
+      dir_close (dir);
+      return false;
+    }
+
+    int name_size = strlen(name)+1;
+
+    char pointer[name_size];
+    tmp = malloc (name_size);
+    memset(tmp, 0, name_size);
+    memcpy(pointer, name, name_size);
+  
+    char *token, *saved_ptr;
+ 
+    for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
+      token = strtok_r (NULL, "/", &saved_ptr))
+    {
+      memcpy(tmp, token, sizeof(token)+1);
+    }
+    file_name = tmp;
+  }
+  // 이밑을 여는 순간 extensible의 헬게이트가 시작된다. 
+  // if (strlen(file_name)== 0)
+  //   return file_open (dir_get_inode (dir));
 
   if (dir != NULL)
-    dir_lookup (dir, name, &inode);
+    dir_lookup (dir, file_name, &inode);
   dir_close (dir);
+
+  if (tmp != NULL)
+    free(tmp);
 
   return file_open (inode);
 }
@@ -126,8 +175,41 @@ filesys_remove (const char *name)
 #else
   struct dir *dir = dir_open_root ();
 #endif
-  bool success = dir != NULL && dir_remove (dir, name);
+
+  struct inode *inode = NULL;
+  char * file_name = name;
+  char *tmp = NULL;
+
+  if (strrchr (name, '/') != NULL)
+  {
+    bool find = find_dir (dir, name);
+    if (!find){
+      dir_close (dir);
+      return false;
+    }
+
+    int name_size = strlen(name)+1;
+
+    char pointer[name_size];
+    tmp = malloc (name_size);
+    memset(tmp, 0, name_size);
+    memcpy(pointer, name, name_size);
+  
+    char *token, *saved_ptr;
+ 
+    for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
+      token = strtok_r (NULL, "/", &saved_ptr))
+    {
+      memcpy(tmp, token, sizeof(token)+1);
+    }
+    file_name = tmp;
+  }
+
+  bool success = dir != NULL && dir_remove (dir, file_name);
   dir_close (dir); 
+
+  if (tmp != NULL)
+    free(tmp);
 
   return success;
 }

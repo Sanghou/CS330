@@ -139,6 +139,7 @@ struct thread
 struct file_descript
   {
     int fd;
+    bool is_file;
     struct file *file;
     struct list_elem fd_elem;
   };  

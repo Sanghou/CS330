@@ -293,11 +293,6 @@ syscall_handler (struct intr_frame *f)
       }
 
       struct file_descript *descript = find_file_descript(fd);
-      if (fd != 0 && descript == NULL){
-        f->eax = -1;
-        terminate_error();
-        break;
-      }
 
       if (fd == 0)
       {
@@ -306,19 +301,21 @@ syscall_handler (struct intr_frame *f)
           memcpy(buffer, tmp, 1);
           buffer++;
           read_size++;
-          //putbuf();
         }
 
       } else {
-        // int page_per_buffer = size / PGSIZE;
-        // // printf("page_per_buffer : %d\n",page_per_buffer);
-        // int i;
-        // for (i = 0; i< page_per_buffer; i++)
-        // {
-        //   int mini_buf = (size < PGSIZE) ? size: PGSIZE;
-        //   read_size += file_read(descript->file, buffer, (off_t) mini_buf);
-        //   size -= mini_buf;
-        // }
+
+        if (descript == NULL)
+        {
+          f->eax = -1;
+          terminate_error();
+          break;
+        }
+        if (!descript->is_file)
+        {
+          f->eax = -1;
+          break;
+        }
 
         lock_acquire(&sys_lock);
         read_size += file_read(descript->file, buffer, (off_t) size);
@@ -352,12 +349,6 @@ syscall_handler (struct intr_frame *f)
 
       struct file_descript *descript = find_file_descript(fd);
 
-      if (fd != 1 && descript == NULL){
-        f->eax = 0;
-        terminate_error();
-        break;
-      }
-
   		if (fd == 1)
       {
         lock_acquire(&sys_lock);
@@ -367,6 +358,16 @@ syscall_handler (struct intr_frame *f)
   		}
       else
       {
+        if (descript == NULL){
+          f->eax = 0;
+          terminate_error();
+          break;
+        }
+        if (!descript->is_file)
+        {
+          f->eax = -1;
+          break;
+        }
         lock_acquire(&sys_lock);
         write_size = file_write(descript->file, buffer, size);
         lock_release(&sys_lock);
@@ -589,6 +590,14 @@ syscall_handler (struct intr_frame *f)
     {
       int fd = read(f);
 
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (descript == NULL){
+        f->eax = 0;
+        break;
+      }
+
+      f->eax = !descript->is_file;
 
       break;
     }               

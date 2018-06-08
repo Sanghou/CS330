@@ -30,7 +30,6 @@ bool dir_readdir (struct dir *, char name[NAME_MAX + 1]);
 
 bool chdir (const char *name);
 bool mkdir (const char *name);
-void *find_dir (const char *name);
-char *find_name (const char *name);
+bool find_dir (struct dir *dir, const char *name);
 
 #endif /* filesys/directory.h */
