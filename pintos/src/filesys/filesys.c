@@ -87,7 +87,7 @@ filesys_create (const char *name, off_t initial_size)
     for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
       token = strtok_r (NULL, "/", &saved_ptr))
     {
-      memcpy(tmp, token, sizeof(token)+1);
+      memcpy(tmp, token, strlen(token)+1);
     }
     file_name = tmp;
   }
