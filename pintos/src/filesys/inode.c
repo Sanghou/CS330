@@ -138,6 +138,8 @@ allocate_sectors(size_t sectors, struct inode_disk* disk_inode){
 bool
 inode_allocate_sectors (size_t sectors, struct inode *inode)
 {
+  inode->data.length += sectors*BLOCK_SECTOR_SIZE;
+  inode->grow = true;
   return allocate_sectors (sectors, &inode->data);
 }
 
@@ -377,7 +379,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
       int sector_ofs = offset % BLOCK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
-      off_t inode_left = inode_length (inode) - offset;
+      off_t inode_left = ROUND_UP(inode_length (inode), BLOCK_SECTOR_SIZE) - offset;
       int sector_left = BLOCK_SECTOR_SIZE - sector_ofs;
       int min_left = inode_left < sector_left ? inode_left : sector_left;
 
@@ -419,6 +421,8 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
       bytes_read += chunk_size;
     }
   free (bounce);
+  if (inode_length(inode) < offset)
+    inode->data.length = offset;
 
   return bytes_read;
 }

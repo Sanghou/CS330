@@ -182,7 +182,6 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
     access = inode_allocate_sectors(1, dir->inode);
     if (!access)
       return false;
-    ofs -= sizeof e;
     inode_read_at (dir->inode, &e, sizeof e, ofs);
   }
 
