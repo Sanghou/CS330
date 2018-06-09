@@ -261,11 +261,6 @@ inode_create (block_sector_t sector, off_t length, bool is_file)
   return success;
 }
 
-/* Allocate n sectors to not cnt */
-
-
-
-
 /* Reads an inode from SECTOR
    and returns a `struct inode' that contains it.
    Returns a null pointer if memory allocation fails. */

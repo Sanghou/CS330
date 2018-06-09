@@ -118,6 +118,42 @@ lookup (const struct dir *dir, const char *name,
   return false;
 }
 
+/*  
+  Returns true when kernel cannot remove this inumber
+*/
+bool
+erase (struct inode *inode)
+{
+  int current_directory = thread_current()->DIR_SECTOR;
+  int erase = inode_get_inumber (inode);
+
+  if (current_directory == erase || erase == 1)
+    return true;
+
+  if (current_directory == 1)
+    return false;
+
+  struct dir *dir = dir_open_current();
+  struct inode *find_inode = NULL;
+
+  while (true)
+  {
+    if (dir_lookup (dir, "..", &find_inode) && find_inode != NULL && !inode_is_file (find_inode)) 
+    {
+      dir_close(dir);
+      dir = dir_open(find_inode);
+    }
+    if (inode_get_inumber(find_inode) == erase)
+      return true;
+
+    if (inode_get_inumber (find_inode) == 1)
+      break;
+  }
+  
+
+  return false;
+}
+
 /* Searches DIR for a file with the given NAME
    and returns true if one exists, false otherwise.
    On success, sets *INODE to an inode for the file, otherwise to
@@ -234,7 +270,7 @@ dir_remove (struct dir *dir, const char *name)
 
     free (remove_dir);
 
-    if (is_inside (inode_get_inumber (inode)) || inode_get_inumber (inode) == thread_current()->DIR_SECTOR)
+    if (is_inside (inode_get_inumber (inode)) || erase (inode))
       return success;
   }
 
@@ -276,7 +312,7 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
 bool
 chdir (const char *name)
 {
-  struct dir *dir = dir_open_root();
+  struct dir *dir = dir_open_current();
   struct inode *dir_inode;
   bool success;
   if (strrchr (name, '/') != NULL){
@@ -323,7 +359,7 @@ chdir (const char *name)
 bool
 mkdir (const char *name)
 {
-  struct dir *dir = dir_open_root();
+  struct dir *dir = dir_open_current();
   struct inode * dir_inode = NULL;
   char *tmp = NULL;
 
