@@ -363,7 +363,6 @@ syscall_handler (struct intr_frame *f)
         f->eax = write_size;
       }
 
-
   		break;
   	}
 
