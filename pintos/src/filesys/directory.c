@@ -161,14 +161,14 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
   /* Check that NAME is not in use. */
   if (lookup (dir, name, NULL, NULL))
     goto done;
-  
 
-  if (BLOCK_SECTOR_SIZE - dir->pos < sizeof e)
-  {
-    bool access = inode_allocate_sectors(1, dir->inode);
-    if (!access) return false;
-  }
+  // if (BLOCK_SECTOR_SIZE - dir->pos < sizeof e)
+  // {
+  //   bool access = inode_allocate_sectors(1, dir->inode);
+  //   if (!access) return false;
+  // }
 
+  bool access = false;
   /* Set OFS to offset of free slot.
      If there are no free slots, then it will be set to the
      current end-of-file.
@@ -178,8 +178,19 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
      read due to something intermittent such as low memory. */
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e) 
-    if (!e.in_use)
+    if (!e.in_use){
+      access = true;
       break;
+    }
+
+  if (!access)
+  {
+    access = inode_allocate_sectors(1, dir->inode);
+    if (!access)
+      return false;
+    ofs -= sizeof e;
+    inode_read_at (dir->inode, &e, sizeof e, ofs);
+  }
 
   /* Write slot. */
   e.in_use = true;

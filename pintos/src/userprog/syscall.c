@@ -52,6 +52,7 @@ syscall_handler (struct intr_frame *f)
 {
   //read system call number 
   int sys_num = read(f);
+  // printf("sys Num %d\n", sys_num);
 
   switch(sys_num)
   {
@@ -604,6 +605,14 @@ syscall_handler (struct intr_frame *f)
     case SYS_INUMBER:
     {
       int fd = read(f);
+      struct file_descript *descript = find_file_descript(fd);
+
+      if (descript == NULL){
+        f->eax = -1;
+        break;
+      }
+
+      f->eax = inode_get_inumber(file_get_inode(fd->file));
 
       break;
     }
