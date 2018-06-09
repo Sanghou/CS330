@@ -320,6 +320,8 @@ thread_exit (void)
         {
           struct file_descript *file = list_entry (list_prev(e), struct file_descript, fd_elem);
           file_close(file->file);
+          if (!file->is_file)
+            dir_close(file->dir);
           free(file);
         }
     }
@@ -697,6 +699,8 @@ void
 remove_file (struct list_elem *elem){
   struct file_descript *file_descript = list_entry(elem, struct file_descript, fd_elem);
   list_remove(elem);
+  if (!file_descript->is_file)
+    dir_close(file_descript->dir);
   free(file_descript);
 }
 
@@ -712,6 +716,8 @@ set_file_descript(struct file *file){
 
   file_descript->file = file;
   file_descript->is_file = inode_is_file(file_get_inode(file));
+  if (!file_descript->is_file)
+    file_descript->dir = dir_open (file_get_inode (file));
 
   struct list_elem *e;
 

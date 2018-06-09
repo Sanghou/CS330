@@ -593,16 +593,7 @@ syscall_handler (struct intr_frame *f)
         f->eax = 0;
         break;
       }
-      struct dir *dir = dir_open(file_get_inode(descript->file));
-
-      if (dir == NULL){
-        f->eax = 0;
-        break;
-      }
-
-      bool success =  dir_readdir(dir, name);
-      free(dir);
-
+      bool success =  dir_readdir(descript->dir, name);
       f->eax = success;
       break;
     }           

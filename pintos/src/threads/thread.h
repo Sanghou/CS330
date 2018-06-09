@@ -141,6 +141,7 @@ struct file_descript
     int fd;
     bool is_file;
     struct file *file;
+    struct dir *dir;
     struct list_elem fd_elem;
   };  
 
