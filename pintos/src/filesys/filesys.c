@@ -148,9 +148,9 @@ filesys_open (const char *name)
       memcpy(tmp, token, strlen(token)+1);
     }
     file_name = tmp;
-  } 
-  // if (strlen(file_name)== 0)
-  //   return file_open (dir_get_inode (dir));
+  }
+  if (strlen(file_name)== 0)
+    return file_open (dir_get_inode (dir));
 
   if (dir != NULL)
     dir_lookup (dir, file_name, &inode);

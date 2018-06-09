@@ -749,9 +749,27 @@ find_file_descript(int fd)
       {
         return file_descript;
       }
-
   }
   return NULL;
+}
+
+
+
+bool 
+is_inside (int inumber)
+{
+  struct list_elem *e;
+  struct thread *t = thread_current();
+  for(e=list_begin(&t->fd_list); e != list_end(&t->fd_list);e=list_next(e))
+  {
+    struct file_descript *file_descript = list_entry(e, struct file_descript, fd_elem);
+
+    if(inode_get_inumber(file_get_inode(file_descript->file)) == inumber)
+      {
+        return true;
+      }
+  }
+  return false;
 }
 
 /* Called in devices/timer.c. 

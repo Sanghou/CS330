@@ -195,4 +195,5 @@ struct file_descript * find_file_descript(int fd);
 
 void timer_release(int64_t tick);
 void timer_set(int64_t tick);
+bool is_inside(int inumber);
 

@@ -106,7 +106,7 @@ lookup (const struct dir *dir, const char *name,
   ASSERT (name != NULL);
 
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
-       ofs += sizeof e) 
+       ofs += sizeof e)
     if (e.in_use && !strcmp (name, e.name)) 
       {
         if (ep != NULL)
@@ -162,12 +162,6 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)
   if (lookup (dir, name, NULL, NULL))
     goto done;
 
-  // if (BLOCK_SECTOR_SIZE - dir->pos < sizeof e)
-  // {
-  //   bool access = inode_allocate_sectors(1, dir->inode);
-  //   if (!access) return false;
-  // }
-
   bool access = false;
   /* Set OFS to offset of free slot.
      If there are no free slots, then it will be set to the
@@ -216,7 +210,7 @@ dir_remove (struct dir *dir, const char *name)
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
 
-  if (!strcmp(name, ".") || !strcmp(name, ".."))
+  if (!strcmp (name, ".") || !strcmp (name, ".."))
     goto done;
 
   /* Find directory entry. */
@@ -228,14 +222,20 @@ dir_remove (struct dir *dir, const char *name)
   if (inode == NULL)
     goto done;
 
-  if (!inode_is_file(inode))
+  if (!inode_is_file (inode))
   {
     char * last_file;
-    struct dir *remove_dir = dir_open(inode);
+    struct dir *remove_dir = dir_open (inode);
     bool exist = dir_readdir (remove_dir, last_file);
-    if (exist)
+    if (exist){
+      free (remove_dir);
       return success;
-    free(remove_dir);
+    }
+
+    free (remove_dir);
+
+    if (is_inside (inode_get_inumber (inode)) || inode_get_inumber (inode) == thread_current()->DIR_SECTOR)
+      return success;
   }
 
   /* Erase directory entry. */
@@ -281,7 +281,31 @@ chdir (const char *name)
   bool success;
   if (strrchr (name, '/') != NULL){
     success = find_dir (dir, name);
+    if (!success)
+      return false;
+
+    int name_size = strlen(name)+1;
+
+    char pointer[name_size];
+    memcpy(pointer, name, name_size);
+  
+    char *token, *saved_ptr;
+ 
+    for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
+      token = strtok_r (NULL, "/", &saved_ptr))
+    {
+      if (strlen(saved_ptr) == 0)
+      {
+        if (dir_lookup (dir, token, &dir_inode) && dir_inode != NULL && !inode_is_file (dir_inode)) 
+        {   
+          dir_close(dir);
+          dir = dir_open(dir_inode);
+        }
+      }
+    }
+
     dir_inode = dir->inode;
+
   }
   else 
   {
@@ -291,9 +315,6 @@ chdir (const char *name)
     }
   }
   dir_close(dir);
-
-  if (!success)
-    return false;
 
   thread_current()->DIR_SECTOR = inode_get_inumber (dir_inode);
   return true; 
@@ -361,6 +382,10 @@ find_dir (struct dir *dir, const char *name)
   memcpy(pointer, name, strlen(name)+1);
   
   char *token, *saved_ptr;
+  if (name[0]=='/'){
+    dir_close(dir);
+    dir = dir_open_root();
+  }
 
   for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
     token = strtok_r (NULL, "/", &saved_ptr))
@@ -370,7 +395,8 @@ find_dir (struct dir *dir, const char *name)
     }
     
     if (dir_lookup (dir, token, &inode) && inode != NULL && !inode_is_file (inode)) {   
-      dir->inode = inode;
+      dir_close(dir);
+      dir = dir_open(inode);
     }
     else{
       return false;
