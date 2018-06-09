@@ -148,8 +148,7 @@ filesys_open (const char *name)
       memcpy(tmp, token, strlen(token)+1);
     }
     file_name = tmp;
-  }
-  // 이밑을 여는 순간 extensible의 헬게이트가 시작된다. 
+  } 
   // if (strlen(file_name)== 0)
   //   return file_open (dir_get_inode (dir));
 

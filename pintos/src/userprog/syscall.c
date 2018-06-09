@@ -560,7 +560,8 @@ syscall_handler (struct intr_frame *f)
 
       f->eax = success;
       break;
-    }                 
+    }              
+
 
     case SYS_MKDIR: /* Create a directory. */
     {
@@ -575,6 +576,8 @@ syscall_handler (struct intr_frame *f)
       f->eax = success;
       break;
     }                  
+
+
     case SYS_READDIR: /* Reads a directory entry. */
     {
       int fd = read (f);
@@ -584,9 +587,27 @@ syscall_handler (struct intr_frame *f)
         f->eax = 0;
         break;
       }
+      struct file_descript *descript = find_file_descript(fd);
 
+      if (descript == NULL){
+        f->eax = 0;
+        break;
+      }
+      struct dir *dir = dir_open(file_get_inode(descript->file));
+
+      if (dir == NULL){
+        f->eax = 0;
+        break;
+      }
+
+      bool success =  dir_readdir(dir, name);
+      free(dir);
+
+      f->eax = success;
       break;
-    }                
+    }           
+
+
     case SYS_ISDIR:  /* Tests if a fd represents a directory. */
     {
       int fd = read(f);
@@ -602,6 +623,9 @@ syscall_handler (struct intr_frame *f)
 
       break;
     }               
+
+
+
     case SYS_INUMBER:
     {
       int fd = read(f);

@@ -216,6 +216,9 @@ dir_remove (struct dir *dir, const char *name)
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
 
+  if (!strcmp(name, ".") || !strcmp(name, ".."))
+    goto done;
+
   /* Find directory entry. */
   if (!lookup (dir, name, &e, &ofs))
     goto done;
@@ -225,10 +228,15 @@ dir_remove (struct dir *dir, const char *name)
   if (inode == NULL)
     goto done;
 
-  // if (!inode_is_file(inode))
-  // {
-  //   deallocate_sectors(inode);
-  // }
+  if (!inode_is_file(inode))
+  {
+    char * last_file;
+    struct dir *remove_dir = dir_open(inode);
+    bool exist = dir_readdir (remove_dir, last_file);
+    if (exist)
+      return success;
+    free(remove_dir);
+  }
 
   /* Erase directory entry. */
   e.in_use = false;
@@ -255,7 +263,7 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
   while (inode_read_at (dir->inode, &e, sizeof e, dir->pos) == sizeof e) 
     {
       dir->pos += sizeof e;
-      if (e.in_use)
+      if (e.in_use && !strcmp(e.name, ".") && !strcmp(e.name, ".."))
         {
           strlcpy (name, e.name, NAME_MAX + 1);
           return true;
