@@ -69,7 +69,7 @@ filesys_create (const char *name, off_t initial_size)
 
   if (strrchr (name, '/') != NULL)
   {
-    bool find = find_dir (dir, name);
+    bool find = find_dir (dir, name, false);
     if (!find){
       dir_close (dir);
       return false;
@@ -127,12 +127,11 @@ filesys_open (const char *name)
 
   if (strrchr (name, '/') != NULL)
   {
-    bool find = find_dir (dir, name);
+    bool find = find_dir (dir, name, false);
     if (!find){
       dir_close (dir);
       return false;
     }
-
     int name_size = strlen(name)+1;
 
     char pointer[name_size];
@@ -181,7 +180,7 @@ filesys_remove (const char *name)
 
   if (strrchr (name, '/') != NULL)
   {
-    bool find = find_dir (dir, name);
+    bool find = find_dir (dir, name, false);
     if (!find){
       dir_close (dir);
       return false;

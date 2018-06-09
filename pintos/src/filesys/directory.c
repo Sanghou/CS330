@@ -118,42 +118,6 @@ lookup (const struct dir *dir, const char *name,
   return false;
 }
 
-/*  
-  Returns true when kernel cannot remove this inumber
-*/
-bool
-erase (struct inode *inode)
-{
-  int current_directory = thread_current()->DIR_SECTOR;
-  int erase = inode_get_inumber (inode);
-
-  if (current_directory == erase || erase == 1)
-    return true;
-
-  if (current_directory == 1)
-    return false;
-
-  struct dir *dir = dir_open_current();
-  struct inode *find_inode = NULL;
-
-  while (true)
-  {
-    if (dir_lookup (dir, "..", &find_inode) && find_inode != NULL && !inode_is_file (find_inode)) 
-    {
-      dir_close(dir);
-      dir = dir_open(find_inode);
-    }
-    if (inode_get_inumber(find_inode) == erase)
-      return true;
-
-    if (inode_get_inumber (find_inode) == 1)
-      break;
-  }
-  
-
-  return false;
-}
-
 /* Searches DIR for a file with the given NAME
    and returns true if one exists, false otherwise.
    On success, sets *INODE to an inode for the file, otherwise to
@@ -258,18 +222,20 @@ dir_remove (struct dir *dir, const char *name)
   if (inode == NULL)
     goto done;
 
+
   if (!inode_is_file (inode))
   {
     char * last_file;
-    if (is_inside (inode_get_inumber (inode)) || erase (inode))
+    if (is_inside (inode_get_inumber (inode)))
       return success;
-
+    
     struct dir *remove_dir = dir_open (inode);
     if (dir_readdir (remove_dir, last_file)){
       free (remove_dir);
       return success;
     }
     free (remove_dir);
+    
   }
 
   /* Erase directory entry. */
@@ -314,32 +280,11 @@ chdir (const char *name)
   struct inode *dir_inode;
   bool success;
   if (strrchr (name, '/') != NULL){
-    success = find_dir (dir, name);
+    success = find_dir (dir, name, true);
     if (!success)
       return false;
 
-    int name_size = strlen(name)+1;
-
-    char pointer[name_size];
-    memcpy(pointer, name, name_size);
-  
-    char *token, *saved_ptr;
- 
-    for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
-      token = strtok_r (NULL, "/", &saved_ptr))
-    {
-      if (strlen(saved_ptr) == 0)
-      {
-        if (dir_lookup (dir, token, &dir_inode) && dir_inode != NULL && !inode_is_file (dir_inode)) 
-        {   
-          dir_close(dir);
-          dir = dir_open(dir_inode);
-        }
-      }
-    }
-
     dir_inode = dir->inode;
-
   }
   else 
   {
@@ -363,7 +308,7 @@ mkdir (const char *name)
 
   if (strrchr (name, '/') != NULL)
   {
-    bool find = find_dir (dir, name);
+    bool find = find_dir (dir, name, false);
     if (!find){
       dir_close (dir);
       return false;
@@ -409,7 +354,7 @@ mkdir (const char *name)
   void * 리턴하는 거 struct inode * 이고 싶었음.
 */
 bool
-find_dir (struct dir *dir, const char *name)
+find_dir (struct dir *dir, const char *name, bool chdir)
 {
   struct inode *inode = NULL;
   char pointer[strlen(name)+1];
@@ -424,7 +369,7 @@ find_dir (struct dir *dir, const char *name)
   for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
     token = strtok_r (NULL, "/", &saved_ptr))
   { 
-    if (strlen(saved_ptr)== 0){
+    if (!chdir && strlen(saved_ptr)== 0){
       break;
     }
     
@@ -435,6 +380,6 @@ find_dir (struct dir *dir, const char *name)
     else{
       return false;
     }
-  } 
+  }
   return true;
 }
