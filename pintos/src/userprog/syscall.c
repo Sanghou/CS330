@@ -612,7 +612,7 @@ syscall_handler (struct intr_frame *f)
         break;
       }
 
-      f->eax = inode_get_inumber(file_get_inode(fd->file));
+      f->eax = inode_get_inumber(file_get_inode(descript->file));
 
       break;
     }
