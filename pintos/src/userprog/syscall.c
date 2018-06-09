@@ -52,7 +52,6 @@ syscall_handler (struct intr_frame *f)
 {
   //read system call number 
   int sys_num = read(f);
-  // printf("sys Num %d\n", sys_num);
 
   switch(sys_num)
   {
@@ -93,7 +92,6 @@ syscall_handler (struct intr_frame *f)
 
   		info->is_waiting = false;
 
-      // printf("SYS_EXIT end\n");
   		terminate();
   		break;
   	}
@@ -103,7 +101,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXEC:
     {
-      // printf("SYS_EXEC\n");
   		enum intr_level old_level;
   		old_level = intr_disable();
 
@@ -142,7 +139,6 @@ syscall_handler (struct intr_frame *f)
   	case SYS_WAIT:
     {
       tid_t child_pid = (tid_t) read(f);
-      // printf("SYS_WAIT start %d\n", child_pid);
 
   		tid_t parent_pid = thread_current()->tid;
 
@@ -161,7 +157,6 @@ syscall_handler (struct intr_frame *f)
   		f->eax = info->exit_status;
   		remove_child(&info->elem);
   		free(info);
-      // printf("SYS_WAIT end\n");
   		break;
   	}
 
@@ -170,7 +165,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_CREATE:
   	{
-      // printf("SYS_CREATE\n");
       const char *file = (const char *) read(f);
       int size = read(f);
 
@@ -194,7 +188,6 @@ syscall_handler (struct intr_frame *f)
   	case SYS_REMOVE:
   	{
   		//read arguments
-      // printf("SYS_REMOVE\n");
       const char *file = (const char *) read(f);
 
       if (!is_valid_addr(file)) 
@@ -216,7 +209,6 @@ syscall_handler (struct intr_frame *f)
   	case SYS_OPEN:
     {
   		//read arguments
-      // printf("SYS_OPEN\n");
       const char *file_name = (const char *) read(f);
       char *tmp = "";
 
@@ -254,7 +246,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_FILESIZE:
     {
-      // printf("SYS_FILESIZE\n");
       int fd = read(f);
       
       struct file_descript *descript = find_file_descript(fd);
@@ -278,7 +269,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_READ:
     {
-      // printf("SYS_READ\n");
       int fd = read(f);
       const char *buffer = (const char *) read(f);
       int size = read(f);
@@ -333,7 +323,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_WRITE:
     { 
-      // printf("SYS_WRITE\n");
 
       int fd = read(f);
       const char *buffer = (const char *) read(f);
@@ -385,7 +374,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_SEEK:
     {
-      // printf("SYS_SEEK\n");
       int fd = read(f);
       int position = read(f);
 
