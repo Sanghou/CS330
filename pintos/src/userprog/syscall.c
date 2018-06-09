@@ -323,7 +323,6 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_WRITE:
     { 
-
       int fd = read(f);
       const char *buffer = (const char *) read(f);
   		int size = read(f);
