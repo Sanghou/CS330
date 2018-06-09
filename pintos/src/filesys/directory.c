@@ -231,10 +231,10 @@ dir_remove (struct dir *dir, const char *name)
     
     struct dir *remove_dir = dir_open (inode);
     if (dir_readdir (remove_dir, last_file)){
-      free (remove_dir);
+      dir_close (remove_dir);
       return success;
     }
-    free (remove_dir);
+    dir_close (remove_dir);
     
   }
 
@@ -325,7 +325,7 @@ mkdir (const char *name)
     for (token = strtok_r (pointer, "/", &saved_ptr); token != NULL;
       token = strtok_r (NULL, "/", &saved_ptr))
     {
-      memcpy(tmp, token, sizeof(token)+1);
+      memcpy(tmp, token, strlen(token)+1);
     }
     name = tmp;
   } 
